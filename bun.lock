@@ -29,6 +29,9 @@
     "packages/schema": {
       "name": "schema",
       "version": "0.0.0",
+      "dependencies": {
+        "zod": "^4.0.0",
+      },
     },
     "packages/ui": {
       "name": "ui",
@@ -253,5 +256,7 @@
     "web": ["web@workspace:apps/web"],
 
     "why-is-node-running": ["why-is-node-running@2.3.0", "", { "dependencies": { "siginfo": "^2.0.0", "stackback": "0.0.2" }, "bin": { "why-is-node-running": "cli.js" } }, "sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w=="],
+
+    "zod": ["zod@4.5.2", "", {}, "sha512-XkYXCol10+ba/6F/cueWV+TezUeOqXW0hdeJt5CdXjTYeAgAQg5N03RQdJ80mhfFE72+pblvYMW4wy2Qp4Qbrg=="],
   }
 }
