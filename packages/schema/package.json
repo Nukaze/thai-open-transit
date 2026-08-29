@@ -6,7 +6,8 @@
   "main": "./src/index.ts",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "generate-schemas": "bun run scripts/generate-schemas.ts"
   },
   "dependencies": {
     "zod": "^4.0.0"
