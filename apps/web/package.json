@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",
+    "fuse.js": "^7.0.0",
     "maplibre-gl": "^6.4.1",
     "network-graph": "workspace:*",
     "next": "^16.0.0",

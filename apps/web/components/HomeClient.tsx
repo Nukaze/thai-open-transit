@@ -1,10 +1,12 @@
 // apps/web/components/HomeClient.tsx
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Map as NetworkMap } from "./Map";
 import { StationPanel } from "./StationPanel";
 import { LineFilter } from "./LineFilter";
+import { StationSearch } from "./StationSearch";
+import { getStationIdFromUrl, buildStationDeepLink } from "../lib/deep-link";
 import type { Line } from "schema";
 import type { FeatureCollection, Point } from "geojson";
 import type { StationWithStatus } from "../lib/types";
@@ -32,10 +34,43 @@ export function HomeClient({
     () => new Map(stations.map((s) => [s.id, s])),
     [stations],
   );
+  // Deep-link write: selecting a station - from the map or from search -
+  // opens its panel and pushes a shareable `?station=` URL via
+  // `buildStationDeepLink`, so a copied URL reopens the same station on load
+  // (via the read-side effect below). Both selection paths route through
+  // this one handler so "shareable deep links" (this task's commit message)
+  // actually covers the primary interaction (clicking a station on the map),
+  // not just the new search box.
+  const handleSelectStation = useCallback((station: StationWithStatus) => {
+    setSelectedStation(station);
+    window.history.replaceState(null, "", buildStationDeepLink(station.id));
+  }, []);
+
   const handleStationClick = useCallback(
-    (id: string) => setSelectedStation(stationById.get(id) ?? null),
-    [stationById],
+    (id: string) => {
+      const station = stationById.get(id);
+      if (station) handleSelectStation(station);
+      else setSelectedStation(null);
+    },
+    [stationById, handleSelectStation],
   );
+
+  // Deep-link read: on mount, check the URL for a `?station=` param (per
+  // brief Step 7 - originally written against `page.tsx`, redirected here
+  // since Task 15 moved all interactive state into this Client Component)
+  // and open that station's panel if it exists in this build's data. Runs
+  // once per `stationById` identity (stable across re-renders per the
+  // `useMemo` above, so effectively "once on mount" in practice) rather than
+  // on every render. Uses `setSelectedStation` directly rather than
+  // `handleSelectStation` - the URL already has this param, so rewriting it
+  // via `replaceState` here would be a harmless but pointless no-op.
+  useEffect(() => {
+    const stationId = getStationIdFromUrl(window.location.href);
+    if (stationId) {
+      const station = stationById.get(stationId);
+      if (station) setSelectedStation(station);
+    }
+  }, [stationById]);
 
   const filteredGeoJson = useMemo(() => {
     const visibleStationIds = new Set(
@@ -68,6 +103,7 @@ export function HomeClient({
           })
         }
       />
+      <StationSearch stations={stations} onSelect={handleSelectStation} />
       <StationPanel
         station={selectedStation}
         onClose={() => setSelectedStation(null)}
