@@ -124,7 +124,7 @@ documents, or produced originally by this project.
 
 ### Package manager
 
-pnpm workspaces. This is a monorepo.
+Bun workspaces. This is a monorepo.
 
 ### Vercel deployment constraints
 

@@ -207,13 +207,32 @@ Substitute `PACKAGE_NAME` with `schema`, `geo-utils`, `network-graph`,
 And an empty `src/index.ts` (`export {};`) so the workspace resolves before
 later tasks add real content.
 
-- [ ] **Step 8: Verify the workspace installs**
+- [ ] **Step 8: Write a root Vitest workspace config**
+
+Root-level `bun run test` (used by CI in Task 19) must discover every
+package's tests, not just tests at the repo root. Write `vitest.config.ts`:
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    projects: ['packages/*', 'scripts/*', 'apps/*'],
+  },
+});
+```
+
+Add `vitest` as a root devDependency if not already present (it is, from
+Step 3).
+
+- [ ] **Step 9: Verify the workspace installs**
 
 Run: `bun install`
 Expected: lockfile created, no errors, all 5 packages listed under
 `node_modules/.bin` resolution (verify with `bun pm ls`).
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
 git add -A
@@ -1865,8 +1884,9 @@ git commit -m "feat(build): assemble network.json and network.geojson from data/
 ### Task 12: `scripts/validate` - schema, provenance, and performance budget gate
 
 **Files:**
-- Create: `scripts/validate/index.ts`
+- Create: `scripts/validate/package.json`, `scripts/validate/index.ts`
 - Test: `scripts/validate/check-source-refs.test.ts`
+- Modify: root `package.json` (`workspaces` array)
 
 **Interfaces:**
 - Consumes: `data/dist/network.json` (Task 11's output)
@@ -1874,6 +1894,25 @@ git commit -m "feat(build): assemble network.json and network.geojson from data/
   (returns a list of violation messages, empty = pass) - exported from
   `scripts/validate/check-source-refs.ts`, consumed by `scripts/validate/index.ts`
   and by CI (Task 19).
+
+- [ ] **Step 0: Register `scripts/validate` as a workspace member**
+
+`scripts/validate/index.ts` (Step 5) imports from the `schema` and
+`network-graph` workspace packages, so this directory needs its own
+`package.json`, same pattern as Task 11's `scripts/build`:
+
+```json
+{
+  "name": "validate-scripts",
+  "private": true,
+  "type": "module",
+  "dependencies": { "schema": "workspace:*", "network-graph": "workspace:*" }
+}
+```
+
+Add `"scripts/build"` and `"scripts/validate"` to the root `package.json`'s
+`workspaces` array (Task 1 only listed `packages/*` and `apps/*`; Task 11
+added `scripts/build` - add `scripts/validate` alongside it now).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2346,7 +2385,8 @@ git commit -m "feat(web): render MapLibre + self-hosted PMTiles basemap with clu
 
 **Files:**
 - Create: `apps/web/components/StationPanel.tsx`, `apps/web/components/LineFilter.tsx`
-- Modify: `apps/web/components/Map.tsx`, `apps/web/app/page.tsx`
+- Modify: `apps/web/components/Map.tsx`, `apps/web/app/page.tsx`,
+  `scripts/build/assemble.ts`, `scripts/build/assemble.test.ts`
 
 **Interfaces:**
 - Consumes: `StatusBadge` (Task 9), `network.json`'s `Station`/`Line` shapes
@@ -2415,9 +2455,25 @@ export function deriveStatus(milestones: { date: string; event: MilestoneEvent }
 }
 ```
 
-Update `assembleNetwork`'s station mapping to attach `status: deriveStatus(station.milestones)`
-to each station in the `network` output (not the `geojson` output, which stays
-minimal per CLAUDE.md 2.5).
+In `assembleNetwork` (Task 11), replace:
+
+```typescript
+  const network = { stations, lines, segments, generated_at: new Date().toISOString() };
+```
+
+with:
+
+```typescript
+  const network = {
+    stations: stations.map((station) => ({ ...station, status: deriveStatus(station.milestones) })),
+    lines,
+    segments,
+    generated_at: new Date().toISOString(),
+  };
+```
+
+Leave `geojson` untouched - it stays minimal per CLAUDE.md 2.5, `status` is not
+added to it.
 
 - [ ] **Step 3: Write a test for `deriveStatus`**
 
