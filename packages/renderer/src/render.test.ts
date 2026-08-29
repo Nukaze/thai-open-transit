@@ -64,4 +64,30 @@ describe('renderSchematic', () => {
     expect(svg).toContain('<title>A &quot;quoted&quot;</title>');
     expect(svg).toContain("<title>A &apos;quoted&apos;</title>");
   });
+
+  it('throws when a layout station has NaN coordinates', () => {
+    const layout: Layout = {
+      era: 'test',
+      stations: [{ station_id: 'A', x: NaN, y: 0 }],
+    };
+    const stations = [{ id: 'A', name_th: 'A', name_en: 'A' } as Station];
+    const segments = [] as Segment[];
+
+    expect(() => renderSchematic(layout, stations, segments)).toThrow(
+      'Invalid coordinate value: NaN',
+    );
+  });
+
+  it('throws when a layout station has Infinity coordinates', () => {
+    const layout: Layout = {
+      era: 'test',
+      stations: [{ station_id: 'A', x: 0, y: Infinity }],
+    };
+    const stations = [{ id: 'A', name_th: 'A', name_en: 'A' } as Station];
+    const segments = [] as Segment[];
+
+    expect(() => renderSchematic(layout, stations, segments)).toThrow(
+      'Invalid coordinate value: Infinity',
+    );
+  });
 });

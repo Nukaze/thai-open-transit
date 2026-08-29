@@ -13,6 +13,13 @@ function escapeXml(value: string): string {
   });
 }
 
+function safeCoord(value: number): number {
+  if (!Number.isFinite(value)) {
+    throw new Error(`Invalid coordinate value: ${value}`);
+  }
+  return value;
+}
+
 export function renderSchematic(
   layout: Layout,
   stations: Station[],
@@ -35,14 +42,14 @@ export function renderSchematic(
           `Segment ${segment.id} references a station missing from the layout: ${segment.to_station}`,
         );
       }
-      return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="black" stroke-width="4" />`;
+      return `<line x1="${safeCoord(from.x)}" y1="${safeCoord(from.y)}" x2="${safeCoord(to.x)}" y2="${safeCoord(to.y)}" stroke="black" stroke-width="4" />`;
     })
     .join('\n  ');
 
   const circles = layout.stations
     .map((pos) => {
       const name = stationNameById.get(pos.station_id) ?? pos.station_id;
-      return `<circle cx="${pos.x}" cy="${pos.y}" r="6" fill="white" stroke="black" stroke-width="2"><title>${escapeXml(name)}</title></circle>`;
+      return `<circle cx="${safeCoord(pos.x)}" cy="${safeCoord(pos.y)}" r="6" fill="white" stroke="black" stroke-width="2"><title>${escapeXml(name)}</title></circle>`;
     })
     .join('\n  ');
 
