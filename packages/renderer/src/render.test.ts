@@ -38,4 +38,30 @@ describe('renderSchematic', () => {
       'Segment A__MISSING references a station missing from the layout: MISSING',
     );
   });
+
+  it('escapes XML special characters in station names', () => {
+    const layout: Layout = {
+      era: 'test',
+      stations: [
+        { station_id: 'A', x: 0, y: 0 },
+        { station_id: 'B', x: 100, y: 0 },
+        { station_id: 'C', x: 200, y: 0 },
+        { station_id: 'D', x: 300, y: 0 },
+      ],
+    };
+    const stations = [
+      { id: 'A', name_th: 'A & B', name_en: 'A & B' } as Station,
+      { id: 'B', name_th: '<Test>', name_en: '<Test>' } as Station,
+      { id: 'C', name_th: 'A "quoted"', name_en: 'A "quoted"' } as Station,
+      { id: 'D', name_th: "A 'quoted'", name_en: "A 'quoted'" } as Station,
+    ];
+    const segments = [] as Segment[];
+
+    const svg = renderSchematic(layout, stations, segments);
+
+    expect(svg).toContain('<title>A &amp; B</title>');
+    expect(svg).toContain('<title>&lt;Test&gt;</title>');
+    expect(svg).toContain('<title>A &quot;quoted&quot;</title>');
+    expect(svg).toContain("<title>A &apos;quoted&apos;</title>");
+  });
 });

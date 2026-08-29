@@ -1,5 +1,18 @@
 import type { Layout, Station, Segment } from 'schema';
 
+function escapeXml(value: string): string {
+  return value.replace(/[&<>'"]/g, (char) => {
+    switch (char) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case "'": return '&apos;';
+      case '"': return '&quot;';
+      default: return char;
+    }
+  });
+}
+
 export function renderSchematic(
   layout: Layout,
   stations: Station[],
@@ -29,7 +42,7 @@ export function renderSchematic(
   const circles = layout.stations
     .map((pos) => {
       const name = stationNameById.get(pos.station_id) ?? pos.station_id;
-      return `<circle cx="${pos.x}" cy="${pos.y}" r="6" fill="white" stroke="black" stroke-width="2"><title>${name}</title></circle>`;
+      return `<circle cx="${pos.x}" cy="${pos.y}" r="6" fill="white" stroke="black" stroke-width="2"><title>${escapeXml(name)}</title></circle>`;
     })
     .join('\n  ');
 
