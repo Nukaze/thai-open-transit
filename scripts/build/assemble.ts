@@ -1,9 +1,34 @@
-import type { Station, Line, Segment } from "schema";
+import type { Station, Line, Segment, Status, MilestoneEvent } from "schema";
 import {
   buildGraph,
   findOrphanStations,
   findDanglingSegments,
 } from "network-graph";
+
+const EVENT_TO_STATUS: Record<MilestoneEvent, Status> = {
+  construction_started: "under_construction",
+  trial_run: "trial",
+  opened: "operational",
+  extended: "operational",
+  renamed: "operational",
+  recoded: "operational",
+  suspended: "suspended",
+  closed: "cancelled",
+};
+
+// Per CLAUDE.md 9: status is never hand-set, it is always derived from
+// milestones[]. This runs once at build time so `apps/web` never re-derives
+// business logic - it just renders the `status` field that ends up on each
+// station in network.json.
+export function deriveStatus(
+  milestones: { date: string; event: MilestoneEvent }[],
+): Status {
+  if (milestones.length === 0) return "planned";
+  const latest = [...milestones].sort((a, b) =>
+    a.date.localeCompare(b.date),
+  ).at(-1)!;
+  return EVENT_TO_STATUS[latest.event];
+}
 
 export function assembleNetwork(
   stations: Station[],
@@ -26,7 +51,10 @@ export function assembleNetwork(
   }
 
   const network = {
-    stations,
+    stations: stations.map((station) => ({
+      ...station,
+      status: deriveStatus(station.milestones),
+    })),
     lines,
     segments,
     generated_at: new Date().toISOString(),
