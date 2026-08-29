@@ -7,5 +7,11 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "proj4": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/proj4": "^2.5.0"
   }
 }
