@@ -25,4 +25,11 @@ describe('filterAsOf', () => {
     const result2031 = filterAsOf(entities, '2031-01-01');
     expect(result2031.map((e) => e.id).sort()).toEqual(['ALWAYS_OPEN', 'OPENS_2030']);
   });
+
+  it('excludes entities exactly at their to boundary (half-open interval semantics)', () => {
+    // CLOSED_2020 has validity [from: '2004-01-01', to: '2020-01-01']
+    // Half-open interval means [2004-01-01, 2020-01-01) - the to date is excluded
+    const result = filterAsOf(entities, '2020-01-01');
+    expect(result.map((e) => e.id)).toEqual(['ALWAYS_OPEN']);
+  });
 });
