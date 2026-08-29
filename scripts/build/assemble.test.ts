@@ -101,9 +101,7 @@ describe("assembleNetwork", () => {
     const net = network as { stations: { id: string; status: string }[] };
 
     expect(net.stations.find((s) => s.id === "A")?.status).toBe("planned");
-    expect(net.stations.find((s) => s.id === "C")?.status).toBe(
-      "operational",
-    );
+    expect(net.stations.find((s) => s.id === "C")?.status).toBe("operational");
   });
 });
 

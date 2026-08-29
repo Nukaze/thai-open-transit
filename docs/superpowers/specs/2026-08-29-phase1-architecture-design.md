@@ -12,14 +12,14 @@ does not re-litigate anything already decided in those two files.
 
 ## 1. Decisions locked in this design
 
-| Decision | Choice | Why |
-|---|---|---|
-| Public frontend framework | Next.js, `output: 'export'` | Static export per CLAUDE.md 3; Vercel-native tooling |
-| Package manager | **Bun workspaces** (supersedes CLAUDE.md 3's "pnpm workspaces") | Native workspace support, zero-config on Vercel. CLAUDE.md must be updated - see task list, item 1 |
-| Data scope for Phase 1 | **Current (2026) + planned/under_construction only.** No 1999-2026 historical backfill | Historical time travel is a Phase 2 P0 feature, not Phase 1. Historical sourcing is a tens-of-hours research task (SPEC.md section 8) that must not block shipping. Schema stays bitemporal-shaped so history can be added later without migration (CLAUDE.md 2.2) |
-| Monorepo package scope | All 5 packages built now: `schema`, `geo-utils`, `network-graph`, `renderer`, `ui` | `renderer` is needed for the Phase 1 P1 schematic-mode toggle (SPEC 1.7); `network-graph` is needed for interchange resolution used by both map and schematic renderer |
-| Basemap hosting | Protomaps regional (Bangkok metro only, not national/planet) PMTiles extract, committed to repo, served as a static asset from Vercel | Regional extract is small (tens of MB, not the 30-50GB+ national/continental extracts); keeps "no env vars to build" rule (CLAUDE.md 3) intact; avoids an external storage dependency for Phase 1 |
-| Reference added | `sanjorn.com/studio/bangkok-transit-map` added to SPEC.md section 6, same copyright exclusion as bangkoktransitmap.com (same author, © Oran Viriyincy, no license) | Historical narrative cross-check only, never geometry/design source |
+| Decision                  | Choice                                                                                                                                                             | Why                                                                                                                                                                                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Public frontend framework | Next.js, `output: 'export'`                                                                                                                                        | Static export per CLAUDE.md 3; Vercel-native tooling                                                                                                                                                                                                               |
+| Package manager           | **Bun workspaces** (supersedes CLAUDE.md 3's "pnpm workspaces")                                                                                                    | Native workspace support, zero-config on Vercel. CLAUDE.md must be updated - see task list, item 1                                                                                                                                                                 |
+| Data scope for Phase 1    | **Current (2026) + planned/under_construction only.** No 1999-2026 historical backfill                                                                             | Historical time travel is a Phase 2 P0 feature, not Phase 1. Historical sourcing is a tens-of-hours research task (SPEC.md section 8) that must not block shipping. Schema stays bitemporal-shaped so history can be added later without migration (CLAUDE.md 2.2) |
+| Monorepo package scope    | All 5 packages built now: `schema`, `geo-utils`, `network-graph`, `renderer`, `ui`                                                                                 | `renderer` is needed for the Phase 1 P1 schematic-mode toggle (SPEC 1.7); `network-graph` is needed for interchange resolution used by both map and schematic renderer                                                                                             |
+| Basemap hosting           | Protomaps regional (Bangkok metro only, not national/planet) PMTiles extract, committed to repo, served as a static asset from Vercel                              | Regional extract is small (tens of MB, not the 30-50GB+ national/continental extracts); keeps "no env vars to build" rule (CLAUDE.md 3) intact; avoids an external storage dependency for Phase 1                                                                  |
+| Reference added           | `sanjorn.com/studio/bangkok-transit-map` added to SPEC.md section 6, same copyright exclusion as bangkoktransitmap.com (same author, © Oran Viriyincy, no license) | Historical narrative cross-check only, never geometry/design source                                                                                                                                                                                                |
 
 ---
 
@@ -92,15 +92,17 @@ arrays. No server involved, per CLAUDE.md 2.4/2.5.
 ## 4. Data scope detail
 
 Phase 1 populates, per line/station:
+
 - Current operational status (`operational`, `trial`, `suspended` where applicable)
 - `under_construction`, `approved`, `planned` entries from the current M-Map2
   master plan (SRT/MRTA/BMA published documents)
 - `code_history[]` only where a station's code has already changed under the
-  *current* network (e.g. Sukhumvit Line renumbering) - this is present-day
+  _current_ network (e.g. Sukhumvit Line renumbering) - this is present-day
   fact, not historical backfill
 - `last_verified_at` set honestly per entity at time of import
 
 Explicitly deferred (not built in Phase 1, no stub data fabricated):
+
 - Any milestone dated before whatever the earliest "current" opening context
   requires (e.g. no synthetic 1999/2019 milestone entries invented to make a
   slider look populated)
@@ -116,6 +118,7 @@ supports them.
 ## 5. Testing (per CLAUDE.md 6 priority list)
 
 Vitest across `packages/network-graph`, `packages/geo-utils`, `packages/schema`:
+
 1. `as_of` filtering returns correct network for a given date (tested against
    current+planned data, since that's all that exists in Phase 1)
 2. Graph integrity: no orphan stations, no dangling segments, interchange

@@ -24,9 +24,9 @@ export function deriveStatus(
   milestones: { date: string; event: MilestoneEvent }[],
 ): Status {
   if (milestones.length === 0) return "planned";
-  const latest = [...milestones].sort((a, b) =>
-    a.date.localeCompare(b.date),
-  ).at(-1)!;
+  const latest = [...milestones]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .at(-1)!;
   return EVENT_TO_STATUS[latest.event];
 }
 

@@ -1,10 +1,10 @@
 // apps/web/app/page.tsx
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { HomeClient } from '../components/HomeClient';
-import type { Line } from 'schema';
-import type { FeatureCollection, Point } from 'geojson';
-import type { StationWithStatus } from '../lib/types';
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { HomeClient } from "../components/HomeClient";
+import type { Line } from "schema";
+import type { FeatureCollection, Point } from "geojson";
+import type { StationWithStatus } from "../lib/types";
 
 // This page stays a Server Component (no 'use client') so it can load the
 // build artifacts with `fs` at build time, then hands the parsed data down
@@ -44,13 +44,15 @@ import type { StationWithStatus } from '../lib/types';
 // / `import.meta.dirname` are unreliable under this Bun-runtime + Turbopack
 // build, so paths are resolved from `process.cwd()`, which Next.js
 // guarantees is the package root (`apps/web`) for `next build`.
-const distDir = join(process.cwd(), '../../data/dist');
+const distDir = join(process.cwd(), "../../data/dist");
 
 const networkGeoJson = JSON.parse(
-  readFileSync(join(distDir, 'network.geojson'), 'utf-8'),
+  readFileSync(join(distDir, "network.geojson"), "utf-8"),
 ) as FeatureCollection<Point>;
 
-const networkData = JSON.parse(readFileSync(join(distDir, 'network.json'), 'utf-8')) as {
+const networkData = JSON.parse(
+  readFileSync(join(distDir, "network.json"), "utf-8"),
+) as {
   stations: StationWithStatus[];
   lines: Line[];
 };

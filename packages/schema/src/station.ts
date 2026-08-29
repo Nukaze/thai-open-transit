@@ -1,17 +1,22 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const DatePrecisionSchema = z.enum(['exact', 'month', 'year', 'disputed']);
+export const DatePrecisionSchema = z.enum([
+  "exact",
+  "month",
+  "year",
+  "disputed",
+]);
 export type DatePrecision = z.infer<typeof DatePrecisionSchema>;
 
 export const MilestoneEventSchema = z.enum([
-  'construction_started',
-  'trial_run',
-  'opened',
-  'extended',
-  'renamed',
-  'recoded',
-  'suspended',
-  'closed',
+  "construction_started",
+  "trial_run",
+  "opened",
+  "extended",
+  "renamed",
+  "recoded",
+  "suspended",
+  "closed",
 ]);
 export type MilestoneEvent = z.infer<typeof MilestoneEventSchema>;
 
@@ -30,21 +35,20 @@ export const MilestoneSchema = z
     line: z.string().min(1).optional(),
     source_refs: z.array(SourceRefSchema).min(1),
   })
-  .refine(
-    (m) => m.date_precision !== 'disputed' || m.source_refs.length >= 2,
-    { message: 'disputed date_precision requires at least 2 source_refs' },
-  );
+  .refine((m) => m.date_precision !== "disputed" || m.source_refs.length >= 2, {
+    message: "disputed date_precision requires at least 2 source_refs",
+  });
 export type Milestone = z.infer<typeof MilestoneSchema>;
 
 export const StatusSchema = z.enum([
-  'operational',
-  'trial',
-  'under_construction',
-  'approved',
-  'planned',
-  'proposed',
-  'suspended',
-  'cancelled',
+  "operational",
+  "trial",
+  "under_construction",
+  "approved",
+  "planned",
+  "proposed",
+  "suspended",
+  "cancelled",
 ]);
 export type Status = z.infer<typeof StatusSchema>;
 
@@ -62,10 +66,13 @@ export const StationSchema = z.object({
     )
     .min(1),
   interchange_group: z.string().min(1).nullable().optional(),
-  structure: z.enum(['underground', 'elevated', 'at_grade']),
+  structure: z.enum(["underground", "elevated", "at_grade"]),
   accessible: z.boolean(),
   coords: z.object({
-    geo: z.object({ lat: z.number().min(-90).max(90), lon: z.number().min(-180).max(180) }),
+    geo: z.object({
+      lat: z.number().min(-90).max(90),
+      lon: z.number().min(-180).max(180),
+    }),
     schematic: z.object({ x: z.number(), y: z.number() }).optional(),
   }),
   validity: z.array(
@@ -76,7 +83,7 @@ export const StationSchema = z.object({
     }),
   ),
   milestones: z.array(MilestoneSchema),
-  confidence: z.enum(['high', 'medium', 'low']),
+  confidence: z.enum(["high", "medium", "low"]),
   last_verified_at: z.string().date(),
 });
 export type Station = z.infer<typeof StationSchema>;

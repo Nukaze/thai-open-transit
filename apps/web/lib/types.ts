@@ -1,5 +1,5 @@
 // apps/web/lib/types.ts
-import type { Station, Status } from 'schema';
+import type { Station, Status } from "schema";
 
 // `status` is computed once at build time in `scripts/build/assemble.ts`
 // (per CLAUDE.md 9: never hand-set, never re-derived client-side) and

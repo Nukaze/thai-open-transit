@@ -1,8 +1,8 @@
 // apps/web/app/layout.tsx
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 export const metadata = {
-  title: 'BangkokOpenTransit',
+  title: "BangkokOpenTransit",
   description: "Bangkok's rail transit network as an open, structured dataset.",
 };
 

@@ -1,7 +1,7 @@
 // apps/web/components/LineFilter.tsx
-'use client';
+"use client";
 
-import type { Line } from 'schema';
+import type { Line } from "schema";
 
 export function LineFilter({
   lines,
@@ -13,9 +13,17 @@ export function LineFilter({
   onToggle: (id: string) => void;
 }) {
   return (
-    <div style={{ position: 'absolute', top: 16, left: 16, background: 'white', padding: 8 }}>
+    <div
+      style={{
+        position: "absolute",
+        top: 16,
+        left: 16,
+        background: "white",
+        padding: 8,
+      }}
+    >
       {lines.map((line) => (
-        <label key={line.id} style={{ display: 'block' }}>
+        <label key={line.id} style={{ display: "block" }}>
           <input
             type="checkbox"
             checked={activeLineIds.has(line.id)}

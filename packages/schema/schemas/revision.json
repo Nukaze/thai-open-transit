@@ -8,11 +8,7 @@
     },
     "entity_type": {
       "type": "string",
-      "enum": [
-        "station",
-        "line",
-        "segment"
-      ]
+      "enum": ["station", "line", "segment"]
     },
     "entity_id": {
       "type": "string",
@@ -24,10 +20,7 @@
       "maximum": 9007199254740991
     },
     "parent_rev_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "content": {
       "type": "object",
@@ -42,13 +35,7 @@
     },
     "actor_role": {
       "type": "string",
-      "enum": [
-        "contributor",
-        "editor",
-        "approver",
-        "owner",
-        "bot"
-      ]
+      "enum": ["contributor", "editor", "approver", "owner", "bot"]
     },
     "created_at": {
       "type": "string",
@@ -86,10 +73,7 @@
             ]
           }
         },
-        "required": [
-          "url",
-          "title"
-        ],
+        "required": ["url", "title"],
         "additionalProperties": false
       }
     },
@@ -100,10 +84,7 @@
       "type": "boolean"
     },
     "revert_of": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": ["string", "null"]
     },
     "content_hash": {
       "type": "string",

@@ -6,7 +6,9 @@
  * services do not carry route=light_rail/subway and are excluded by this
  * query's route filter (see plan's "Explicitly out of scope" scope call).
  */
-export function buildOverpassQuery(bbox: [number, number, number, number]): string {
+export function buildOverpassQuery(
+  bbox: [number, number, number, number],
+): string {
   const [minLat, minLon, maxLat, maxLon] = bbox;
   return `[out:json][timeout:60][bbox:${minLat},${minLon},${maxLat},${maxLon}];
 relation[type="route"][route~"light_rail|subway|monorail"];

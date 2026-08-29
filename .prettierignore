@@ -1,0 +1,8 @@
+# Raw imported data - write-once, never hand-edited
+data/source/**
+
+# Generated distribution artifacts
+data/dist/**
+
+# Binary assets
+apps/web/public/basemap/**

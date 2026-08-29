@@ -1,7 +1,12 @@
 {
   "name": "bangkok-open-transit",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "scripts/build", "scripts/validate"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "scripts/build",
+    "scripts/validate"
+  ],
   "scripts": {
     "build": "bun run --filter='./packages/*' build && bun run --filter='./apps/*' build",
     "test": "vitest run",
