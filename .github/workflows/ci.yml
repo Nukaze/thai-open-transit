@@ -1,1 +1,40 @@
-﻿# Filled in by Task 19 (CI pipeline)
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Lint (Prettier check)
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Unit tests
+        run: bun run test
+
+      - name: Generate JSON Schemas
+        run: cd packages/schema && bun run generate-schemas
+
+      - name: Build dataset artifacts
+        run: bun run data:build
+
+      - name: Validate dataset (schema, graph integrity, provenance, perf budget)
+        run: bun run data:validate
+
+      - name: Build web app
+        run: cd apps/web && bun run build
