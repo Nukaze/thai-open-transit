@@ -20,6 +20,11 @@ export default function DownloadPage() {
             network.geojson
           </a>
         </li>
+        <li>
+          <a href="/stations.csv" download>
+            stations.csv
+          </a>
+        </li>
       </ul>
     </main>
   );

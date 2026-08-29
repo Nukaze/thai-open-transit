@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { StationSchema, LineSchema, SegmentSchema } from "schema";
 import { assembleNetwork } from "./assemble";
+import { stationsToCsv } from "./to-csv";
 
 function readEntities<T>(dir: URL, parse: (raw: unknown) => T): T[] {
   let files: string[] = [];
@@ -51,6 +52,10 @@ function main() {
   mkdirSync(distDir, { recursive: true });
   writeFileSync(new URL("network.json", distDir), JSON.stringify(network));
   writeFileSync(new URL("network.geojson", distDir), JSON.stringify(geojson));
+  writeFileSync(
+    new URL("stations.csv", distDir),
+    stationsToCsv(applyOverrides(stations)),
+  );
   console.log(
     `Wrote data/dist/network.json (${stations.length} stations, ${lines.length} lines, ${segments.length} segments)`,
   );
