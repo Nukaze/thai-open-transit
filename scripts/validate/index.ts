@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { StationSchema, LineSchema, SegmentSchema } from "schema";
 import {
