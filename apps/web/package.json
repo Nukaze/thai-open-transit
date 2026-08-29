@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "cp ../../data/dist/network.json ../../data/dist/network.geojson public/ && next build",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {

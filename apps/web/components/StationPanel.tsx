@@ -3,6 +3,7 @@
 
 import { StatusBadge } from "ui";
 import type { StationWithStatus } from "../lib/types";
+import { ReportErrorButton } from "./ReportErrorButton";
 
 export function StationPanel({
   station,
@@ -31,6 +32,7 @@ export function StationPanel({
       <p>Structure: {station.structure}</p>
       <p>Accessible: {station.accessible ? "Yes" : "No"}</p>
       <p>Last verified: {station.last_verified_at}</p>
+      <ReportErrorButton station={station} />
     </aside>
   );
 }
