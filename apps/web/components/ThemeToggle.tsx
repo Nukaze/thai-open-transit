@@ -18,11 +18,12 @@ export function ThemeToggle({
     <button
       type="button"
       onClick={() => onChange(next)}
-      // `aria-pressed` rather than a label that flips between "Light"/"Dark":
-      // a toggle whose label changes on activation is read out inconsistently
-      // by screen readers, since the name no longer describes the control.
-      aria-pressed={dark}
-      aria-label={t(dark ? "theme_to_light" : "theme_to_dark", "en")}
+      // An action button, not a toggle: the label names what activating it
+      // does ("Dark map" while the map is light). `aria-pressed` was here too,
+      // which contradicted that - a screen reader announced "Light map, toggle
+      // button, pressed" in dark mode, which reads as "Light is on", the
+      // opposite of the state. A flipping label and a pressed state cannot
+      // both be right; the label is the one users can see.
       style={{
         // Bottom-left, clearing MapLibre's own logo control: `LineFilter`
         // holds top-left, `StationSearch` holds top-right (and its results

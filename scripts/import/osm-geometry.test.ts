@@ -43,6 +43,36 @@ describe("buildGraph / shortestPath", () => {
   });
 });
 
+describe("buildGraph way provenance", () => {
+  // `osm_way_refs` is meant to make a trace reproducible, so it must name the
+  // ways the path actually traversed - not every way in the route relation.
+  it("reports only the ways the traced path used", () => {
+    const nodes = nodeMap(NODES);
+    const twoWays = buildGraph(
+      [
+        { type: "way", id: 800, nodes: [1, 2, 3] },
+        { type: "way", id: 801, nodes: [3, 4, 5] },
+      ],
+      nodes,
+    );
+    const trace = chooseTrace(
+      [{ graph: twoWays }],
+      nodes,
+      [100.5, 13.75],
+      [100.502, 13.75],
+    );
+    expect(trace!.wayRefs).toEqual([800]);
+  });
+
+  // Filtering absent nodes out of a way would link the survivors directly,
+  // inventing connectivity and a straight line across unknown geometry.
+  it("breaks the chain at a missing node instead of bridging it", () => {
+    const partial = nodeMap([NODES[0]!, NODES[4]!]);
+    const graph = buildGraph([WAY], partial);
+    expect(graph.adjacency.size).toBe(0);
+  });
+});
+
 describe("nearestGraphNode", () => {
   it("attaches a point to the closest node and reports the distance", () => {
     const graph = buildGraph([WAY], nodeMap(NODES));
@@ -58,10 +88,7 @@ describe("nearestGraphNode", () => {
 
 describe("chooseTrace", () => {
   const nodes = nodeMap(NODES);
-  const candidate: TraceCandidate = {
-    wayRefs: [900],
-    graph: buildGraph([WAY], nodes),
-  };
+  const candidate: TraceCandidate = { graph: buildGraph([WAY], nodes) };
 
   it("traces the track between two stations", () => {
     const trace = chooseTrace(
@@ -83,7 +110,6 @@ describe("chooseTrace", () => {
       { type: "node", id: 50, lon: 100.5005, lat: 13.79 },
     ]);
     const detour: TraceCandidate = {
-      wayRefs: [901],
       graph: buildGraph(
         [{ type: "way", id: 901, nodes: [1, 50, 5] }],
         detourNodes,
@@ -100,7 +126,6 @@ describe("chooseTrace", () => {
 
   it("prefers the tightest candidate when several qualify", () => {
     const slightlyLonger: TraceCandidate = {
-      wayRefs: [902],
       graph: buildGraph(
         [{ type: "way", id: 902, nodes: [1, 2, 3, 4, 5] }],
         nodes,
