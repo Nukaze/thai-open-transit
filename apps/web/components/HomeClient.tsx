@@ -6,10 +6,12 @@ import dynamic from "next/dynamic";
 import { StationPanel } from "./StationPanel";
 import { LineFilter } from "./LineFilter";
 import { StationSearch } from "./StationSearch";
+import { ThemeToggle } from "./ThemeToggle";
 import { getStationIdFromUrl, buildStationDeepLink } from "../lib/deep-link";
 import type { Line } from "schema";
 import type { FeatureCollection, Point, LineString } from "geojson";
 import type { StationWithStatus } from "../lib/types";
+import type { MapTheme } from "./Map";
 
 // `maplibre-gl` and friends (pmtiles, @protomaps/basemaps) are ~270KB gzipped
 // on their own - CLAUDE.md 7's "First load, compressed: < 300 KB" budget
@@ -40,6 +42,17 @@ export function HomeClient({
   );
   const [selectedStation, setSelectedStation] =
     useState<StationWithStatus | null>(null);
+  // Starts light rather than reading `prefers-color-scheme` during render:
+  // this component is prerendered to static HTML at build time, where no
+  // media query exists, so branching on it here would produce markup that
+  // disagrees with the client's first paint. The effect below applies the
+  // OS preference after mount, and any explicit toggle then wins.
+  const [theme, setTheme] = useState<MapTheme>("light");
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    if (query.matches) setTheme("dark");
+  }, []);
 
   // Stable across re-renders as long as the `stations` prop (loaded once at
   // build time) doesn't change, so it doesn't force `Map`'s effect (which
@@ -113,7 +126,9 @@ export function HomeClient({
       <NetworkMap
         networkGeoJson={filteredGeoJson}
         onStationClick={handleStationClick}
+        theme={theme}
       />
+      <ThemeToggle theme={theme} onChange={setTheme} />
       <LineFilter
         lines={lines}
         activeLineIds={activeLineIds}

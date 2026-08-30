@@ -5,6 +5,8 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   report_error: { th: "แจ้งข้อผิดพลาด", en: "Report an error" },
   last_verified: { th: "ตรวจสอบล่าสุด", en: "Last verified" },
   download_dataset: { th: "ดาวน์โหลดชุดข้อมูล", en: "Download dataset" },
+  theme_to_dark: { th: "โหมดมืด", en: "Dark map" },
+  theme_to_light: { th: "โหมดสว่าง", en: "Light map" },
 };
 
 export function t(key: string, lang: "th" | "en"): string {
