@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Map as NetworkMap } from "./Map";
+import dynamic from "next/dynamic";
 import { StationPanel } from "./StationPanel";
 import { LineFilter } from "./LineFilter";
 import { StationSearch } from "./StationSearch";
@@ -10,6 +10,21 @@ import { getStationIdFromUrl, buildStationDeepLink } from "../lib/deep-link";
 import type { Line } from "schema";
 import type { FeatureCollection, Point, LineString } from "geojson";
 import type { StationWithStatus } from "../lib/types";
+
+// `maplibre-gl` and friends (pmtiles, @protomaps/basemaps) are ~270KB gzipped
+// on their own - CLAUDE.md 7's "First load, compressed: < 300 KB" budget
+// can't absorb them in the initial bundle. `next/dynamic` with `ssr: false`
+// moves `Map.tsx` (and everything it imports) into a separate chunk that
+// downloads after hydration instead of blocking First Contentful Paint. The
+// `.then` resolves the named `Map` export to the default export shape
+// `next/dynamic` requires.
+const NetworkMap = dynamic(
+  () => import("./Map").then((mod) => ({ default: mod.Map })),
+  {
+    ssr: false,
+    loading: () => <div style={{ width: "100%", height: "100vh" }} />,
+  },
+);
 
 export function HomeClient({
   stations,
