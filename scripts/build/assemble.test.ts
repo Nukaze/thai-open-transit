@@ -2,6 +2,12 @@ import { describe, it, expect } from "vitest";
 import { assembleNetwork, deriveStatus } from "./assemble";
 import type { Station, Line, Segment } from "schema";
 
+type GeoFeature = {
+  type: string;
+  geometry: { type: string; coordinates: unknown };
+  properties: Record<string, unknown>;
+};
+
 function makeStation(id: string): Station {
   return {
     id,
@@ -51,7 +57,73 @@ describe("assembleNetwork", () => {
     expect(network).toHaveProperty("lines");
     expect(network).toHaveProperty("segments");
     expect(geojson).toMatchObject({ type: "FeatureCollection" });
-    expect((geojson as { features: unknown[] }).features).toHaveLength(2);
+    // 2 station Points + 1 segment LineString
+    expect((geojson as { features: unknown[] }).features).toHaveLength(3);
+  });
+
+  it("emits a LineString feature per segment with endpoint coords, derived status and line color", () => {
+    const a: Station = {
+      ...makeStation("A"),
+      coords: { geo: { lat: 13.75, lon: 100.5 } },
+    };
+    const b: Station = {
+      ...makeStation("B"),
+      coords: { geo: { lat: 13.8, lon: 100.6 } },
+    };
+    const lines: Line[] = [
+      {
+        id: "TEST_LINE",
+        operator: "TEST",
+        name_th: "ทดสอบ",
+        name_en: "Test Line",
+        color_hex: "#ff0000",
+        milestones: [],
+        confidence: "high",
+        last_verified_at: "2026-07-01",
+      },
+    ];
+    const segments: Segment[] = [
+      {
+        id: "A__B",
+        line: "TEST_LINE",
+        from_station: "A",
+        to_station: "B",
+        milestones: [
+          {
+            date: "2026-01-01",
+            date_precision: "exact",
+            event: "construction_started",
+            source_refs: [{ url: "https://example.com", title: "Example" }],
+          },
+        ],
+        confidence: "high",
+        last_verified_at: "2026-07-01",
+      },
+    ];
+
+    const { geojson } = assembleNetwork([a, b], lines, segments);
+    const features = (geojson as { features: GeoFeature[] }).features;
+    const lineFeatures = features.filter(
+      (f) => f.geometry.type === "LineString",
+    );
+
+    expect(lineFeatures).toHaveLength(1);
+    expect(lineFeatures[0]).toEqual({
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [100.5, 13.75],
+          [100.6, 13.8],
+        ],
+      },
+      properties: {
+        id: "A__B",
+        line: "TEST_LINE",
+        status: "under_construction",
+        color: "#ff0000",
+      },
+    });
   });
 
   it("throws if graph integrity check finds an orphan or dangling segment", () => {

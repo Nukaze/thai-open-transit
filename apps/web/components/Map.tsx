@@ -13,15 +13,41 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { Protocol } from "pmtiles";
 import { layers, namedFlavor } from "@protomaps/basemaps";
 import { PUBLIC_BASE_URL } from "../lib/constants";
-import type { FeatureCollection, Point } from "geojson";
+import type { Feature, FeatureCollection, Point, LineString } from "geojson";
 
 const BANGKOK_CENTER: [number, number] = [100.5018, 13.7563];
+
+// The station source has `cluster: true`, and MapLibre feeds a clustered
+// GeoJSON source through supercluster, which only accepts Point geometry -
+// LineStrings handed to it are dropped before tiling, so segments would be
+// silently invisible if both shared one source. Segments therefore get their
+// own unclustered source, and this splits the single collection the parent
+// passes down into the two the map actually needs.
+function splitFeatures(collection: FeatureCollection<Point | LineString>): {
+  points: FeatureCollection<Point>;
+  lines: FeatureCollection<LineString>;
+} {
+  return {
+    points: {
+      type: "FeatureCollection",
+      features: collection.features.filter(
+        (f): f is Feature<Point> => f.geometry.type === "Point",
+      ),
+    },
+    lines: {
+      type: "FeatureCollection",
+      features: collection.features.filter(
+        (f): f is Feature<LineString> => f.geometry.type === "LineString",
+      ),
+    },
+  };
+}
 
 export function Map({
   networkGeoJson,
   onStationClick,
 }: {
-  networkGeoJson: FeatureCollection<Point>;
+  networkGeoJson: FeatureCollection<Point | LineString>;
   onStationClick?: (id: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,11 +68,19 @@ export function Map({
 
   // Data updates flow into the already-running map via `source.setData`
   // instead of remounting. Guarded by `getSource` because this can fire
-  // before the map's own `load` event has attached the source.
+  // before the map's own `load` event has attached the sources. Both sources
+  // are updated: the caller's contract is a single FeatureCollection, which
+  // this component splits (see `splitFeatures`).
   useEffect(() => {
-    const source = mapRef.current?.getSource("network") as
-      maplibregl.GeoJSONSource | undefined;
-    source?.setData(networkGeoJson);
+    const map = mapRef.current;
+    if (!map) return;
+    const { points, lines } = splitFeatures(networkGeoJson);
+    (map.getSource("network") as maplibregl.GeoJSONSource | undefined)?.setData(
+      points,
+    );
+    (
+      map.getSource("network-lines") as maplibregl.GeoJSONSource | undefined
+    )?.setData(lines);
   }, [networkGeoJson]);
 
   useEffect(() => {
@@ -74,12 +108,75 @@ export function Map({
     });
 
     map.on("load", () => {
+      const { points, lines } = splitFeatures(networkGeoJsonRef.current);
+
       map.addSource("network", {
         type: "geojson",
-        data: networkGeoJsonRef.current,
+        data: points,
         cluster: true,
         clusterRadius: 40,
       });
+      map.addSource("network-lines", {
+        type: "geojson",
+        data: lines,
+      });
+
+      // Segment rendering, per SPEC 3.3's status table. Added before the
+      // station layers so segments draw underneath the station dots, matching
+      // conventional transit-map z-ordering.
+      map.addLayer({
+        id: "segments",
+        type: "line",
+        source: "network-lines",
+        // `proposed` and `cancelled` are "hidden by default" in SPEC 3.3, so
+        // they are filtered out of the layer rather than drawn at zero
+        // opacity - a zero-opacity line is still tiled and still answers
+        // queryRenderedFeatures, which is not the same thing as hidden.
+        filter: [
+          "!",
+          ["in", ["get", "status"], ["literal", ["proposed", "cancelled"]]],
+        ],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          // `suspended` overrides the line's brand color with grey; every
+          // other status keeps `color`, which `scripts/build/assemble.ts`
+          // denormalises onto each feature from the segment's parent Line
+          // (MapLibre paint expressions can only read feature properties).
+          "line-color": [
+            "case",
+            ["==", ["get", "status"], "suspended"],
+            "#9ca3af",
+            ["get", "color"],
+          ],
+          // SPEC 3.3 asks for an "outline" treatment for `planned`. MapLibre
+          // has no outline-stroke-only paint for a line layer the way it has
+          // `fill-outline-color` for a polygon, so a thin, low-opacity stroke
+          // stands in for it. Recorded here rather than silently approximated.
+          "line-width": ["match", ["get", "status"], "planned", 1.5, 3],
+          "line-opacity": [
+            "match",
+            ["get", "status"],
+            "approved",
+            0.5,
+            "planned",
+            0.6,
+            1,
+          ],
+          // `line-dasharray` is `cross-faded-data-driven` in this MapLibre
+          // version - verified against the bundled style-spec reference, whose
+          // entry for it lists `"parameters": ["zoom", "feature"]` - so a
+          // `get`-based `match` is valid and dashed/solid need not be split
+          // across two layers. `[1, 0]` is the solid case.
+          "line-dasharray": [
+            "match",
+            ["get", "status"],
+            ["under_construction", "approved"],
+            ["literal", [2, 2]],
+            ["literal", [1, 0]],
+          ],
+        },
+      });
+
       map.addLayer({
         id: "station-clusters",
         type: "circle",

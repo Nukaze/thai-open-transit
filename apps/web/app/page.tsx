@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { HomeClient } from "../components/HomeClient";
 import type { Line } from "schema";
-import type { FeatureCollection, Point } from "geojson";
+import type { FeatureCollection, Point, LineString } from "geojson";
 import type { StationWithStatus } from "../lib/types";
 
 // This page stays a Server Component (no 'use client') so it can load the
@@ -48,7 +48,9 @@ const distDir = join(process.cwd(), "../../data/dist");
 
 const networkGeoJson = JSON.parse(
   readFileSync(join(distDir, "network.geojson"), "utf-8"),
-) as FeatureCollection<Point>;
+  // Station Points and segment LineStrings share one collection; `Map`
+  // splits them into its two sources (see `splitFeatures` there).
+) as FeatureCollection<Point | LineString>;
 
 const networkData = JSON.parse(
   readFileSync(join(distDir, "network.json"), "utf-8"),

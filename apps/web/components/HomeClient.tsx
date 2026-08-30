@@ -8,7 +8,7 @@ import { LineFilter } from "./LineFilter";
 import { StationSearch } from "./StationSearch";
 import { getStationIdFromUrl, buildStationDeepLink } from "../lib/deep-link";
 import type { Line } from "schema";
-import type { FeatureCollection, Point } from "geojson";
+import type { FeatureCollection, Point, LineString } from "geojson";
 import type { StationWithStatus } from "../lib/types";
 
 export function HomeClient({
@@ -18,7 +18,7 @@ export function HomeClient({
 }: {
   stations: StationWithStatus[];
   lines: Line[];
-  networkGeoJson: FeatureCollection<Point>;
+  networkGeoJson: FeatureCollection<Point | LineString>;
 }) {
   const [activeLineIds, setActiveLineIds] = useState(
     new Set(lines.map((l) => l.id)),
@@ -72,6 +72,11 @@ export function HomeClient({
     }
   }, [stationById]);
 
+  // The line filter has to branch on geometry: a station Point is visible when
+  // any line it serves is active, whereas a segment LineString carries its own
+  // `line` id and is visible when that one line is active. Testing every
+  // feature against `visibleStationIds` (as this did before segments existed)
+  // would drop every LineString, since a segment id is never a station id.
   const filteredGeoJson = useMemo(() => {
     const visibleStationIds = new Set(
       stations
@@ -81,9 +86,11 @@ export function HomeClient({
     return {
       ...networkGeoJson,
       features: networkGeoJson.features.filter((f) =>
-        visibleStationIds.has(f.properties?.id),
+        f.geometry.type === "LineString"
+          ? activeLineIds.has(f.properties?.line)
+          : visibleStationIds.has(f.properties?.id),
       ),
-    } as FeatureCollection<Point>;
+    } as FeatureCollection<Point | LineString>;
   }, [activeLineIds, stations, networkGeoJson]);
 
   return (
