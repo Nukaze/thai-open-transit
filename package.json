@@ -5,12 +5,13 @@
     "packages/*",
     "apps/*",
     "scripts/build",
-    "scripts/validate"
+    "scripts/validate",
+    "scripts/import"
   ],
   "scripts": {
     "build": "bun run --filter='./packages/*' build && bun run --filter='./apps/*' build",
     "test": "vitest run",
-    "typecheck": "bun run --filter='./packages/*' --filter='./apps/*' typecheck",
+    "typecheck": "bun run --filter='./packages/*' --filter='./apps/*' --filter='./scripts/*' typecheck",
     "lint": "prettier --check .",
     "data:import": "bun run scripts/import/index.ts",
     "data:build": "bun run scripts/build/index.ts",

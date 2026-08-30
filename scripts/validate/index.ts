@@ -10,13 +10,40 @@ import { checkSourceRefs } from "./check-source-refs";
 
 const NETWORK_JSON_BROTLI_BUDGET_BYTES = 120 * 1024;
 
+// `JSON.parse` returns `any`, so reaching straight for `raw.stations.map(...)`
+// is an unchecked `any` access - forbidden by CLAUDE.md 6 - and would fail
+// with a TypeError rather than a validation message if network.json were
+// malformed. This narrows the top-level shape first, so a bad artifact is
+// reported as a validation failure like every other problem in this file.
+function parseNetworkFile(json: string): {
+  stations: unknown[];
+  lines: unknown[];
+  segments: unknown[];
+} {
+  const raw: unknown = JSON.parse(json);
+  if (typeof raw !== "object" || raw === null) {
+    throw new Error("network.json is not a JSON object");
+  }
+  const record = raw as Record<string, unknown>;
+  for (const key of ["stations", "lines", "segments"] as const) {
+    if (!Array.isArray(record[key])) {
+      throw new Error(`network.json is missing an array property "${key}"`);
+    }
+  }
+  return {
+    stations: record.stations as unknown[],
+    lines: record.lines as unknown[],
+    segments: record.segments as unknown[],
+  };
+}
+
 function main() {
   const networkPath = new URL("../../data/dist/network.json", import.meta.url);
-  const raw = JSON.parse(readFileSync(networkPath, "utf-8"));
+  const raw = parseNetworkFile(readFileSync(networkPath, "utf-8"));
 
-  const stations = raw.stations.map((s: unknown) => StationSchema.parse(s));
-  const lines = raw.lines.map((l: unknown) => LineSchema.parse(l));
-  const segments = raw.segments.map((s: unknown) => SegmentSchema.parse(s));
+  const stations = raw.stations.map((s) => StationSchema.parse(s));
+  const lines = raw.lines.map((l) => LineSchema.parse(l));
+  const segments = raw.segments.map((s) => SegmentSchema.parse(s));
 
   const graph = buildGraph(stations, segments);
   const orphans = findOrphanStations(graph);
