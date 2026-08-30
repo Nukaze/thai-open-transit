@@ -85,6 +85,10 @@
     },
     "scripts/import": {
       "name": "import-scripts",
+      "dependencies": {
+        "geo-utils": "workspace:*",
+        "schema": "workspace:*",
+      },
     },
     "scripts/validate": {
       "name": "validate-scripts",
