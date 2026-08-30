@@ -166,13 +166,20 @@ export function Map({
           // version - verified against the bundled style-spec reference, whose
           // entry for it lists `"parameters": ["zoom", "feature"]` - so a
           // `get`-based `match` is valid and dashed/solid need not be split
-          // across two layers. `[1, 0]` is the solid case.
+          // across two layers.
+          //
+          // `[1]` (a single continuous dash, no gap) is the solid case, not
+          // `[1, 0]`. A trailing zero would add a zero-length gap range, and
+          // `LineAtlas.addRoundDash` - which is what runs here, since
+          // `line-cap` is `round` - has none of the zero-length range cleanup
+          // that `addRegularDash` does. An odd-length array is the documented
+          // way to express a pattern with no gap.
           "line-dasharray": [
             "match",
             ["get", "status"],
             ["under_construction", "approved"],
             ["literal", [2, 2]],
-            ["literal", [1, 0]],
+            ["literal", [1]],
           ],
         },
       });
