@@ -1,5 +1,5 @@
 // scripts/import/seed-1999.ts
-import { readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import type { Station, Line, Segment, SourceRef } from "schema";
 import {
   buildGraph,
@@ -158,10 +158,10 @@ function loadOsm(): OsmElement[] {
  * the directional pair when that is all there is, and fail loudly rather than
  * silently matching nothing.
  */
-function resolveCoords(
+function stationCandidates(
   seed: SeedStation,
   elements: OsmElement[],
-): { lat: number; lon: number; name_th: string; name_en: string | null } {
+): OsmElement[] {
   const isStationish = (e: OsmElement) =>
     e.type === "node" &&
     e.lat !== undefined &&
@@ -169,7 +169,11 @@ function resolveCoords(
       e.tags?.public_transport === "station" ||
       e.tags?.public_transport === "stop_position");
 
-  const candidates = seed.osm_ref
+  // Both branches guard against an undefined key matching an absent tag:
+  // `e.tags?.ref === undefined` is true for every untagged node, which is how
+  // the coordinate bug happened and how `accessible` was later read off an
+  // airport station in Suvarnabhumi.
+  return seed.osm_ref !== undefined
     ? elements.filter((e) => isStationish(e) && e.tags?.ref === seed.osm_ref)
     : elements.filter(
         (e) =>
@@ -177,6 +181,13 @@ function resolveCoords(
           seed.osm_name !== undefined &&
           e.tags?.name === seed.osm_name,
       );
+}
+
+function resolveCoords(
+  seed: SeedStation,
+  elements: OsmElement[],
+): { lat: number; lon: number; name_th: string; name_en: string | null } {
+  const candidates = stationCandidates(seed, elements);
 
   if (candidates.length === 0) {
     throw new Error(
@@ -205,6 +216,7 @@ function buildStation(
   elements: OsmElement[],
 ): Station {
   const { lat, lon, name_th, name_en } = resolveCoords(seed, elements);
+  const candidates = stationCandidates(seed, elements);
 
   const code_history = seed.code_1999
     ? [
@@ -243,10 +255,15 @@ function buildStation(
     // minority of these nodes, so "no tag" collapses to false. That is a
     // schema limitation worth an ADR (the field wants a third "unknown"
     // state); until then station confidence stays "medium" because of it.
-    accessible:
-      elements.find(
-        (e) => e.tags?.ref === seed.osm_ref && e.tags?.railway === "station",
-      )?.tags?.wheelchair === "yes",
+    // Read from the SAME nodes that produced the coordinate. The previous
+    // version matched `ref === seed.osm_ref && railway === "station"`, which
+    // failed in both directions: for CEN and W1 (matched by name, so
+    // `osm_ref` is undefined) it matched any `railway=station` node without a
+    // `ref` - in practice Suvarnabhumi's Midfield Satellite Concourse - and
+    // published its `wheelchair=yes` as theirs; for Sukhumvit stations, which
+    // are `stop_position` nodes, it matched nothing and published `false`
+    // regardless of what OSM actually says.
+    accessible: candidates.some((e) => e.tags?.wheelchair === "yes"),
     coords: { geo: { lat, lon } },
     validity: lineIds.map((line) => ({ line, from: OPENING_DATE, to: null })),
     milestones,
@@ -273,14 +290,14 @@ function traceCandidates(
 
     // role "" is the track itself; "stop" and "platform" members are points
     // and areas, not the alignment.
-    const wayRefs = (element.members ?? [])
-      .filter((member) => member.type === "way" && member.role === "")
-      .map((member) => member.ref);
-    const ways = elements.filter(
-      (e) => e.type === "way" && wayRefs.includes(e.id),
+    const wayRefs = new Set(
+      (element.members ?? [])
+        .filter((member) => member.type === "way" && member.role === "")
+        .map((member) => member.ref),
     );
+    const ways = elements.filter((e) => e.type === "way" && wayRefs.has(e.id));
     if (ways.length === 0) continue;
-    candidates.push({ wayRefs, graph: buildGraph(ways, nodes) });
+    candidates.push({ graph: buildGraph(ways, nodes) });
   }
   return candidates;
 }
@@ -358,6 +375,18 @@ function main() {
     [SILOM_1999, SILOM_LINE],
   ] as const) {
     for (const seed of seeds) {
+      // Siam is on both lines, so it is seeded twice. Overwriting silently is
+      // the failure the comment above warns about: a future disagreement on
+      // `code_1999` or `interchange_group` between the two entries would
+      // publish whichever came last, with no error.
+      const existing = seedsById.get(seed.id);
+      if (existing !== undefined) {
+        if (JSON.stringify(existing) !== JSON.stringify(seed)) {
+          throw new Error(
+            `Conflicting seed entries for station ${seed.id}: ${JSON.stringify(existing)} vs ${JSON.stringify(seed)}`,
+          );
+        }
+      }
       seedsById.set(seed.id, seed);
       linesByStationId.set(seed.id, [
         ...(linesByStationId.get(seed.id) ?? []),
@@ -390,7 +419,13 @@ function main() {
     ["segments", segments],
   ] as const) {
     const outDir = new URL(`${dir}/`, sourceDir);
-    rmSync(outDir, { recursive: true, force: true });
+    // Writes only this run's ids; it does NOT clear the directory. The
+    // previous version did an `rmSync(..., { recursive: true })` on each
+    // output directory, so re-running the seeder after any other era or
+    // importer had written there would destroy those files - and
+    // `data/source/` is write-once (CLAUDE.md 4). Entities this seeder no
+    // longer produces are removed deliberately, in a reviewed commit, where
+    // the deletion is visible in the diff.
     mkdirSync(outDir, { recursive: true });
     for (const entity of entities) {
       writeFileSync(

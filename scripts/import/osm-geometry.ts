@@ -17,7 +17,21 @@ export type OsmElement = {
   tags?: Record<string, string>;
 };
 
-type Graph = Map<number, { to: number; weight: number }[]>;
+type Adjacency = Map<number, { to: number; weight: number }[]>;
+
+/**
+ * Adjacency plus the way each edge came from, so a traced path can report the
+ * ways it actually used rather than every way in the relation.
+ */
+export type TrackGraph = {
+  adjacency: Adjacency;
+  wayOfEdge: Map<string, number>;
+};
+
+/** Undirected edge key; the lower node id first so both directions agree. */
+function edgeKey(a: number, b: number): string {
+  return a < b ? `${a}:${b}` : `${b}:${a}`;
+}
 
 /**
  * Builds an undirected node graph from a set of OSM ways.
@@ -32,27 +46,33 @@ type Graph = Map<number, { to: number; weight: number }[]>;
 export function buildGraph(
   ways: OsmElement[],
   nodes: Map<number, OsmElement>,
-): Graph {
-  const graph: Graph = new Map();
+): TrackGraph {
+  const adjacency: Adjacency = new Map();
+  const wayOfEdge = new Map<string, number>();
   const link = (a: number, b: number, weight: number) => {
-    if (!graph.has(a)) graph.set(a, []);
-    graph.get(a)!.push({ to: b, weight });
+    if (!adjacency.has(a)) adjacency.set(a, []);
+    adjacency.get(a)!.push({ to: b, weight });
   };
 
   for (const way of ways) {
-    const ids = (way.nodes ?? []).filter((id) => nodes.has(id));
-    for (let i = 1; i < ids.length; i++) {
-      const a = ids[i - 1]!;
-      const b = ids[i]!;
+    for (let i = 1; i < (way.nodes ?? []).length; i++) {
+      const a = way.nodes![i - 1]!;
+      const b = way.nodes![i]!;
+      // A missing node BREAKS the chain rather than being filtered out of it.
+      // Filtering would link the surviving neighbours directly, inventing both
+      // connectivity and a straight line where the real geometry is unknown -
+      // silently, and indistinguishably from a real edge.
+      if (!nodes.has(a) || !nodes.has(b)) continue;
       const weight = distanceMeters(
         positionOf(nodes.get(a)!),
         positionOf(nodes.get(b)!),
       );
       link(a, b, weight);
       link(b, a, weight);
+      wayOfEdge.set(edgeKey(a, b), way.id);
     }
   }
-  return graph;
+  return { adjacency, wayOfEdge };
 }
 
 export function positionOf(node: OsmElement): Position {
@@ -61,12 +81,12 @@ export function positionOf(node: OsmElement): Position {
 
 /** Graph node closest to `point`, used to attach a station to the track. */
 export function nearestGraphNode(
-  graph: Graph,
+  graph: TrackGraph,
   nodes: Map<number, OsmElement>,
   point: Position,
 ): { id: number; distanceMeters: number } {
   let best = { id: -1, distanceMeters: Number.POSITIVE_INFINITY };
-  for (const id of graph.keys()) {
+  for (const id of graph.adjacency.keys()) {
     const d = distanceMeters(positionOf(nodes.get(id)!), point);
     if (d < best.distanceMeters) best = { id, distanceMeters: d };
   }
@@ -75,7 +95,7 @@ export function nearestGraphNode(
 
 /** Dijkstra. Returns node ids from `start` to `goal`, or null if disconnected. */
 export function shortestPath(
-  graph: Graph,
+  graph: TrackGraph,
   start: number,
   goal: number,
 ): number[] | null {
@@ -101,7 +121,7 @@ export function shortestPath(
     if (current === goal) break;
     visited.add(current);
 
-    for (const edge of graph.get(current) ?? []) {
+    for (const edge of graph.adjacency.get(current) ?? []) {
       if (visited.has(edge.to)) continue;
       const candidate = currentDistance + edge.weight;
       if (candidate < (distance.get(edge.to) ?? Number.POSITIVE_INFINITY)) {
@@ -145,7 +165,7 @@ export const MIN_SPAN_RATIO = 0.9;
 /** How far a station may sit from the track it is attached to. */
 export const MAX_ATTACH_METERS = 150;
 
-export type TraceCandidate = { wayRefs: number[]; graph: Graph };
+export type TraceCandidate = { graph: TrackGraph };
 
 export type Trace = {
   coordinates: Position[];
@@ -179,9 +199,22 @@ function traceWithin(
   if (detourRatio > MAX_DETOUR_RATIO || detourRatio < MIN_SPAN_RATIO)
     return null;
 
+  // Only the ways this path actually traverses. Recording the whole relation
+  // instead (7-14 ways for a two-vertex segment) would make `osm_way_refs`
+  // useless for its stated purpose: a consumer re-fetching them could not tell
+  // which way produced the geometry, nor reproduce it.
+  const wayRefs = [
+    ...new Set(
+      path
+        .slice(1)
+        .map((id, i) => candidate.graph.wayOfEdge.get(edgeKey(path[i]!, id)))
+        .filter((ref): ref is number => ref !== undefined),
+    ),
+  ];
+
   return {
     coordinates: roundLine(simplifyLine(full, SIMPLIFY_TOLERANCE_METERS)),
-    wayRefs: candidate.wayRefs,
+    wayRefs,
     lengthMeters,
     detourRatio,
     attachMeters,

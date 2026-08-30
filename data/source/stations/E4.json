@@ -11,7 +11,7 @@
   ],
   "interchange_group": null,
   "structure": "elevated",
-  "accessible": false,
+  "accessible": true,
   "coords": {
     "geo": {
       "lat": 13.73704895,

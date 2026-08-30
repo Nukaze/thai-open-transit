@@ -11,7 +11,7 @@
   ],
   "interchange_group": "SIAM",
   "structure": "elevated",
-  "accessible": true,
+  "accessible": false,
   "coords": {
     "geo": {
       "lat": 13.74562135,
