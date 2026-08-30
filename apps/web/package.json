@@ -1,0 +1,31 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "cp ../../data/dist/network.json ../../data/dist/network.geojson ../../data/dist/stations.csv public/ && next build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check-bundle-size": "bun run scripts/check-bundle-size.ts"
+  },
+  "dependencies": {
+    "@protomaps/basemaps": "^5.7.2",
+    "fuse.js": "^7.0.0",
+    "maplibre-gl": "^6.4.1",
+    "network-graph": "workspace:*",
+    "next": "^16.0.0",
+    "pmtiles": "^3.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "schema": "workspace:*",
+    "ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "@types/geojson": "^7946.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}

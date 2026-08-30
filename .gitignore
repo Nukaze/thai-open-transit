@@ -1,0 +1,13 @@
+node_modules/
+data/dist/
+*.log
+.next/
+out/
+.DS_Store
+
+# Copied from data/dist/ into apps/web/public/ by the `build` script so the
+# static export's /download links resolve. Generated per-build; the source
+# of truth lives in data/dist/, which is itself gitignored. Never commit.
+apps/web/public/network.json
+apps/web/public/network.geojson
+apps/web/public/stations.csv

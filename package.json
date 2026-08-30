@@ -1,0 +1,25 @@
+{
+  "name": "bangkok-open-transit",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "scripts/build",
+    "scripts/validate",
+    "scripts/import"
+  ],
+  "scripts": {
+    "build": "bun run --filter='./packages/*' build && bun run --filter='./apps/*' build",
+    "test": "vitest run",
+    "typecheck": "bun run --filter='./packages/*' --filter='./apps/*' --filter='./scripts/*' typecheck",
+    "lint": "prettier --check .",
+    "data:import": "bun run scripts/import/index.ts",
+    "data:build": "bun run scripts/build/index.ts",
+    "data:validate": "bun run scripts/validate/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "prettier": "^3.4.0"
+  }
+}

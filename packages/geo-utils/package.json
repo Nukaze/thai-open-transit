@@ -1,0 +1,17 @@
+{
+  "name": "geo-utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "proj4": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/proj4": "^2.5.0"
+  }
+}
