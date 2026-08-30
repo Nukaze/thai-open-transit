@@ -25,7 +25,13 @@ export function StationSearch<T extends Station>({
   const fuse = useMemo(
     () =>
       new Fuse(stations, {
-        keys: ["name_th", "name_en", "id"],
+        // `code_history.code` is a Fuse dot-notation path into the array,
+        // so it matches every historical code a station has carried, not
+        // just the current one. Station code and station id diverge over
+        // time (CLAUDE.md 9 - the Sukhumvit extension renumbered stations),
+        // so someone searching the code printed on an older sign or map
+        // would otherwise find nothing.
+        keys: ["name_th", "name_en", "id", "code_history.code"],
         threshold: 0.3,
       }),
     [stations],
