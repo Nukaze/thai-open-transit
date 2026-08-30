@@ -17,6 +17,26 @@ import type { Feature, FeatureCollection, Point, LineString } from "geojson";
 
 const BANGKOK_CENTER: [number, number] = [100.5018, 13.7563];
 
+export type MapTheme = "light" | "dark";
+
+// `StyleSpecification` lives in `@maplibre/maplibre-gl-style-spec`, which is a
+// transitive dependency here, not a declared one - importing it directly would
+// mean depending on a package apps/web never installed. `MapOptions["style"]`
+// is the same type reached through maplibre-gl's own public exports.
+type MapStyle = NonNullable<maplibregl.MapOptions["style"]>;
+
+// The network overlay sits on top of the basemap, so its colors have to move
+// with the flavor: the light flavor's near-white land makes dark navy dots
+// readable, and on the dark flavor those same dots disappear into the
+// background. Kept adjacent to the flavor name so the two cannot drift apart.
+const OVERLAY_COLORS: Record<
+  MapTheme,
+  { cluster: string; station: string; suspended: string }
+> = {
+  light: { cluster: "#2563eb", station: "#1e3a8a", suspended: "#9ca3af" },
+  dark: { cluster: "#60a5fa", station: "#bfdbfe", suspended: "#6b7280" },
+};
+
 // The station source has `cluster: true`, and MapLibre feeds a clustered
 // GeoJSON source through supercluster, which only accepts Point geometry -
 // LineStrings handed to it are dropped before tiling, so segments would be
@@ -43,26 +63,175 @@ function splitFeatures(collection: FeatureCollection<Point | LineString>): {
   };
 }
 
+// MapLibre's `normalizeSpriteURL` rejects a relative sprite path outright
+// ("Invalid sprite URL ..., must be absolute"), unlike `glyphs` and source
+// `url`, which it resolves against the document. `PUBLIC_BASE_URL` is empty by
+// design (CLAUDE.md 3: never hardcode the deployment domain), so the origin is
+// read from the browser at runtime instead - which keeps the artifact portable
+// across vercel.app, a future custom domain, and localhost, and still honours
+// `PUBLIC_BASE_URL` if one is ever configured. Safe to touch `window` here:
+// `Map` is only ever mounted through `next/dynamic` with `ssr: false`.
+// Must resolve to an ORIGIN, not a path prefix: a bare path here (say
+// "/bangkok-open-transit" for a subpath deployment) would make the sprite URL
+// relative again, which is exactly what MapLibre rejects.
+function assetOrigin(): string {
+  return PUBLIC_BASE_URL || window.location.origin;
+}
+
+function buildStyle(theme: MapTheme): MapStyle {
+  const origin = assetOrigin();
+  return {
+    version: 8,
+    glyphs: `${origin}/basemap/fonts/{fontstack}/{range}.pbf`,
+    // Both flavors' sprite sheets are vendored under public/basemap/sprites/
+    // from protomaps/basemaps-assets v4, the same source `generate_style`
+    // points at, because the public plane must not fetch from a third-party
+    // host at runtime (CLAUDE.md 2.4).
+    sprite: `${origin}/basemap/sprites/${theme}`,
+    sources: {
+      protomaps: {
+        type: "vector",
+        url: `pmtiles://${origin}/basemap/bangkok.pmtiles`,
+        attribution: "© OpenStreetMap contributors",
+      },
+    },
+    layers: layers("protomaps", namedFlavor(theme), { lang: "en" }),
+  };
+}
+
+// Every source and layer below is added at runtime rather than declared in the
+// style, so `setStyle` (the theme switch) discards all of it. Extracted into
+// one function so the theme effect can rebuild exactly what the init path
+// built, with no second copy of the layer definitions to keep in sync.
+function addNetworkLayers(
+  map: maplibregl.Map,
+  theme: MapTheme,
+  collection: FeatureCollection<Point | LineString>,
+): void {
+  // Idempotent: `style.load` can fire more than once per style if the theme
+  // is toggled again while the previous style is still loading (a full sprite
+  // + basemap reload leaves a wide window). A second `addSource("network")`
+  // on a style that already has one throws "There is already a source with
+  // ID", so the duplicate call is dropped here instead.
+  if (map.getSource("network")) return;
+
+  const { points, lines } = splitFeatures(collection);
+  const colors = OVERLAY_COLORS[theme];
+
+  map.addSource("network", {
+    type: "geojson",
+    data: points,
+    cluster: true,
+    clusterRadius: 40,
+  });
+  map.addSource("network-lines", {
+    type: "geojson",
+    data: lines,
+  });
+
+  // Segment rendering, per SPEC 3.3's status table. Added before the
+  // station layers so segments draw underneath the station dots, matching
+  // conventional transit-map z-ordering.
+  map.addLayer({
+    id: "segments",
+    type: "line",
+    source: "network-lines",
+    // `proposed` and `cancelled` are "hidden by default" in SPEC 3.3, so
+    // they are filtered out of the layer rather than drawn at zero
+    // opacity - a zero-opacity line is still tiled and still answers
+    // queryRenderedFeatures, which is not the same thing as hidden.
+    filter: [
+      "!",
+      ["in", ["get", "status"], ["literal", ["proposed", "cancelled"]]],
+    ],
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      // `suspended` overrides the line's brand color with grey; every
+      // other status keeps `color`, which `scripts/build/assemble.ts`
+      // denormalises onto each feature from the segment's parent Line
+      // (MapLibre paint expressions can only read feature properties).
+      "line-color": [
+        "case",
+        ["==", ["get", "status"], "suspended"],
+        colors.suspended,
+        ["get", "color"],
+      ],
+      // SPEC 3.3 asks for an "outline" treatment for `planned`. MapLibre
+      // has no outline-stroke-only paint for a line layer the way it has
+      // `fill-outline-color` for a polygon, so a thin, low-opacity stroke
+      // stands in for it. Recorded here rather than silently approximated.
+      "line-width": ["match", ["get", "status"], "planned", 1.5, 3],
+      "line-opacity": [
+        "match",
+        ["get", "status"],
+        "approved",
+        0.5,
+        "planned",
+        0.6,
+        1,
+      ],
+      // `line-dasharray` is `cross-faded-data-driven` in this MapLibre
+      // version - verified against the bundled style-spec reference, whose
+      // entry for it lists `"parameters": ["zoom", "feature"]` - so a
+      // `get`-based `match` is valid and dashed/solid need not be split
+      // across two layers.
+      //
+      // `[1]` (a single continuous dash, no gap) is the solid case, not
+      // `[1, 0]`. A trailing zero would add a zero-length gap range, and
+      // `LineAtlas.addRoundDash` - which is what runs here, since
+      // `line-cap` is `round` - has none of the zero-length range cleanup
+      // that `addRegularDash` does. An odd-length array is the documented
+      // way to express a pattern with no gap.
+      "line-dasharray": [
+        "match",
+        ["get", "status"],
+        ["under_construction", "approved"],
+        ["literal", [2, 2]],
+        ["literal", [1]],
+      ],
+    },
+  });
+
+  map.addLayer({
+    id: "station-clusters",
+    type: "circle",
+    source: "network",
+    filter: ["has", "point_count"],
+    paint: { "circle-radius": 16, "circle-color": colors.cluster },
+  });
+  map.addLayer({
+    id: "stations",
+    type: "circle",
+    source: "network",
+    filter: ["!", ["has", "point_count"]],
+    paint: { "circle-radius": 6, "circle-color": colors.station },
+  });
+}
+
 export function Map({
   networkGeoJson,
   onStationClick,
+  theme = "light",
 }: {
   networkGeoJson: FeatureCollection<Point | LineString>;
   onStationClick?: (id: string) => void;
+  theme?: MapTheme;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
 
-  // `onStationClick` and `networkGeoJson` are read through refs inside the
-  // init effect below instead of being listed in its dependency array. The
-  // init effect must run exactly once: it calls `addProtocol('pmtiles', ...)`,
-  // which "must only be called once per app lifecycle" (Protomaps docs), and
-  // re-running it on every line-filter toggle (which produces a new
-  // `networkGeoJson` object each time) would tear down and rebuild the whole
-  // MapLibre instance - destroying the protocol, resetting zoom/center to
-  // `BANGKOK_CENTER`, and re-registering the protocol on top of itself.
+  // `onStationClick`, `networkGeoJson` and `theme` are read through refs
+  // inside the init effect below instead of being listed in its dependency
+  // array. The init effect must run exactly once: it calls
+  // `addProtocol('pmtiles', ...)`, which "must only be called once per app
+  // lifecycle" (Protomaps docs), and re-running it on every line-filter
+  // toggle (which produces a new `networkGeoJson` object each time) would
+  // tear down and rebuild the whole MapLibre instance - destroying the
+  // protocol, resetting zoom/center to `BANGKOK_CENTER`, and re-registering
+  // the protocol on top of itself.
   const onStationClickRef = useRef(onStationClick);
   const networkGeoJsonRef = useRef(networkGeoJson);
+  const themeRef = useRef(theme);
   onStationClickRef.current = onStationClick;
   networkGeoJsonRef.current = networkGeoJson;
 
@@ -83,122 +252,53 @@ export function Map({
     )?.setData(lines);
   }, [networkGeoJson]);
 
+  // Theme switch. `setStyle` swaps the basemap flavor and its sprite sheet in
+  // place, keeping camera position, so toggling does not re-run the init
+  // effect (see why that matters above). It also drops every runtime-added
+  // source and layer, hence the re-add once the new style has loaded.
+  // The delegated listeners registered on `"stations"` in the init effect do
+  // survive: MapLibre resolves the layer at dispatch time, not at bind time,
+  // so a layer re-added under the same id keeps working.
   useEffect(() => {
+    const map = mapRef.current;
+    if (!map || themeRef.current === theme) return;
+    themeRef.current = theme;
+    map.setStyle(buildStyle(theme), { diff: false });
+  }, [theme]);
+
+  useEffect(() => {
+    // maplibre-gl v6 is ESM-only and builds its worker from
+    // `new URL('./maplibre-gl-worker.mjs', import.meta.url)`. MapLibre's docs
+    // name Next.js as the exception where that does not survive bundling: the
+    // worker is emitted without the `maplibre-gl-shared.mjs` it imports, so it
+    // throws on its first import and then answers nothing. Nothing surfaces -
+    // no console error, no `error` event - the map just renders an empty
+    // basemap while every tile request stays pending forever. Pointing at the
+    // copy in public/ (see scripts/copy-maplibre-worker.ts) is the documented
+    // fix. Must run before the first `new maplibregl.Map`.
+    maplibregl.setWorkerUrl(`${assetOrigin()}/maplibre/maplibre-gl-worker.mjs`);
+
     // addProtocol must only be called once per app lifecycle (Protomaps docs).
     const protocol = new Protocol();
     maplibregl.addProtocol("pmtiles", protocol.tile);
 
+    const initialTheme = themeRef.current;
     const map = new maplibregl.Map({
       container: containerRef.current!,
       center: BANGKOK_CENTER,
       zoom: 11,
-      style: {
-        version: 8,
-        glyphs: `${PUBLIC_BASE_URL}/basemap/fonts/{fontstack}/{range}.pbf`,
-        sprite: `${PUBLIC_BASE_URL}/basemap/sprites/light`,
-        sources: {
-          protomaps: {
-            type: "vector",
-            url: `pmtiles://${PUBLIC_BASE_URL}/basemap/bangkok.pmtiles`,
-            attribution: "© OpenStreetMap contributors",
-          },
-        },
-        layers: layers("protomaps", namedFlavor("light"), { lang: "en" }),
-      },
+      style: buildStyle(initialTheme),
+    });
+
+    // `style.load` fires for the initial style and again after every
+    // `setStyle`, so one registration covers both the first paint and each
+    // theme swap - no second re-add path to keep in sync, and no pile-up of
+    // `once` handlers when the theme is toggled repeatedly.
+    map.on("style.load", () => {
+      addNetworkLayers(map, themeRef.current, networkGeoJsonRef.current);
     });
 
     map.on("load", () => {
-      const { points, lines } = splitFeatures(networkGeoJsonRef.current);
-
-      map.addSource("network", {
-        type: "geojson",
-        data: points,
-        cluster: true,
-        clusterRadius: 40,
-      });
-      map.addSource("network-lines", {
-        type: "geojson",
-        data: lines,
-      });
-
-      // Segment rendering, per SPEC 3.3's status table. Added before the
-      // station layers so segments draw underneath the station dots, matching
-      // conventional transit-map z-ordering.
-      map.addLayer({
-        id: "segments",
-        type: "line",
-        source: "network-lines",
-        // `proposed` and `cancelled` are "hidden by default" in SPEC 3.3, so
-        // they are filtered out of the layer rather than drawn at zero
-        // opacity - a zero-opacity line is still tiled and still answers
-        // queryRenderedFeatures, which is not the same thing as hidden.
-        filter: [
-          "!",
-          ["in", ["get", "status"], ["literal", ["proposed", "cancelled"]]],
-        ],
-        layout: { "line-cap": "round", "line-join": "round" },
-        paint: {
-          // `suspended` overrides the line's brand color with grey; every
-          // other status keeps `color`, which `scripts/build/assemble.ts`
-          // denormalises onto each feature from the segment's parent Line
-          // (MapLibre paint expressions can only read feature properties).
-          "line-color": [
-            "case",
-            ["==", ["get", "status"], "suspended"],
-            "#9ca3af",
-            ["get", "color"],
-          ],
-          // SPEC 3.3 asks for an "outline" treatment for `planned`. MapLibre
-          // has no outline-stroke-only paint for a line layer the way it has
-          // `fill-outline-color` for a polygon, so a thin, low-opacity stroke
-          // stands in for it. Recorded here rather than silently approximated.
-          "line-width": ["match", ["get", "status"], "planned", 1.5, 3],
-          "line-opacity": [
-            "match",
-            ["get", "status"],
-            "approved",
-            0.5,
-            "planned",
-            0.6,
-            1,
-          ],
-          // `line-dasharray` is `cross-faded-data-driven` in this MapLibre
-          // version - verified against the bundled style-spec reference, whose
-          // entry for it lists `"parameters": ["zoom", "feature"]` - so a
-          // `get`-based `match` is valid and dashed/solid need not be split
-          // across two layers.
-          //
-          // `[1]` (a single continuous dash, no gap) is the solid case, not
-          // `[1, 0]`. A trailing zero would add a zero-length gap range, and
-          // `LineAtlas.addRoundDash` - which is what runs here, since
-          // `line-cap` is `round` - has none of the zero-length range cleanup
-          // that `addRegularDash` does. An odd-length array is the documented
-          // way to express a pattern with no gap.
-          "line-dasharray": [
-            "match",
-            ["get", "status"],
-            ["under_construction", "approved"],
-            ["literal", [2, 2]],
-            ["literal", [1]],
-          ],
-        },
-      });
-
-      map.addLayer({
-        id: "station-clusters",
-        type: "circle",
-        source: "network",
-        filter: ["has", "point_count"],
-        paint: { "circle-radius": 16, "circle-color": "#2563eb" },
-      });
-      map.addLayer({
-        id: "stations",
-        type: "circle",
-        source: "network",
-        filter: ["!", ["has", "point_count"]],
-        paint: { "circle-radius": 6, "circle-color": "#1e3a8a" },
-      });
-
       // Station selection: clicking an unclustered station point notifies
       // the parent with the station's id (from GeoJSON `properties.id`, per
       // `assembleNetwork`'s geojson output); the parent looks up the full
@@ -226,8 +326,8 @@ export function Map({
       maplibregl.removeProtocol("pmtiles");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once by
-    // design; `networkGeoJson` and `onStationClick` flow through the refs
-    // above instead, see the comment on those refs.
+    // design; `networkGeoJson`, `onStationClick` and `theme` flow through the
+    // refs above instead, see the comment on those refs.
   }, []);
 
   return <div ref={containerRef} style={{ width: "100%", height: "100vh" }} />;

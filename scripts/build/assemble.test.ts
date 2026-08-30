@@ -48,6 +48,10 @@ describe("assembleNetwork", () => {
         line: "TEST_LINE",
         from_station: "A",
         to_station: "B",
+        geometry: null,
+        geometry_source: "straight",
+        osm_way_refs: [],
+        validity: [{ from: "2026-01-01", to: null }],
         milestones: [],
         confidence: "high",
         last_verified_at: "2026-07-01",
@@ -91,6 +95,10 @@ describe("assembleNetwork", () => {
         line: "TEST_LINE",
         from_station: "A",
         to_station: "B",
+        geometry: null,
+        geometry_source: "straight",
+        osm_way_refs: [],
+        validity: [{ from: "2026-01-01", to: null }],
         milestones: [
           {
             date: "2026-01-01",
@@ -125,8 +133,68 @@ describe("assembleNetwork", () => {
         line: "TEST_LINE",
         status: "under_construction",
         color: "#ff0000",
+        geometry_source: "straight",
       },
     });
+  });
+
+  // Traced geometry is the whole point of segment.geometry: a straight chord
+  // between two stations misses every curve the track actually takes.
+  it("uses the segment's traced geometry when it has some", () => {
+    const a = {
+      ...makeStation("A"),
+      coords: { geo: { lat: 13.75, lon: 100.5 } },
+    };
+    const b = {
+      ...makeStation("B"),
+      coords: { geo: { lat: 13.8, lon: 100.6 } },
+    };
+    const lines: Line[] = [
+      {
+        id: "TEST_LINE",
+        operator: "TEST",
+        name_th: "ทดสอบ",
+        name_en: "Test Line",
+        color_hex: "#ff0000",
+        milestones: [],
+        confidence: "high",
+        last_verified_at: "2026-07-01",
+      },
+    ];
+    const traced: Segment[] = [
+      {
+        id: "A__B",
+        line: "TEST_LINE",
+        from_station: "A",
+        to_station: "B",
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [100.5, 13.75],
+            [100.55, 13.79],
+            [100.6, 13.8],
+          ],
+        },
+        geometry_source: "osm",
+        osm_way_refs: [900],
+        validity: [{ from: "2026-01-01", to: null }],
+        milestones: [],
+        confidence: "high",
+        last_verified_at: "2026-07-01",
+      },
+    ];
+
+    const { geojson } = assembleNetwork([a, b], lines, traced);
+    const lineFeature = (geojson as { features: GeoFeature[] }).features.find(
+      (f) => f.geometry.type === "LineString",
+    )!;
+
+    expect(lineFeature.geometry.coordinates).toEqual([
+      [100.5, 13.75],
+      [100.55, 13.79],
+      [100.6, 13.8],
+    ]);
+    expect(lineFeature.properties.geometry_source).toBe("osm");
   });
 
   it("throws if graph integrity check finds an orphan or dangling segment", () => {
@@ -137,6 +205,10 @@ describe("assembleNetwork", () => {
         line: "TEST_LINE",
         from_station: "A",
         to_station: "MISSING",
+        geometry: null,
+        geometry_source: "straight",
+        osm_way_refs: [],
+        validity: [{ from: "2026-01-01", to: null }],
         milestones: [],
         confidence: "high",
         last_verified_at: "2026-07-01",
@@ -166,6 +238,10 @@ describe("assembleNetwork", () => {
         line: "TEST_LINE",
         from_station: "A",
         to_station: "C",
+        geometry: null,
+        geometry_source: "straight",
+        osm_way_refs: [],
+        validity: [{ from: "2026-01-01", to: null }],
         milestones: [],
         confidence: "high",
         last_verified_at: "2026-07-01",

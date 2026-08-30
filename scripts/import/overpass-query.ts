@@ -10,9 +10,14 @@ export function buildOverpassQuery(
   bbox: [number, number, number, number],
 ): string {
   const [minLat, minLon, maxLat, maxLon] = bbox;
-  return `[out:json][timeout:60][bbox:${minLat},${minLon},${maxLat},${maxLon}];
+  // `out body` on the recursed members, not `out skel`: skel emits geometry
+  // with the tags stripped, which loses exactly the fields an entity needs -
+  // `name`, `name:en` and the station code in `ref`. The first import used
+  // skel and produced 4166 elements of which zero carried tags, so the
+  // extract had coordinates but no identities.
+  return `[out:json][timeout:90][bbox:${minLat},${minLon},${maxLat},${maxLon}];
 relation[type="route"][route~"light_rail|subway|monorail"];
 out body;
 >;
-out skel qt;`;
+out body qt;`;
 }

@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "cp ../../data/dist/network.json ../../data/dist/network.geojson ../../data/dist/stations.csv public/ && next build",
+    "dev": "bun run copy-maplibre-worker && next dev",
+    "build": "bun run copy-maplibre-worker && cp ../../data/dist/network.json ../../data/dist/network.geojson ../../data/dist/stations.csv public/ && next build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "check-bundle-size": "bun run scripts/check-bundle-size.ts"
+    "check-bundle-size": "bun run scripts/check-bundle-size.ts",
+    "copy-maplibre-worker": "bun run scripts/copy-maplibre-worker.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",

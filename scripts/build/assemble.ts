@@ -94,21 +94,25 @@ export function assembleNetwork(
     // check; this artifact-building step just skips them so partial data
     // still produces a usable geojson instead of throwing.
     if (!from || !to) return [];
+    // Traced geometry when the segment has it, straight chord otherwise. The
+    // chord is a deliberate fallback, not an error path: a segment added
+    // before anyone has traced it still renders, just crudely, and
+    // `geometry_source` on the entity says which one a consumer is looking at.
+    const coordinates = segment.geometry?.coordinates ?? [
+      [from.coords.geo.lon, from.coords.geo.lat],
+      [to.coords.geo.lon, to.coords.geo.lat],
+    ];
+
     return [
       {
         type: "Feature",
-        geometry: {
-          type: "LineString",
-          coordinates: [
-            [from.coords.geo.lon, from.coords.geo.lat],
-            [to.coords.geo.lon, to.coords.geo.lat],
-          ],
-        },
+        geometry: { type: "LineString", coordinates },
         properties: {
           id: segment.id,
           line: segment.line,
           status: deriveStatus(segment.milestones),
           color: lineById.get(segment.line)?.color_hex ?? DEFAULT_LINE_COLOR,
+          geometry_source: segment.geometry_source,
         },
       },
     ];

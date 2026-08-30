@@ -1,0 +1,68 @@
+{
+  "id": "S5__S6",
+  "line": "BTS_SILOM",
+  "from_station": "S5",
+  "to_station": "S6",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.521458,
+        13.719291
+      ],
+      [
+        100.518267,
+        13.718351
+      ],
+      [
+        100.51722,
+        13.718119
+      ],
+      [
+        100.516752,
+        13.718147
+      ],
+      [
+        100.514223,
+        13.718813
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    1391980684,
+    1418574506,
+    1391977407,
+    1449601866,
+    1418574207,
+    1391977406,
+    157481737
+  ],
+  "validity": [
+    {
+      "from": "1999-12-05",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "1999-12-05",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://www.openstreetmap.org/relation/2064205",
+          "title": "OpenStreetMap - BTS Sukhumvit Line route relation",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-08-30"
+}

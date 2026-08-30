@@ -11,3 +11,6 @@ out/
 apps/web/public/network.json
 apps/web/public/network.geojson
 apps/web/public/stations.csv
+
+# Copied from node_modules by apps/web/scripts/copy-maplibre-worker.ts
+apps/web/public/maplibre/
