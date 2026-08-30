@@ -50,3 +50,12 @@ jobs:
 
       - name: Build web app
         run: cd apps/web && bun run build
+
+      # CLAUDE.md 7's performance budget ("First load, compressed: < 300 KB")
+      # was previously unenforced anywhere in CI, which is how a ~441 KB
+      # regression (maplibre-gl bundled into the initial page load) shipped
+      # unnoticed. This measures the actual gzip size of the JS/CSS assets
+      # apps/web/out/index.html references on first load and fails the build
+      # if the budget is exceeded.
+      - name: Check bundle size budget
+        run: cd apps/web && bun run check-bundle-size

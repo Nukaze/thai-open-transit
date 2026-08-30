@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "cp ../../data/dist/network.json ../../data/dist/network.geojson ../../data/dist/stations.csv public/ && next build",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check-bundle-size": "bun run scripts/check-bundle-size.ts"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",
