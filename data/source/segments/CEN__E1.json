@@ -1,0 +1,83 @@
+{
+  "id": "CEN__E1",
+  "line": "BTS_SUKHUMVIT",
+  "from_station": "CEN",
+  "to_station": "E1",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.534234,
+        13.745697
+      ],
+      [
+        100.535333,
+        13.745507
+      ],
+      [
+        100.536067,
+        13.74531
+      ],
+      [
+        100.538646,
+        13.744854
+      ],
+      [
+        100.539676,
+        13.744764
+      ],
+      [
+        100.54075,
+        13.74452
+      ],
+      [
+        100.543073,
+        13.744119
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    791625654,
+    884167052,
+    815065850,
+    377160877,
+    1392013009,
+    1449600340,
+    157481747,
+    1165313179,
+    1392287981,
+    1306290560,
+    1392287999,
+    1449603200,
+    859223070,
+    1392288031
+  ],
+  "validity": [
+    {
+      "from": "1999-12-05",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "1999-12-05",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://www.openstreetmap.org/relation/2064205",
+          "title": "OpenStreetMap - BTS Sukhumvit Line route relation",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-08-30"
+}

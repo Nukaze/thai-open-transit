@@ -1,0 +1,23 @@
+{
+  "id": "BTS_SILOM",
+  "operator": "BTS",
+  "name_th": "รถไฟฟ้าบีทีเอส สายสีลม",
+  "name_en": "BTS Silom Line",
+  "color_hex": "#02817D",
+  "milestones": [
+    {
+      "date": "1999-12-05",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "high",
+  "last_verified_at": "2026-08-30"
+}

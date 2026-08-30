@@ -1,0 +1,62 @@
+{
+  "id": "S5",
+  "name_th": "สุรศักดิ์",
+  "name_en": "Surasak",
+  "code_history": [
+    {
+      "code": "S4",
+      "from": "1999-12-05",
+      "to": "2021-02-08"
+    },
+    {
+      "code": "S5",
+      "from": "2021-02-08",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.7192683,
+      "lon": 100.5214619
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SILOM",
+      "from": "1999-12-05",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "1999-12-05",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2021-02-08",
+      "date_precision": "exact",
+      "event": "recoded",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Saint_Louis_BTS_station",
+          "title": "Saint Louis BTS station - opened 8 February 2021, taking code S4",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-08-30"
+}
