@@ -113,6 +113,7 @@ export function HomeClient({
       <StationSearch stations={stations} onSelect={handleSelectStation} />
       <StationPanel
         station={selectedStation}
+        lines={lines}
         onClose={() => setSelectedStation(null)}
       />
     </>
