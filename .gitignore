@@ -10,3 +10,4 @@ out/
 # of truth lives in data/dist/, which is itself gitignored. Never commit.
 apps/web/public/network.json
 apps/web/public/network.geojson
+apps/web/public/stations.csv
