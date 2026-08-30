@@ -1,0 +1,24 @@
+/*
+ * packages/ui's subsetting step produces this file, but nothing referenced it,
+ * so Thai text fell back to whatever the OS happened to have and the subset
+ * shipped as dead weight in the static export.
+ *
+ * The path is root-relative rather than absolute: CLAUDE.md 3 forbids
+ * hardcoding the deployment domain, and a custom domain is still to come.
+ *
+ * `font-display: swap` keeps text visible during load, which matters for the
+ * LCP-on-3G budget in CLAUDE.md 7 - a blocking font fetch would delay first
+ * paint of every label on the page.
+ */
+@font-face {
+  font-family: "Noto Sans Thai";
+  src: url("/fonts/NotoSansThai-subset.woff2") format("woff2");
+  font-display: swap;
+}
+
+body {
+  font-family: "Noto Sans Thai", system-ui, sans-serif;
+  /* The map fills the viewport; the UA's default body margin left a white
+   * gutter around it. */
+  margin: 0;
+}
