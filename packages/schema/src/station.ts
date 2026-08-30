@@ -83,6 +83,13 @@ export const StationSchema = z.object({
     }),
   ),
   milestones: z.array(MilestoneSchema),
+  // DERIVED from milestones[], never hand-set (CLAUDE.md 9, SPEC 3.2).
+  // `scripts/build/assemble.ts` computes it via `deriveStatus` and writes it
+  // onto every station in network.json. It is declared here because the
+  // generated JSON Schema is `additionalProperties: false`, so a consumer
+  // validating the published network.json against schemas/station.json would
+  // otherwise reject the very field we publish.
+  status: StatusSchema,
   confidence: z.enum(["high", "medium", "low"]),
   last_verified_at: z.string().date(),
 });

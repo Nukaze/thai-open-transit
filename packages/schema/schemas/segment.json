@@ -30,7 +30,12 @@
           },
           "date_precision": {
             "type": "string",
-            "enum": ["exact", "month", "year", "disputed"]
+            "enum": [
+              "exact",
+              "month",
+              "year",
+              "disputed"
+            ]
           },
           "event": {
             "type": "string",
@@ -76,18 +81,30 @@
                   ]
                 }
               },
-              "required": ["url", "title"],
+              "required": [
+                "url",
+                "title"
+              ],
               "additionalProperties": false
             }
           }
         },
-        "required": ["date", "date_precision", "event", "source_refs"],
+        "required": [
+          "date",
+          "date_precision",
+          "event",
+          "source_refs"
+        ],
         "additionalProperties": false
       }
     },
     "confidence": {
       "type": "string",
-      "enum": ["high", "medium", "low"]
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
     },
     "last_verified_at": {
       "type": "string",

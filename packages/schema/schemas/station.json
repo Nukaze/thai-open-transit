@@ -49,7 +49,11 @@
             ]
           }
         },
-        "required": ["code", "from", "to"],
+        "required": [
+          "code",
+          "from",
+          "to"
+        ],
         "additionalProperties": false
       }
     },
@@ -66,7 +70,11 @@
     },
     "structure": {
       "type": "string",
-      "enum": ["underground", "elevated", "at_grade"]
+      "enum": [
+        "underground",
+        "elevated",
+        "at_grade"
+      ]
     },
     "accessible": {
       "type": "boolean"
@@ -88,7 +96,10 @@
               "maximum": 180
             }
           },
-          "required": ["lat", "lon"],
+          "required": [
+            "lat",
+            "lon"
+          ],
           "additionalProperties": false
         },
         "schematic": {
@@ -101,11 +112,16 @@
               "type": "number"
             }
           },
-          "required": ["x", "y"],
+          "required": [
+            "x",
+            "y"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["geo"],
+      "required": [
+        "geo"
+      ],
       "additionalProperties": false
     },
     "validity": {
@@ -135,7 +151,11 @@
             ]
           }
         },
-        "required": ["line", "from", "to"],
+        "required": [
+          "line",
+          "from",
+          "to"
+        ],
         "additionalProperties": false
       }
     },
@@ -151,7 +171,12 @@
           },
           "date_precision": {
             "type": "string",
-            "enum": ["exact", "month", "year", "disputed"]
+            "enum": [
+              "exact",
+              "month",
+              "year",
+              "disputed"
+            ]
           },
           "event": {
             "type": "string",
@@ -197,18 +222,43 @@
                   ]
                 }
               },
-              "required": ["url", "title"],
+              "required": [
+                "url",
+                "title"
+              ],
               "additionalProperties": false
             }
           }
         },
-        "required": ["date", "date_precision", "event", "source_refs"],
+        "required": [
+          "date",
+          "date_precision",
+          "event",
+          "source_refs"
+        ],
         "additionalProperties": false
       }
     },
+    "status": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "trial",
+        "under_construction",
+        "approved",
+        "planned",
+        "proposed",
+        "suspended",
+        "cancelled"
+      ]
+    },
     "confidence": {
       "type": "string",
-      "enum": ["high", "medium", "low"]
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
     },
     "last_verified_at": {
       "type": "string",
@@ -226,6 +276,7 @@
     "coords",
     "validity",
     "milestones",
+    "status",
     "confidence",
     "last_verified_at"
   ],

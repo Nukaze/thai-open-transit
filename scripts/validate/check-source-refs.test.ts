@@ -13,6 +13,7 @@ function makeStation(milestones: Station["milestones"]): Station {
     coords: { geo: { lat: 13.75, lon: 100.5 } },
     validity: [],
     milestones,
+    status: "operational",
     confidence: "high",
     last_verified_at: "2026-07-01",
   };

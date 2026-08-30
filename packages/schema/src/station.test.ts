@@ -30,6 +30,7 @@ describe("StationSchema", () => {
           ],
         },
       ],
+      status: "operational",
       confidence: "high",
       last_verified_at: "2026-07-01",
     };
@@ -56,6 +57,7 @@ describe("StationSchema", () => {
           source_refs: [],
         },
       ],
+      status: "operational",
       confidence: "high",
       last_verified_at: "2026-07-01",
     };
@@ -74,6 +76,7 @@ describe("StationSchema", () => {
       coords: { geo: { lat: 13.8163, lon: 100.5615 } },
       validity: [],
       milestones: [],
+      status: "operational",
       confidence: "high",
       last_verified_at: "2026-07-01",
     };
@@ -106,6 +109,7 @@ describe("StationSchema", () => {
           ],
         },
       ],
+      status: "operational",
       confidence: "high",
       last_verified_at: "2026-07-01",
     };
@@ -143,6 +147,7 @@ describe("StationSchema", () => {
           ],
         },
       ],
+      status: "operational",
       confidence: "high",
       last_verified_at: "2026-07-01",
     };

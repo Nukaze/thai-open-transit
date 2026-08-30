@@ -19,6 +19,9 @@ function makeStation(id: string): Station {
     coords: { geo: { lat: 13.75, lon: 100.5 } },
     validity: [{ line: "TEST_LINE", from: "2026-01-01", to: null }],
     milestones: [],
+    // Placeholder only: `assembleNetwork` overwrites `status` with the value
+    // derived from `milestones`, which is exactly what these tests assert.
+    status: "planned",
     confidence: "high",
     last_verified_at: "2026-07-01",
   };

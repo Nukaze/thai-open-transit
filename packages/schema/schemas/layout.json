@@ -22,11 +22,18 @@
             "type": "number"
           }
         },
-        "required": ["station_id", "x", "y"],
+        "required": [
+          "station_id",
+          "x",
+          "y"
+        ],
         "additionalProperties": false
       }
     }
   },
-  "required": ["era", "stations"],
+  "required": [
+    "era",
+    "stations"
+  ],
   "additionalProperties": false
 }
