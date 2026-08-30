@@ -42,6 +42,11 @@ jobs:
 
       - name: Validate dataset (schema, graph integrity, provenance, perf budget)
         run: bun run data:validate
+        env:
+          # data/source/ is still empty - population is a separate workstream -
+          # so the empty-network guard is opted out of here, not disabled at
+          # source. Remove this once real data lands.
+          ALLOW_EMPTY: "1"
 
       - name: Build web app
         run: cd apps/web && bun run build

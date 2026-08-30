@@ -56,6 +56,18 @@ function main() {
     ...sourceRefViolations,
   ];
 
+  // An empty network passes every other check here vacuously - no orphans, no
+  // dangling segments, no missing source_refs, trivially under the size budget
+  // - so an accidental data wipe would ship a blank map with CI green. This
+  // defaults to strict; CI opts out explicitly while data population is still
+  // a separate workstream, so removing that env var later restores the guard
+  // rather than requiring anyone to remember to add it.
+  if (stations.length === 0 && process.env.ALLOW_EMPTY !== "1") {
+    errors.push(
+      "Network has zero stations - set ALLOW_EMPTY=1 to permit this intentionally (e.g. before data population)",
+    );
+  }
+
   // gzip is a close, dependency-free proxy for brotli size for this budget
   // check; CI's actual deploy step still measures real brotli output.
   const compressedSize = gzipSync(readFileSync(networkPath)).byteLength;
