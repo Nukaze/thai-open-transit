@@ -30,6 +30,13 @@ jobs:
       - name: Generate JSON Schemas
         run: cd packages/schema && bun run generate-schemas
 
+      # packages/schema is the single source of truth (CLAUDE.md 4), but the
+      # generated .json schemas are what external consumers validate against.
+      # If someone edits a Zod schema without regenerating, the two silently
+      # diverge and the published schemas describe an older shape.
+      - name: Check generated JSON Schemas are up to date
+        run: git diff --exit-code packages/schema/schemas
+
       - name: Build dataset artifacts
         run: bun run data:build
 
