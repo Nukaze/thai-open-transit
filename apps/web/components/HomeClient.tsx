@@ -8,6 +8,7 @@ import { LineFilter } from "./LineFilter";
 import { StationSearch } from "./StationSearch";
 import { ThemeToggle } from "./ThemeToggle";
 import { YearSelector } from "./YearSelector";
+import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
 import { getStationIdFromUrl, buildStationDeepLink } from "../lib/deep-link";
 import { isValidAt } from "../lib/asOf";
 import type { Line } from "schema";
@@ -44,16 +45,29 @@ export function HomeClient({
   );
   const [selectedStation, setSelectedStation] =
     useState<StationWithStatus | null>(null);
-  // Starts light rather than reading `prefers-color-scheme` during render:
+  // Per-theme, per-viewer only, no persistence (not asked for) - resets to
+  // these defaults on reload. Separate colors per theme because a color that
+  // reads clearly against the dark flavor's near-black land often disappears
+  // (or looks wrong) against the light flavor's near-white land, and vice
+  // versa - same reason `OVERLAY_COLORS` in Map.tsx varies station-dot color
+  // by theme. `SelectionRingColorPicker` always edits whichever entry
+  // matches the theme currently on screen.
+  const [selectionRingColors, setSelectionRingColors] = useState<
+    Record<MapTheme, string>
+  >({
+    light: "#FF0000",
+    dark: "#FFFFFF",
+  });
+  // Starts dark rather than reading `prefers-color-scheme` during render:
   // this component is prerendered to static HTML at build time, where no
   // media query exists, so branching on it here would produce markup that
   // disagrees with the client's first paint. The effect below applies the
   // OS preference after mount, and any explicit toggle then wins.
-  const [theme, setTheme] = useState<MapTheme>("light");
+  const [theme, setTheme] = useState<MapTheme>("dark");
 
   useEffect(() => {
-    const query = window.matchMedia("(prefers-color-scheme: dark)");
-    if (query.matches) setTheme("dark");
+    const query = window.matchMedia("(prefers-color-scheme: light)");
+    if (query.matches) setTheme("light");
   }, []);
 
   // Same prerendered-at-build-time problem as `theme` above: `output:'export'`
@@ -185,8 +199,17 @@ export function HomeClient({
         networkGeoJson={filteredGeoJson}
         onStationClick={handleStationClick}
         theme={theme}
+        selectedStationId={selectedStation?.id ?? null}
+        selectionRingColor={selectionRingColors[theme]}
       />
       <ThemeToggle theme={theme} onChange={setTheme} />
+      <SelectionRingColorPicker
+        theme={theme}
+        color={selectionRingColors[theme]}
+        onChange={(color) =>
+          setSelectionRingColors((prev) => ({ ...prev, [theme]: color }))
+        }
+      />
       <LineFilter
         lines={lines}
         activeLineIds={activeLineIds}
