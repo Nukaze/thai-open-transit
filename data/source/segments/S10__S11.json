@@ -1,0 +1,77 @@
+{
+  "id": "S10__S11",
+  "line": "BTS_SILOM",
+  "from_station": "S10",
+  "to_station": "S11",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.476678,
+        13.714244
+      ],
+      [
+        100.475674,
+        13.713691
+      ],
+      [
+        100.474583,
+        13.712938
+      ],
+      [
+        100.473821,
+        13.712511
+      ],
+      [
+        100.473247,
+        13.712302
+      ],
+      [
+        100.472968,
+        13.712259
+      ],
+      [
+        100.472312,
+        13.712195
+      ],
+      [
+        100.471584,
+        13.712219
+      ],
+      [
+        100.470456,
+        13.712464
+      ],
+      [
+        100.46892,
+        13.71305
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    853439699
+  ],
+  "validity": [
+    {
+      "from": "2013-12-05",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2013-12-05",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bang_Wa_station",
+          "title": "Bang Wa station - Wikipedia (Talat Phlu-Bang Wa opened 5 December 2013)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

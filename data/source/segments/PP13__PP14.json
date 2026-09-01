@@ -1,0 +1,49 @@
+{
+  "id": "PP13__PP14",
+  "line": "MRT_PURPLE",
+  "from_station": "PP13",
+  "to_station": "PP14",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.515011,
+        13.839575
+      ],
+      [
+        100.521576,
+        13.83401
+      ],
+      [
+        100.526532,
+        13.829919
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    685610910
+  ],
+  "validity": [
+    {
+      "from": "2016-08-06",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2016-08-06",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Purple_Line_(Bangkok)",
+          "title": "Purple Line (Bangkok) - Wikipedia (Khlong Bang Phai-Tao Poon opened 6 August 2016)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

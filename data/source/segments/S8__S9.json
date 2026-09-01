@@ -1,0 +1,62 @@
+{
+  "id": "S8__S9",
+  "line": "BTS_SILOM",
+  "from_station": "S8",
+  "to_station": "S9",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.495156,
+        13.721069
+      ],
+      [
+        100.493221,
+        13.721002
+      ],
+      [
+        100.490241,
+        13.720545
+      ],
+      [
+        100.489097,
+        13.720208
+      ],
+      [
+        100.487,
+        13.719466
+      ],
+      [
+        100.485975,
+        13.719229
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    1449601866,
+    1391977407
+  ],
+  "validity": [
+    {
+      "from": "2013-02-14",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2013-02-14",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Silom_Line",
+          "title": "Silom Line - Wikipedia (Wongwian Yai-Talat Phlu opened 14 February 2013)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

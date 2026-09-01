@@ -1,0 +1,45 @@
+{
+  "id": "PP11",
+  "name_th": "ศูนย์ราชการนนทบุรี",
+  "name_en": "Nonthaburi Civic Center",
+  "code_history": [
+    {
+      "code": "PP11",
+      "from": "2016-08-06",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.860015266666666,
+      "lon": 100.51474446666667
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_PURPLE",
+      "from": "2016-08-06",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2016-08-06",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Purple_Line_(Bangkok)",
+          "title": "Purple Line (Bangkok) - Wikipedia (Khlong Bang Phai-Tao Poon opened 6 August 2016)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

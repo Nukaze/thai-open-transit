@@ -1,0 +1,49 @@
+{
+  "id": "BL26__BL27",
+  "line": "MRT_BLUE",
+  "from_station": "BL26",
+  "to_station": "BL27",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.537075,
+        13.729222
+      ],
+      [
+        100.532221,
+        13.731283
+      ],
+      [
+        100.530129,
+        13.732079
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    1382560869
+  ],
+  "validity": [
+    {
+      "from": "2004-07-03",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2004-07-03",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Bang Sue opened 3 July 2004)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

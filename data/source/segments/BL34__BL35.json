@@ -1,0 +1,61 @@
+{
+  "id": "BL34__BL35",
+  "line": "MRT_BLUE",
+  "from_station": "BL34",
+  "to_station": "BL35",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.457005,
+        13.720315
+      ],
+      [
+        100.452579,
+        13.717918
+      ],
+      [
+        100.445442,
+        13.715577
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    1382560870
+  ],
+  "validity": [
+    {
+      "from": "2019-09-29",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2019-07-29",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Lak Song extension: trial 29 July 2019, commercial 29 September 2019)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2019-09-29",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Lak Song extension: trial 29 July 2019, commercial 29 September 2019)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

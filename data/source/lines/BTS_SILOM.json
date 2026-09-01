@@ -16,8 +16,44 @@
           "published_at": null
         }
       ]
+    },
+    {
+      "date": "2009-05-15",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Wongwian_Yai_BTS_station",
+          "title": "Wongwian Yai BTS station - Wikipedia (opened 15 May 2009)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2013-02-14",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Silom_Line",
+          "title": "Silom Line - Wikipedia (Wongwian Yai-Talat Phlu opened 14 February 2013)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2013-12-05",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bang_Wa_station",
+          "title": "Bang Wa station - Wikipedia (Talat Phlu-Bang Wa opened 5 December 2013)",
+          "published_at": null
+        }
+      ]
     }
   ],
   "confidence": "high",
-  "last_verified_at": "2026-08-30"
+  "last_verified_at": "2026-09-01"
 }

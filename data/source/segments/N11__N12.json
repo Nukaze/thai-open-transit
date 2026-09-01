@@ -1,0 +1,45 @@
+{
+  "id": "N11__N12",
+  "line": "BTS_SUKHUMVIT",
+  "from_station": "N11",
+  "to_station": "N12",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.56974,
+        13.829738
+      ],
+      [
+        100.573648,
+        13.836392
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    815065850
+  ],
+  "validity": [
+    {
+      "from": "2019-12-04",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2019-12-04",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Ha_Yaek_Lat_Phrao_BTS_station",
+          "title": "Ha Yaek Lat Phrao BTS station - Wikipedia (4-station extension to Kasetsart University, 4 December 2019)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

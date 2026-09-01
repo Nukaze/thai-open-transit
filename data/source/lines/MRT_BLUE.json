@@ -1,0 +1,59 @@
+{
+  "id": "MRT_BLUE",
+  "operator": "BEM",
+  "name_th": "รถไฟฟ้ามหานคร สายเฉลิมรัชมงคล",
+  "name_en": "MRT Blue Line",
+  "color_hex": "#1E3A8A",
+  "milestones": [
+    {
+      "date": "2004-07-03",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Bang Sue opened 3 July 2004)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2017-08-11",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Tao_Poon_MRT_station",
+          "title": "Tao Poon MRT station - Wikipedia (Bang Sue-Tao Poon extension opened 11 August 2017)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2019-07-29",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Lak Song extension: trial 29 July 2019, commercial 29 September 2019)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2019-09-29",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Lak Song extension: trial 29 July 2019, commercial 29 September 2019)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "high",
+  "last_verified_at": "2026-09-01"
+}

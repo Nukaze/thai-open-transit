@@ -1,0 +1,45 @@
+{
+  "id": "S10",
+  "name_th": "ตลาดพลู",
+  "name_en": "Talat Phlu",
+  "code_history": [
+    {
+      "code": "S10",
+      "from": "2013-02-14",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.7142201,
+      "lon": 100.4766912
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SILOM",
+      "from": "2013-02-14",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2013-02-14",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Silom_Line",
+          "title": "Silom Line - Wikipedia (Wongwian Yai-Talat Phlu opened 14 February 2013)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

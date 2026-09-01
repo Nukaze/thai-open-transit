@@ -1,0 +1,45 @@
+{
+  "id": "S9",
+  "name_th": "โพธิ์นิมิตร",
+  "name_en": "Pho Nimit",
+  "code_history": [
+    {
+      "code": "S9",
+      "from": "2013-02-14",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": true,
+  "coords": {
+    "geo": {
+      "lat": 13.7192426,
+      "lon": 100.4859681
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SILOM",
+      "from": "2013-02-14",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2013-02-14",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Silom_Line",
+          "title": "Silom Line - Wikipedia (Wongwian Yai-Talat Phlu opened 14 February 2013)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

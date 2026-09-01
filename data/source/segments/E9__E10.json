@@ -1,0 +1,46 @@
+{
+  "id": "E9__E10",
+  "line": "BTS_SUKHUMVIT",
+  "from_station": "E9",
+  "to_station": "E10",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.601023,
+        13.705632
+      ],
+      [
+        100.605357,
+        13.696772
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    1449603200,
+    859223070
+  ],
+  "validity": [
+    {
+      "from": "2011-08-12",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2011-08-12",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bearing_BTS_station",
+          "title": "Bearing BTS station - Wikipedia (On Nut-Bearing extension opened 12 August 2011)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

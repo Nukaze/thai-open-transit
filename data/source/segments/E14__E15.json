@@ -1,0 +1,49 @@
+{
+  "id": "E14__E15",
+  "line": "BTS_SUKHUMVIT",
+  "from_station": "E14",
+  "to_station": "E15",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.601825,
+        13.66118
+      ],
+      [
+        100.596512,
+        13.648232
+      ],
+      [
+        100.595855,
+        13.64647
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    859223070
+  ],
+  "validity": [
+    {
+      "from": "2017-04-03",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2017-04-03",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Samrong_BTS_station",
+          "title": "Samrong BTS station - Wikipedia (opened 3 April 2017)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

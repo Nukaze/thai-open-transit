@@ -1,0 +1,45 @@
+{
+  "id": "BL22",
+  "name_th": "สุขุมวิท",
+  "name_en": "Sukhumvit",
+  "code_history": [
+    {
+      "code": "BL22",
+      "from": "2004-07-03",
+      "to": null
+    }
+  ],
+  "interchange_group": "ASOK_SUKHUMVIT",
+  "structure": "underground",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.737483749999999,
+      "lon": 100.5615029
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_BLUE",
+      "from": "2004-07-03",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2004-07-03",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Bang Sue opened 3 July 2004)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

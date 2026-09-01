@@ -1,0 +1,45 @@
+{
+  "id": "E15",
+  "name_th": "สำโรง",
+  "name_en": "Samrong",
+  "code_history": [
+    {
+      "code": "E15",
+      "from": "2017-04-03",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.6464965,
+      "lon": 100.59578375000001
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2017-04-03",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2017-04-03",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Samrong_BTS_station",
+          "title": "Samrong BTS station - Wikipedia (opened 3 April 2017)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

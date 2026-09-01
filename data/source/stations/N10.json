@@ -1,0 +1,45 @@
+{
+  "id": "N10",
+  "name_th": "พหลโยธิน 24",
+  "name_en": "Phahonyothin 24",
+  "code_history": [
+    {
+      "code": "N10",
+      "from": "2019-12-04",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.8241206,
+      "lon": 100.56642525000001
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2019-12-04",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2019-12-04",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Ha_Yaek_Lat_Phrao_BTS_station",
+          "title": "Ha Yaek Lat Phrao BTS station - Wikipedia (4-station extension to Kasetsart University, 4 December 2019)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

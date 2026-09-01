@@ -1,0 +1,45 @@
+{
+  "id": "PP15",
+  "name_th": "บางซ่อน",
+  "name_en": "Bang Son",
+  "code_history": [
+    {
+      "code": "PP15",
+      "from": "2016-08-06",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.82009455,
+      "lon": 100.53245905
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_PURPLE",
+      "from": "2016-08-06",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2016-08-06",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Purple_Line_(Bangkok)",
+          "title": "Purple Line (Bangkok) - Wikipedia (Khlong Bang Phai-Tao Poon opened 6 August 2016)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

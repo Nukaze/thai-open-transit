@@ -1,0 +1,45 @@
+{
+  "id": "N9",
+  "name_th": "ห้าแยกลาดพร้าว",
+  "name_en": "Ha Yaek Lat Phrao",
+  "code_history": [
+    {
+      "code": "N9",
+      "from": "2019-08-09",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.81667945,
+      "lon": 100.56203545
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2019-08-09",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2019-08-09",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.railjournal.com/passenger/metros/bangkok-sukhumvit-line-extension-inaugurated/",
+          "title": "Bangkok Sukhumvit Line extension inaugurated - Mo Chit to Ha Yaek Lat Phrao, 9 August 2019",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

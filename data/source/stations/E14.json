@@ -1,0 +1,45 @@
+{
+  "id": "E14",
+  "name_th": "แบริ่ง",
+  "name_en": "Bearing",
+  "code_history": [
+    {
+      "code": "E14",
+      "from": "2011-08-12",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.661186950000001,
+      "lon": 100.60180695
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2011-08-12",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2011-08-12",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bearing_BTS_station",
+          "title": "Bearing BTS station - Wikipedia (On Nut-Bearing extension opened 12 August 2011)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

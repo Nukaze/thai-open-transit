@@ -1,0 +1,45 @@
+{
+  "id": "S8",
+  "name_th": "วงเวียนใหญ่",
+  "name_en": "Wongwian Yai",
+  "code_history": [
+    {
+      "code": "S8",
+      "from": "2009-05-15",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.7210816,
+      "lon": 100.4951594
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SILOM",
+      "from": "2009-05-15",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2009-05-15",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Wongwian_Yai_BTS_station",
+          "title": "Wongwian Yai BTS station - Wikipedia (opened 15 May 2009)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

@@ -16,8 +16,68 @@
           "published_at": null
         }
       ]
+    },
+    {
+      "date": "2011-08-12",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bearing_BTS_station",
+          "title": "Bearing BTS station - Wikipedia (On Nut-Bearing extension opened 12 August 2011)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2017-04-03",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Samrong_BTS_station",
+          "title": "Samrong BTS station - Wikipedia (opened 3 April 2017)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2018-12-06",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Kheha_BTS_station",
+          "title": "Kheha BTS station - Wikipedia (Bearing-Samut Prakan 8-station extension opened 6 December 2018)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2019-08-09",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://www.railjournal.com/passenger/metros/bangkok-sukhumvit-line-extension-inaugurated/",
+          "title": "Bangkok Sukhumvit Line extension inaugurated - Mo Chit to Ha Yaek Lat Phrao, 9 August 2019",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2019-12-04",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Ha_Yaek_Lat_Phrao_BTS_station",
+          "title": "Ha Yaek Lat Phrao BTS station - Wikipedia (4-station extension to Kasetsart University, 4 December 2019)",
+          "published_at": null
+        }
+      ]
     }
   ],
   "confidence": "high",
-  "last_verified_at": "2026-08-30"
+  "last_verified_at": "2026-09-01"
 }

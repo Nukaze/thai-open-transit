@@ -1,0 +1,45 @@
+{
+  "id": "BL12",
+  "name_th": "กำแพงเพชร",
+  "name_en": "Kamphaeng Phet",
+  "code_history": [
+    {
+      "code": "BL12",
+      "from": "2004-07-03",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "underground",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.7979484,
+      "lon": 100.5478837
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_BLUE",
+      "from": "2004-07-03",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2004-07-03",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Bang Sue opened 3 July 2004)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

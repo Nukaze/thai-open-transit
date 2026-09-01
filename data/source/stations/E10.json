@@ -1,0 +1,45 @@
+{
+  "id": "E10",
+  "name_th": "บางจาก",
+  "name_en": "Bang Chak",
+  "code_history": [
+    {
+      "code": "E10",
+      "from": "2011-08-12",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.6967638,
+      "lon": 100.6053376
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2011-08-12",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2011-08-12",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bearing_BTS_station",
+          "title": "Bearing BTS station - Wikipedia (On Nut-Bearing extension opened 12 August 2011)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

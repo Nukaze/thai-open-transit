@@ -1,0 +1,45 @@
+{
+  "id": "N11",
+  "name_th": "รัชโยธิน",
+  "name_en": "Ratchayothin",
+  "code_history": [
+    {
+      "code": "N11",
+      "from": "2019-12-04",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.82974765,
+      "lon": 100.56972214999999
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2019-12-04",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2019-12-04",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Ha_Yaek_Lat_Phrao_BTS_station",
+          "title": "Ha Yaek Lat Phrao BTS station - Wikipedia (4-station extension to Kasetsart University, 4 December 2019)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

@@ -1,0 +1,45 @@
+{
+  "id": "E16",
+  "name_th": "ปู่เจ้า",
+  "name_en": "Pu Chao",
+  "code_history": [
+    {
+      "code": "E16",
+      "from": "2018-12-06",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.6372806,
+      "lon": 100.59200834999999
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2018-12-06",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2018-12-06",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Kheha_BTS_station",
+          "title": "Kheha BTS station - Wikipedia (Bearing-Samut Prakan 8-station extension opened 6 December 2018)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

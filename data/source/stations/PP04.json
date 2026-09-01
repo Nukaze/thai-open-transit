@@ -1,0 +1,45 @@
+{
+  "id": "PP04",
+  "name_th": "บางพลู",
+  "name_en": "Bang Phlu",
+  "code_history": [
+    {
+      "code": "PP04",
+      "from": "2016-08-06",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.87576605,
+      "lon": 100.43380335
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_PURPLE",
+      "from": "2016-08-06",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2016-08-06",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Purple_Line_(Bangkok)",
+          "title": "Purple Line (Bangkok) - Wikipedia (Khlong Bang Phai-Tao Poon opened 6 August 2016)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

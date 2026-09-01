@@ -1,0 +1,45 @@
+{
+  "id": "S11",
+  "name_th": "วุฒากาศ",
+  "name_en": "Wutthakat",
+  "code_history": [
+    {
+      "code": "S11",
+      "from": "2013-12-05",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.7130228,
+      "lon": 100.4689032
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SILOM",
+      "from": "2013-12-05",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2013-12-05",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bang_Wa_station",
+          "title": "Bang Wa station - Wikipedia (Talat Phlu-Bang Wa opened 5 December 2013)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

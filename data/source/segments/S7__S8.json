@@ -1,0 +1,45 @@
+{
+  "id": "S7__S8",
+  "line": "BTS_SILOM",
+  "from_station": "S7",
+  "to_station": "S8",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.502718,
+        13.720913
+      ],
+      [
+        100.495156,
+        13.721069
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    1449601866
+  ],
+  "validity": [
+    {
+      "from": "2009-05-15",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2009-05-15",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Wongwian_Yai_BTS_station",
+          "title": "Wongwian Yai BTS station - Wikipedia (opened 15 May 2009)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

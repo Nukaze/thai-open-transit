@@ -1,0 +1,69 @@
+{
+  "id": "BL10",
+  "name_th": "เตาปูน",
+  "name_en": "Tao Poon",
+  "code_history": [
+    {
+      "code": "PP16",
+      "from": "2016-08-06",
+      "to": null
+    },
+    {
+      "code": "BL10",
+      "from": "2017-08-11",
+      "to": null
+    }
+  ],
+  "interchange_group": "TAO_POON",
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.8061726,
+      "lon": 100.53077350000001
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_BLUE",
+      "from": "2017-08-11",
+      "to": null
+    },
+    {
+      "line": "MRT_PURPLE",
+      "from": "2016-08-06",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2017-08-11",
+      "date_precision": "exact",
+      "event": "opened",
+      "line": "MRT_BLUE",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Tao_Poon_MRT_station",
+          "title": "Tao Poon MRT station - Wikipedia (Bang Sue-Tao Poon extension opened 11 August 2017)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2016-08-06",
+      "date_precision": "exact",
+      "event": "opened",
+      "line": "MRT_PURPLE",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Purple_Line_(Bangkok)",
+          "title": "Purple Line (Bangkok) - Wikipedia (Khlong Bang Phai-Tao Poon opened 6 August 2016)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

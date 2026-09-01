@@ -1,0 +1,45 @@
+{
+  "id": "BL26",
+  "name_th": "สีลม",
+  "name_en": "Si Lom",
+  "code_history": [
+    {
+      "code": "BL26",
+      "from": "2004-07-03",
+      "to": null
+    }
+  ],
+  "interchange_group": "SALA_DAENG_SILOM",
+  "structure": "underground",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.729198,
+      "lon": 100.53707165
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_BLUE",
+      "from": "2004-07-03",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2004-07-03",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/MRT_Blue_Line",
+          "title": "MRT Blue Line - Wikipedia (Hua Lamphong-Bang Sue opened 3 July 2004)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}

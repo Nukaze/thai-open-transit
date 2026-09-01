@@ -1,0 +1,61 @@
+{
+  "id": "E22__E23",
+  "line": "BTS_SUKHUMVIT",
+  "from_station": "E22",
+  "to_station": "E23",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.605467,
+        13.577872
+      ],
+      [
+        100.60476,
+        13.575938
+      ],
+      [
+        100.604654,
+        13.575042
+      ],
+      [
+        100.604721,
+        13.574334
+      ],
+      [
+        100.604994,
+        13.573441
+      ],
+      [
+        100.607726,
+        13.567706
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    1392288031
+  ],
+  "validity": [
+    {
+      "from": "2018-12-06",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2018-12-06",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Kheha_BTS_station",
+          "title": "Kheha BTS station - Wikipedia (Bearing-Samut Prakan 8-station extension opened 6 December 2018)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-09-01"
+}
