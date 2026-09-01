@@ -7,7 +7,9 @@ import { StationPanel } from "./StationPanel";
 import { LineFilter } from "./LineFilter";
 import { StationSearch } from "./StationSearch";
 import { ThemeToggle } from "./ThemeToggle";
+import { YearSelector } from "./YearSelector";
 import { getStationIdFromUrl, buildStationDeepLink } from "../lib/deep-link";
+import { isValidAt } from "../lib/asOf";
 import type { Line } from "schema";
 import type { FeatureCollection, Point, LineString } from "geojson";
 import type { StationWithStatus } from "../lib/types";
@@ -53,6 +55,41 @@ export function HomeClient({
     const query = window.matchMedia("(prefers-color-scheme: dark)");
     if (query.matches) setTheme("dark");
   }, []);
+
+  // Same prerendered-at-build-time problem as `theme` above: `output:'export'`
+  // bakes whatever `new Date()` returns into the static HTML once, at build
+  // time, so it can go stale for however long the site sits undeployed.
+  // `selectedYear` stays `null` (meaning "unfiltered by date", the same
+  // network the map showed before this feature existed) until this effect
+  // resolves the visitor's actual current year after mount.
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  useEffect(() => {
+    setSelectedYear(new Date().getFullYear());
+  }, []);
+
+  // The earliest year any station's line membership began - the slider's
+  // lower bound. Derived from data rather than hardcoded so a future earlier
+  // seed (or a later one) doesn't need this component touched.
+  const minYear = useMemo(
+    () =>
+      Math.min(
+        ...stations.flatMap((s) =>
+          s.validity.map((v) => Number(v.from.slice(0, 4))),
+        ),
+      ),
+    [stations],
+  );
+
+  // Past years query as of Dec 31 (matching the existing seed snapshots'
+  // convention, e.g. "seed the 2019-12-31 network snapshot"); the current
+  // year queries as of today rather than a not-yet-arrived year-end.
+  const selectedDate = useMemo(() => {
+    if (selectedYear === null) return null;
+    const currentYear = new Date().getFullYear();
+    return selectedYear === currentYear
+      ? new Date().toISOString().slice(0, 10)
+      : `${selectedYear}-12-31`;
+  }, [selectedYear]);
 
   // Stable across re-renders as long as the `stations` prop (loaded once at
   // build time) doesn't change, so it doesn't force `Map`'s effect (which
@@ -105,21 +142,42 @@ export function HomeClient({
   // `line` id and is visible when that one line is active. Testing every
   // feature against `visibleStationIds` (as this did before segments existed)
   // would drop every LineString, since a segment id is never a station id.
+  //
+  // The date filter (`selectedDate === null` means unfiltered, matching
+  // pre-feature behavior) layers on top of that, per feature type: a station
+  // is visible when the SAME validity window that grants it an active line
+  // also covers the date (a station's line membership and its open dates
+  // travel together on one window), a segment when any of its own validity
+  // windows - denormalized onto the geojson feature by `assembleNetwork` -
+  // covers the date.
   const filteredGeoJson = useMemo(() => {
     const visibleStationIds = new Set(
       stations
-        .filter((s) => s.validity.some((v) => activeLineIds.has(v.line)))
+        .filter((s) =>
+          s.validity.some(
+            (v) =>
+              activeLineIds.has(v.line) &&
+              (selectedDate === null || isValidAt(v, selectedDate)),
+          ),
+        )
         .map((s) => s.id),
     );
     return {
       ...networkGeoJson,
-      features: networkGeoJson.features.filter((f) =>
-        f.geometry.type === "LineString"
-          ? activeLineIds.has(f.properties?.line)
-          : visibleStationIds.has(f.properties?.id),
-      ),
+      features: networkGeoJson.features.filter((f) => {
+        if (f.geometry.type === "LineString") {
+          if (!activeLineIds.has(f.properties?.line)) return false;
+          if (selectedDate === null) return true;
+          const validity = (f.properties?.validity ?? []) as {
+            from: string;
+            to: string | null;
+          }[];
+          return validity.some((v) => isValidAt(v, selectedDate));
+        }
+        return visibleStationIds.has(f.properties?.id);
+      }),
     } as FeatureCollection<Point | LineString>;
-  }, [activeLineIds, stations, networkGeoJson]);
+  }, [activeLineIds, stations, networkGeoJson, selectedDate]);
 
   return (
     <>
@@ -141,6 +199,14 @@ export function HomeClient({
         }
       />
       <StationSearch stations={stations} onSelect={handleSelectStation} />
+      {selectedYear !== null && (
+        <YearSelector
+          year={selectedYear}
+          minYear={minYear}
+          maxYear={new Date().getFullYear()}
+          onChange={setSelectedYear}
+        />
+      )}
       <StationPanel
         station={selectedStation}
         lines={lines}

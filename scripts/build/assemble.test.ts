@@ -134,8 +134,46 @@ describe("assembleNetwork", () => {
         status: "under_construction",
         color: "#ff0000",
         geometry_source: "straight",
+        validity: [{ from: "2026-01-01", to: null }],
       },
     });
+  });
+
+  it("denormalizes each station's validity onto its Point feature properties", () => {
+    const stations = [
+      {
+        ...makeStation("A"),
+        validity: [
+          { line: "TEST_LINE", from: "2026-01-01", to: null },
+          { line: "OTHER_LINE", from: "2027-01-01", to: "2028-01-01" },
+        ],
+      },
+    ];
+    const segments: Segment[] = [
+      {
+        id: "A__A",
+        line: "TEST_LINE",
+        from_station: "A",
+        to_station: "A",
+        geometry: null,
+        geometry_source: "straight",
+        osm_way_refs: [],
+        validity: [{ from: "2026-01-01", to: null }],
+        milestones: [],
+        confidence: "high",
+        last_verified_at: "2026-07-01",
+      },
+    ];
+
+    const { geojson } = assembleNetwork(stations, [], segments);
+    const pointFeature = (geojson as { features: GeoFeature[] }).features.find(
+      (f) => f.geometry.type === "Point",
+    )!;
+
+    expect(pointFeature.properties.validity).toEqual([
+      { line: "TEST_LINE", from: "2026-01-01", to: null },
+      { line: "OTHER_LINE", from: "2027-01-01", to: "2028-01-01" },
+    ]);
   });
 
   // Traced geometry is the whole point of segment.geometry: a straight chord
