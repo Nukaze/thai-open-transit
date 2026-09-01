@@ -76,6 +76,7 @@ export function assembleNetwork(
       id: station.id,
       name_th: station.name_th,
       name_en: station.name_en,
+      validity: station.validity,
     },
   }));
 
@@ -85,6 +86,9 @@ export function assembleNetwork(
   // (solid/dashed/faded/hidden), and `color` is denormalised from the
   // segment's line here so the renderer never needs a second lookup table
   // client-side - MapLibre paint expressions can only read feature properties.
+  // `validity` (and, on stationFeatures above, the same field) rides along too
+  // so a client-side as-of filter can decide feature visibility for a picked
+  // date without a second full-entity fetch.
   const stationById = new Map(stations.map((s) => [s.id, s]));
   const lineById = new Map(lines.map((l) => [l.id, l]));
   const segmentFeatures = segments.flatMap((segment) => {
@@ -113,6 +117,7 @@ export function assembleNetwork(
           status: deriveStatus(segment.milestones),
           color: lineById.get(segment.line)?.color_hex ?? DEFAULT_LINE_COLOR,
           geometry_source: segment.geometry_source,
+          validity: segment.validity,
         },
       },
     ];

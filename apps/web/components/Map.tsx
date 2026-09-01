@@ -29,13 +29,11 @@ type MapStyle = NonNullable<maplibregl.MapOptions["style"]>;
 // with the flavor: the light flavor's near-white land makes dark navy dots
 // readable, and on the dark flavor those same dots disappear into the
 // background. Kept adjacent to the flavor name so the two cannot drift apart.
-const OVERLAY_COLORS: Record<
-  MapTheme,
-  { station: string; suspended: string }
-> = {
-  light: { station: "#1e3a8a", suspended: "#9ca3af" },
-  dark: { station: "#bfdbfe", suspended: "#6b7280" },
-};
+const OVERLAY_COLORS: Record<MapTheme, { station: string; suspended: string }> =
+  {
+    light: { station: "#1e3a8a", suspended: "#9ca3af" },
+    dark: { station: "#bfdbfe", suspended: "#6b7280" },
+  };
 
 // Stations render as a circle layer and segments as a line layer, and a
 // MapLibre layer's `type` fixes the geometry it draws - a "circle" layer
@@ -204,9 +202,12 @@ function addNetworkLayers(
         "interpolate",
         ["linear"],
         ["zoom"],
-        8, 2,
-        12, 8,
-        16, 16,
+        8,
+        2,
+        12,
+        8,
+        16,
+        16,
       ],
       "circle-color": colors.station,
     },
