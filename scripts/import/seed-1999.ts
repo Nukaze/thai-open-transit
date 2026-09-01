@@ -7,6 +7,7 @@ import {
   type OsmElement,
   type TraceCandidate,
 } from "./osm-geometry";
+import { stationCandidates, resolveCoords } from "./osm-stations";
 
 /**
  * Generates the 1999-era network - the two BTS lines that opened on the
@@ -142,80 +143,12 @@ function loadOsm(): OsmElement[] {
   return raw.elements;
 }
 
-/**
- * Resolves a seed entry to a coordinate and its names.
- *
- * OSM maps these stations inconsistently, and the first version of this
- * function assumed otherwise: it looked only for `railway=station` nodes, of
- * which this extract has 24, almost none on the Sukhumvit Line. Sukhumvit
- * stations are `public_transport=stop_position` nodes instead - two per
- * station, one per direction - so every one of them fell through to the
- * name-matching branch, where an undefined `osm_name` compared equal to the
- * undefined `name` of hundreds of untagged track nodes. The result was 16 of
- * 23 stations averaged onto a single point.
- *
- * Hence: match on `ref` across BOTH station and stop_position nodes, average
- * the directional pair when that is all there is, and fail loudly rather than
- * silently matching nothing.
- */
-function stationCandidates(
-  seed: SeedStation,
-  elements: OsmElement[],
-): OsmElement[] {
-  const isStationish = (e: OsmElement) =>
-    e.type === "node" &&
-    e.lat !== undefined &&
-    (e.tags?.railway === "station" ||
-      e.tags?.public_transport === "station" ||
-      e.tags?.public_transport === "stop_position");
-
-  // Both branches guard against an undefined key matching an absent tag:
-  // `e.tags?.ref === undefined` is true for every untagged node, which is how
-  // the coordinate bug happened and how `accessible` was later read off an
-  // airport station in Suvarnabhumi.
-  return seed.osm_ref !== undefined
-    ? elements.filter((e) => isStationish(e) && e.tags?.ref === seed.osm_ref)
-    : elements.filter(
-        (e) =>
-          isStationish(e) &&
-          seed.osm_name !== undefined &&
-          e.tags?.name === seed.osm_name,
-      );
-}
-
-function resolveCoords(
-  seed: SeedStation,
-  elements: OsmElement[],
-): { lat: number; lon: number; name_th: string; name_en: string | null } {
-  const candidates = stationCandidates(seed, elements);
-
-  if (candidates.length === 0) {
-    throw new Error(
-      `No OSM station node found for seed station ${seed.id} (ref=${seed.osm_ref ?? "-"}, name=${seed.osm_name ?? "-"})`,
-    );
-  }
-
-  // A `railway=station` node is the surveyed station point; stop_positions sit
-  // on the track, one per direction, so their midpoint is the better estimate
-  // when no station node exists.
-  const stationNode = candidates.find((e) => e.tags?.railway === "station");
-  const used = stationNode ? [stationNode] : candidates;
-  const named = stationNode ?? candidates[0]!;
-
-  return {
-    lat: used.reduce((sum, n) => sum + n.lat!, 0) / used.length,
-    lon: used.reduce((sum, n) => sum + n.lon!, 0) / used.length,
-    name_th: named.tags?.name ?? seed.id,
-    name_en: named.tags?.["name:en"] ?? null,
-  };
-}
-
 function buildStation(
   seed: SeedStation,
   lineIds: string[],
   elements: OsmElement[],
 ): Station {
-  const { lat, lon, name_th, name_en } = resolveCoords(seed, elements);
+  const { lat, lon, name_th, name_en } = resolveCoords(seed, elements, seed.id);
   const candidates = stationCandidates(seed, elements);
 
   const code_history = seed.code_1999
