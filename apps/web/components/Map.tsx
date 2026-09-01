@@ -31,18 +31,18 @@ type MapStyle = NonNullable<maplibregl.MapOptions["style"]>;
 // background. Kept adjacent to the flavor name so the two cannot drift apart.
 const OVERLAY_COLORS: Record<
   MapTheme,
-  { cluster: string; station: string; suspended: string }
+  { station: string; suspended: string }
 > = {
-  light: { cluster: "#2563eb", station: "#1e3a8a", suspended: "#9ca3af" },
-  dark: { cluster: "#60a5fa", station: "#bfdbfe", suspended: "#6b7280" },
+  light: { station: "#1e3a8a", suspended: "#9ca3af" },
+  dark: { station: "#bfdbfe", suspended: "#6b7280" },
 };
 
-// The station source has `cluster: true`, and MapLibre feeds a clustered
-// GeoJSON source through supercluster, which only accepts Point geometry -
-// LineStrings handed to it are dropped before tiling, so segments would be
-// silently invisible if both shared one source. Segments therefore get their
-// own unclustered source, and this splits the single collection the parent
-// passes down into the two the map actually needs.
+// Stations render as a circle layer and segments as a line layer, and a
+// MapLibre layer's `type` fixes the geometry it draws - a "circle" layer
+// against a source that also holds LineStrings just ignores them, but
+// filtering that out per-render is wasted work. Segments therefore get their
+// own source, and this splits the single collection the parent passes down
+// into the two the map actually needs.
 function splitFeatures(collection: FeatureCollection<Point | LineString>): {
   points: FeatureCollection<Point>;
   lines: FeatureCollection<LineString>;
@@ -121,8 +121,6 @@ function addNetworkLayers(
   map.addSource("network", {
     type: "geojson",
     data: points,
-    cluster: true,
-    clusterRadius: 40,
   });
   map.addSource("network-lines", {
     type: "geojson",
@@ -192,19 +190,26 @@ function addNetworkLayers(
     },
   });
 
-  map.addLayer({
-    id: "station-clusters",
-    type: "circle",
-    source: "network",
-    filter: ["has", "point_count"],
-    paint: { "circle-radius": 16, "circle-color": colors.cluster },
-  });
+  // No clustering: the dataset is the product (CLAUDE.md 1), so every
+  // station stays individually visible and clickable at every zoom level
+  // rather than being merged into an unlabelled aggregate dot. Radius
+  // interpolates down at low zoom instead, so dense interchanges (e.g. Siam)
+  // don't fully overlap when zoomed out to the whole metro region.
   map.addLayer({
     id: "stations",
     type: "circle",
     source: "network",
-    filter: ["!", ["has", "point_count"]],
-    paint: { "circle-radius": 6, "circle-color": colors.station },
+    paint: {
+      "circle-radius": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        8, 2,
+        12, 8,
+        16, 16,
+      ],
+      "circle-color": colors.station,
+    },
   });
 }
 
@@ -299,7 +304,7 @@ export function Map({
     });
 
     map.on("load", () => {
-      // Station selection: clicking an unclustered station point notifies
+      // Station selection: clicking a station point notifies
       // the parent with the station's id (from GeoJSON `properties.id`, per
       // `assembleNetwork`'s geojson output); the parent looks up the full
       // `Station` record for `StationPanel`, since geojson properties stay
