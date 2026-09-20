@@ -35,6 +35,31 @@ const OVERLAY_COLORS: Record<MapTheme, { station: string; suspended: string }> =
     dark: { station: "#bfdbfe", suspended: "#6b7280" },
   };
 
+// Fallback only - `HomeClient` always passes an explicit `selectionRingColor`
+// (one value per `MapTheme`, user-configurable via `SelectionRingColorPicker`),
+// so
+// this is just what a bare `<Map>` with the prop omitted falls back to.
+const DEFAULT_SELECTION_RING_COLOR = "#FFFFFF";
+
+// Selection ring pulse: a slow breathe on stroke width/opacity rather than on
+// `circle-radius` - the radius is a zoom-interpolated expression (see
+// `station-selection`'s paint below), and re-issuing a full expression every
+// animation frame is far more work than updating two plain numbers.
+const PULSE_PERIOD_MS = 1800;
+const PULSE_STROKE_WIDTH = { min: 2.5, max: 4.5 };
+const PULSE_STROKE_OPACITY = { min: 0.45, max: 1 };
+
+// `FilterSpecification` isn't a type maplibre-gl re-exports on its own (only
+// `@maplibre/maplibre-gl-style-spec`, a transitive dependency, does) - same
+// situation as `MapStyle` above, so pulled the same way: off a public method
+// that already carries the type, rather than depending on the package
+// directly.
+type MapFilter = NonNullable<Parameters<maplibregl.Map["setFilter"]>[1]>;
+
+function selectionFilter(id: string | null): MapFilter {
+  return ["==", ["get", "id"], id ?? ""];
+}
+
 // Stations render as a circle layer and segments as a line layer, and a
 // MapLibre layer's `type` fixes the geometry it draws - a "circle" layer
 // against a source that also holds LineStrings just ignores them, but
@@ -105,6 +130,8 @@ function addNetworkLayers(
   map: maplibregl.Map,
   theme: MapTheme,
   collection: FeatureCollection<Point | LineString>,
+  selectedStationId: string | null,
+  selectionRingColor: string,
 ): void {
   // Idempotent: `style.load` can fire more than once per style if the theme
   // is toggled again while the previous style is still loading (a full sprite
@@ -212,16 +239,50 @@ function addNetworkLayers(
       "circle-color": colors.station,
     },
   });
+
+  // Selection ring: a hollow stroke-only circle (`circle-color: transparent`)
+  // drawn on top of, and larger than, the station dot it's marking - reads as
+  // a ring around the selected station rather than replacing its dot.
+  // Starts filtered to match nothing (`selectionFilter(null)`) rather than
+  // omitted, so the layer exists and `setFilter` (below) always has a target
+  // even before a station is ever clicked.
+  map.addLayer({
+    id: "station-selection",
+    type: "circle",
+    source: "network",
+    filter: selectionFilter(selectedStationId),
+    paint: {
+      "circle-radius": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        8,
+        8,
+        12,
+        14,
+        16,
+        22,
+      ],
+      "circle-color": "transparent",
+      "circle-stroke-color": selectionRingColor,
+      "circle-stroke-width": PULSE_STROKE_WIDTH.min,
+      "circle-stroke-opacity": PULSE_STROKE_OPACITY.min,
+    },
+  });
 }
 
 export function Map({
   networkGeoJson,
   onStationClick,
   theme = "light",
+  selectedStationId = null,
+  selectionRingColor = DEFAULT_SELECTION_RING_COLOR,
 }: {
   networkGeoJson: FeatureCollection<Point | LineString>;
   onStationClick?: (id: string) => void;
   theme?: MapTheme;
+  selectedStationId?: string | null;
+  selectionRingColor?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -238,8 +299,12 @@ export function Map({
   const onStationClickRef = useRef(onStationClick);
   const networkGeoJsonRef = useRef(networkGeoJson);
   const themeRef = useRef(theme);
+  const selectedStationIdRef = useRef(selectedStationId);
+  const selectionRingColorRef = useRef(selectionRingColor);
   onStationClickRef.current = onStationClick;
   networkGeoJsonRef.current = networkGeoJson;
+  selectedStationIdRef.current = selectedStationId;
+  selectionRingColorRef.current = selectionRingColor;
 
   // Data updates flow into the already-running map via `source.setData`
   // instead of remounting. Guarded by `getSource` because this can fire
@@ -257,6 +322,108 @@ export function Map({
       map.getSource("network-lines") as maplibregl.GeoJSONSource | undefined
     )?.setData(lines);
   }, [networkGeoJson]);
+
+  // Selection ring follow: re-filters the `station-selection` layer (added in
+  // `addNetworkLayers`) to the newly selected station, or back to matching
+  // nothing when the panel is dismissed (`selectedStationId` becomes `null`).
+  // Guarded by `getLayer` for the same reason the effect above guards on
+  // `getSource` - this can fire before `style.load` has added the layer.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getLayer("station-selection")) return;
+    map.setFilter("station-selection", selectionFilter(selectedStationId));
+  }, [selectedStationId]);
+
+  // Holds the in-flight pulse loop's frame id across the two call sites
+  // below, so either one can safely cancel whatever the other started.
+  const pulseFrameRef = useRef<number | null>(null);
+
+  // Selection ring pulse: a slow breathe (stroke width + opacity, see
+  // `PULSE_STROKE_WIDTH`/`PULSE_STROKE_OPACITY`) while a station stays
+  // selected - the Google-Maps-"you are here" pattern, and a fix for the
+  // ring's previous flat, static feel. Only `circle-stroke-*` moves each
+  // frame; `circle-radius` stays the zoom-interpolated expression set in
+  // `addNetworkLayers`, since rebuilding a full expression every frame is far
+  // more work than updating two plain numbers.
+  //
+  // Reads `selectedStationIdRef`/`selectionRingColorRef` rather than taking
+  // them as parameters so the SAME function works from both call sites below:
+  // the effect that reacts to a selection/color change, and the `style.load`
+  // handler in the init effect. The second call site is not optional - a
+  // theme toggle runs `setStyle`, which destroys and recreates every
+  // runtime-added layer (see the theme-switch effect's comment), silently
+  // orphaning whatever loop was running against the old "station-selection"
+  // layer and freezing the ring mid-pulse. Restarting it again here, right
+  // after `addNetworkLayers` recreates the layer, is what keeps a selection
+  // made before a theme toggle still pulsing after it.
+  function syncSelectionRing(map: maplibregl.Map): void {
+    if (!map.getLayer("station-selection")) return;
+    if (pulseFrameRef.current !== null) {
+      cancelAnimationFrame(pulseFrameRef.current);
+      pulseFrameRef.current = null;
+    }
+
+    map.setPaintProperty(
+      "station-selection",
+      "circle-stroke-color",
+      selectionRingColorRef.current,
+    );
+    if (selectedStationIdRef.current === null) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduceMotion) {
+      map.setPaintProperty(
+        "station-selection",
+        "circle-stroke-width",
+        PULSE_STROKE_WIDTH.max,
+      );
+      map.setPaintProperty(
+        "station-selection",
+        "circle-stroke-opacity",
+        PULSE_STROKE_OPACITY.max,
+      );
+      return;
+    }
+
+    const start = performance.now();
+    const tick = (now: number) => {
+      // (sin + 1) / 2 maps [-1, 1] to [0, 1], then scaled into each pulse
+      // range - a plain 0-1 oscillation would pulse the stroke fully to 0.
+      const t =
+        (Math.sin(((now - start) / PULSE_PERIOD_MS) * 2 * Math.PI) + 1) / 2;
+      map.setPaintProperty(
+        "station-selection",
+        "circle-stroke-width",
+        PULSE_STROKE_WIDTH.min +
+          t * (PULSE_STROKE_WIDTH.max - PULSE_STROKE_WIDTH.min),
+      );
+      map.setPaintProperty(
+        "station-selection",
+        "circle-stroke-opacity",
+        PULSE_STROKE_OPACITY.min +
+          t * (PULSE_STROKE_OPACITY.max - PULSE_STROKE_OPACITY.min),
+      );
+      pulseFrameRef.current = requestAnimationFrame(tick);
+    };
+    pulseFrameRef.current = requestAnimationFrame(tick);
+  }
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    syncSelectionRing(map);
+    return () => {
+      if (pulseFrameRef.current !== null) {
+        cancelAnimationFrame(pulseFrameRef.current);
+        pulseFrameRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `syncSelectionRing`
+    // reads current values through the refs above, not through these two
+    // params; it's recreated every render but behaves identically each time.
+  }, [selectedStationId, selectionRingColor]);
 
   // Theme switch. `setStyle` swaps the basemap flavor and its sprite sheet in
   // place, keeping camera position, so toggling does not re-run the init
@@ -301,7 +468,21 @@ export function Map({
     // theme swap - no second re-add path to keep in sync, and no pile-up of
     // `once` handlers when the theme is toggled repeatedly.
     map.on("style.load", () => {
-      addNetworkLayers(map, themeRef.current, networkGeoJsonRef.current);
+      addNetworkLayers(
+        map,
+        themeRef.current,
+        networkGeoJsonRef.current,
+        selectedStationIdRef.current,
+        selectionRingColorRef.current,
+      );
+      // A theme toggle runs `setStyle`, which fires `style.load` again and
+      // destroys/recreates every layer `addNetworkLayers` just re-added -
+      // including whatever "station-selection" layer a pulse loop from
+      // before the toggle was still animating. Restarting it here (rather
+      // than relying only on the prop-driven effect below, which has no
+      // reason to re-run on a theme change alone) is what keeps a selection
+      // made before the toggle still pulsing after it.
+      syncSelectionRing(map);
     });
 
     map.on("load", () => {
