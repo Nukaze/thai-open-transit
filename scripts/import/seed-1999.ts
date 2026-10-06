@@ -52,6 +52,18 @@ const SAINT_LOUIS_OPENING: SourceRef = {
   published_at: null,
 };
 
+// The 1999 chain has Chong Nonsi (S3) joined straight to Surasak (S5) - Saint
+// Louis (S4) did not exist yet. When Saint Louis opened on 2021-02-08 that
+// physical link was split in two (S3__S4 + S4__S5, written by seed-2019.ts,
+// which owns the later eras), so the original segment's validity ends there.
+// It stays in data/source as real history; it is retired, never deleted, and
+// the half-open validity window means it is valid through 2021-02-07.
+// Not a `closed` milestone: deriveStatus maps `closed` to "cancelled", which
+// would misreport a segment that ran fine for 21 years.
+const RETIRED_SEGMENTS = new Map<string, string>([
+  ["S3__S5", SILOM_RECODE_DATE],
+]);
+
 type SeedStation = {
   /** Stable id. Current code, never renumbered even when the code is. */
   id: string;
@@ -263,8 +275,9 @@ function buildSegments(
     );
     if (trace !== null) traced++;
 
+    const id = `${from.id}__${to.id}`;
     return {
-      id: `${from.id}__${to.id}`,
+      id,
       line: line.id,
       from_station: from.id,
       to_station: to.id,
@@ -277,7 +290,7 @@ function buildSegments(
       geometry_source: (trace === null ? "straight" : "osm") as
         "straight" | "osm",
       osm_way_refs: trace?.wayRefs ?? [],
-      validity: [{ from: OPENING_DATE, to: null }],
+      validity: [{ from: OPENING_DATE, to: RETIRED_SEGMENTS.get(id) ?? null }],
       milestones: [
         {
           date: OPENING_DATE,

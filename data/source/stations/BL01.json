@@ -1,0 +1,106 @@
+{
+  "id": "BL01",
+  "name_th": "ท่าพระ",
+  "name_en": "Tha Phra",
+  "code_history": [
+    {
+      "code": "BL01",
+      "from": "2019-09-29",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.729649525,
+      "lon": 100.474040875
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_BLUE",
+      "from": "2019-09-29",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2019-07-29",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://mothership.sg/2019/07/bangkok-blue-line-mrt/",
+          "title": "New Bangkok Blue Line MRT cuts travel time (free trial from 29 July 2019 to Wat Mangkon, Sam Yot, Sanam Chai, Itsaraphap and Tha Phra; official opening 29 September)",
+          "published_at": "2019-07-30"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Tha_Phra_MRT_station",
+          "title": "Tha Phra MRT station - Wikipedia (BL01; lower platform 29 July 2019, upper platform 23 December 2019)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2019-09-29",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.mrta.co.th/en/chaloem-ratchamongkhon-line",
+          "title": "MRTA - The MRT Blue Line (Hua Lamphong - Bang Khae section: 29 September 2019; Bang Sue - Tha Phra section: 30 March 2020)",
+          "published_at": null
+        },
+        {
+          "url": "https://railway-news.com/blue-line-extension-opens-on-bangkok-metro/",
+          "title": "Blue Line Extension Opens on Bangkok Metro (trial 29 July 2019, revenue service 29 September 2019)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2019-12-23",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://mgronline.com/business/detail/9620000120725",
+          "title": "Manager Online - MRTA/BEM open Blue Line Tao Poon-Tha Phra trial service on 23 December 2019",
+          "published_at": "2019-12-18"
+        },
+        {
+          "url": "https://www.railwaygazette.com/urban/2020/01/07/bangkok-blue-line-loop-completed/",
+          "title": "Bangkok Blue Line loop completed - Railway Gazette (Section 3 trial operation from 23 December 2019)",
+          "published_at": "2020-01-07"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Tha_Phra_MRT_station",
+          "title": "Tha Phra MRT station - Wikipedia (BL01; lower platform 29 July 2019, upper platform 23 December 2019)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2020-03-30",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.mrta.co.th/en/chaloem-ratchamongkhon-line",
+          "title": "MRTA - The MRT Blue Line (Hua Lamphong - Bang Khae section: 29 September 2019; Bang Sue - Tha Phra section: 30 March 2020)",
+          "published_at": null
+        },
+        {
+          "url": "https://thailand-construction.com/bangkoks-mrt-blue-line-launches-full-service-from-30-march-2020/",
+          "title": "Bangkok's MRT Blue Line launches full service from 30 March 2020",
+          "published_at": "2020-04-01"
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

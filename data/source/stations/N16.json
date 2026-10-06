@@ -1,0 +1,50 @@
+{
+  "id": "N16",
+  "name_th": "กรมทหารราบที่ 11",
+  "name_en": "11th Infantry Regiment",
+  "code_history": [
+    {
+      "code": "N16",
+      "from": "2020-06-05",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.8675784,
+      "lon": 100.5919727
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2020-06-05",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2020-06-05",
+      "date_precision": "disputed",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://www.btsgroup.co.th/en/update/news-event/603/bts-skytrain-begins-trial-operations-of-additional-four-stations-of-northern-green-line",
+          "title": "BTS Group - On 5 Jun 2020 an additional four stations (N14-N17) of the Northern Green Line extension begin trial operations",
+          "published_at": "2020-06-05"
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

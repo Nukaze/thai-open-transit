@@ -1,0 +1,79 @@
+{
+  "id": "BL06__BL07",
+  "line": "MRT_BLUE",
+  "from_station": "BL06",
+  "to_station": "BL07",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.493306,
+        13.783893
+      ],
+      [
+        100.502536,
+        13.789691
+      ],
+      [
+        100.503124,
+        13.790177
+      ],
+      [
+        100.503445,
+        13.790527
+      ],
+      [
+        100.504859,
+        13.79242
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    909682546
+  ],
+  "validity": [
+    {
+      "from": "2020-03-30",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2019-12-04",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://mgronline.com/uptodate/detail/9620000115906",
+          "title": "Manager Online - free trial of Blue Line Bang Pho-Sirindhorn from 4 December 2019; fares from 30 March 2020",
+          "published_at": "2019-12-03"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Blue_Line_(Bangkok)",
+          "title": "Blue Line (Bangkok) - Wikipedia (Tao Poon-Tha Phra: shuttle trial 4 December 2019, to Tha Phra 23 December 2019, through service 1 March 2020, commercial 30 March 2020)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2020-03-30",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.mrta.co.th/en/chaloem-ratchamongkhon-line",
+          "title": "MRTA - The MRT Blue Line (Hua Lamphong - Bang Khae section: 29 September 2019; Bang Sue - Tha Phra section: 30 March 2020)",
+          "published_at": null
+        },
+        {
+          "url": "https://thailand-construction.com/bangkoks-mrt-blue-line-launches-full-service-from-30-march-2020/",
+          "title": "Bangkok's MRT Blue Line launches full service from 30 March 2020",
+          "published_at": "2020-04-01"
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}
