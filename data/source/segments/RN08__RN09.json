@@ -1,0 +1,124 @@
+{
+  "id": "RN08__RN09",
+  "line": "SRT_DARKRED",
+  "from_station": "RN08",
+  "to_station": "RN09",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.597757,
+        13.914752
+      ],
+      [
+        100.598542,
+        13.916151
+      ],
+      [
+        100.599601,
+        13.917752
+      ],
+      [
+        100.607002,
+        13.930925
+      ],
+      [
+        100.607534,
+        13.932008
+      ],
+      [
+        100.607895,
+        13.932922
+      ],
+      [
+        100.608281,
+        13.934162
+      ],
+      [
+        100.608535,
+        13.935428
+      ],
+      [
+        100.608712,
+        13.937421
+      ],
+      [
+        100.608656,
+        13.938967
+      ],
+      [
+        100.607503,
+        13.948347
+      ],
+      [
+        100.60709,
+        13.951029
+      ],
+      [
+        100.606507,
+        13.955692
+      ],
+      [
+        100.605355,
+        13.965721
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    783184425,
+    783184417,
+    970976961,
+    970976962,
+    970976973,
+    1372897850,
+    970976972,
+    970976971,
+    970976970,
+    970976969
+  ],
+  "validity": [
+    {
+      "from": "2021-11-29",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2021-08-02",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.pattayamail.com/thailandnews/bangkok-pushes-start-red-line-rangsit-bang-sue-taling-chan-route-3-months-free-test-run-366095",
+          "title": "Pattaya Mail - Bangkok pushes start 'Red Line' Rangsit-Bang Sue-Taling Chan route, 3 months free test-run (2 August 2021)",
+          "published_at": "2021-08-02"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Dark_Red_Line_(Bangkok)",
+          "title": "Dark Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RN01-RN10)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2021-11-29",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://thethaiger.com/news/bangkok/bangkoks-red-line-starts-fares-at-12-baht-maximum-at-42-baht",
+          "title": "The Thaiger - Bangkok's Red Line starts fares at 12 baht, maximum at 42 baht (ticket sales from 29 November 2021)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Dark_Red_Line_(Bangkok)",
+          "title": "Dark Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RN01-RN10)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

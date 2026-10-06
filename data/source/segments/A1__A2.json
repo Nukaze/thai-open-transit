@@ -1,0 +1,113 @@
+{
+  "id": "A1__A2",
+  "line": "ARL_AIRPORT",
+  "from_station": "A1",
+  "to_station": "A2",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.75134,
+        13.694297
+      ],
+      [
+        100.752365,
+        13.698455
+      ],
+      [
+        100.754698,
+        13.707342
+      ],
+      [
+        100.757466,
+        13.717444
+      ],
+      [
+        100.758021,
+        13.718865
+      ],
+      [
+        100.759603,
+        13.72222
+      ],
+      [
+        100.760025,
+        13.723387
+      ],
+      [
+        100.760304,
+        13.724783
+      ],
+      [
+        100.760357,
+        13.726199
+      ],
+      [
+        100.760248,
+        13.726811
+      ],
+      [
+        100.759904,
+        13.727367
+      ],
+      [
+        100.759403,
+        13.72774
+      ],
+      [
+        100.758838,
+        13.7279
+      ],
+      [
+        100.74932,
+        13.727708
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    312182256,
+    312182253,
+    312182254,
+    312079784
+  ],
+  "validity": [
+    {
+      "from": "2010-08-23",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2010-06-01",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.railwaygazette.com/urban/2010/08/24/bangkok-suvarnabhumi-airport-rail-link-opens/",
+          "title": "Railway Gazette - Bangkok Suvarnabhumi airport rail link opens (commercial operations from 23 August 2010; free SRT trial service since 1 June)",
+          "published_at": "2010-08-24"
+        }
+      ]
+    },
+    {
+      "date": "2010-08-23",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.railwaygazette.com/urban/2010/08/24/bangkok-suvarnabhumi-airport-rail-link-opens/",
+          "title": "Railway Gazette - Bangkok Suvarnabhumi airport rail link opens (commercial operations from 23 August 2010; free SRT trial service since 1 June)",
+          "published_at": "2010-08-24"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Airport_Rail_Link_(Bangkok)",
+          "title": "Airport Rail Link (Bangkok) - Wikipedia (opened 23 August 2010; stations A1-A8)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

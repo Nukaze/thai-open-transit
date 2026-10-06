@@ -1,0 +1,75 @@
+{
+  "id": "RN02__RN03",
+  "line": "SRT_DARKRED",
+  "from_station": "RN02",
+  "to_station": "RN03",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.549424,
+        13.826645
+      ],
+      [
+        100.551453,
+        13.830395
+      ],
+      [
+        100.55302,
+        13.833454
+      ],
+      [
+        100.557449,
+        13.841626
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    783249033
+  ],
+  "validity": [
+    {
+      "from": "2021-11-29",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2021-08-02",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.pattayamail.com/thailandnews/bangkok-pushes-start-red-line-rangsit-bang-sue-taling-chan-route-3-months-free-test-run-366095",
+          "title": "Pattaya Mail - Bangkok pushes start 'Red Line' Rangsit-Bang Sue-Taling Chan route, 3 months free test-run (2 August 2021)",
+          "published_at": "2021-08-02"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Dark_Red_Line_(Bangkok)",
+          "title": "Dark Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RN01-RN10)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2021-11-29",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://thethaiger.com/news/bangkok/bangkoks-red-line-starts-fares-at-12-baht-maximum-at-42-baht",
+          "title": "The Thaiger - Bangkok's Red Line starts fares at 12 baht, maximum at 42 baht (ticket sales from 29 November 2021)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Dark_Red_Line_(Bangkok)",
+          "title": "Dark Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RN01-RN10)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}
