@@ -1,0 +1,116 @@
+{
+  "id": "PK09__PK10",
+  "line": "MRT_PINK",
+  "from_station": "PK09",
+  "to_station": "PK10",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.539985,
+        13.900509
+      ],
+      [
+        100.541704,
+        13.899901
+      ],
+      [
+        100.541974,
+        13.899719
+      ],
+      [
+        100.542126,
+        13.899394
+      ],
+      [
+        100.542072,
+        13.898681
+      ],
+      [
+        100.542123,
+        13.898378
+      ],
+      [
+        100.542353,
+        13.898027
+      ],
+      [
+        100.542689,
+        13.897821
+      ],
+      [
+        100.542992,
+        13.897764
+      ],
+      [
+        100.543233,
+        13.897785
+      ],
+      [
+        100.544539,
+        13.89841
+      ],
+      [
+        100.545087,
+        13.898512
+      ],
+      [
+        100.545417,
+        13.898441
+      ],
+      [
+        100.548436,
+        13.897398
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    1225451150,
+    1225451152
+  ],
+  "validity": [
+    {
+      "from": "2024-01-07",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2023-11-21",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.btsgroup.co.th/en/update/news-event/909/prime-minister-srettha-thavisin-joins-trial-run-of-pink-line-mrt",
+          "title": "Prime Minister Srettha Thavisin Joins Trial Run of Pink Line MRT - BTS Group (free public trial from 21 November 2023)",
+          "published_at": "2023-11-21"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Pink_Line_(Bangkok)",
+          "title": "Pink Line (Bangkok) - Wikipedia (free trial 21 November 2023, official launch 18 December 2023, revenue service 7 January 2024; Muang Thong Thani branch notice to proceed 20 June 2022, trial 20 May 2025)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2024-01-07",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://thethaiger.com/news/national/pink-line-monorail-extends-free-service-during-conductor-rail-repair",
+          "title": "Pink line monorail extends free service during conductor rail repair - The Thaiger (free until 6 January 2024, fares from 7 January)",
+          "published_at": "2024-01-01"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Pink_Line_(Bangkok)",
+          "title": "Pink Line (Bangkok) - Wikipedia (free trial 21 November 2023, official launch 18 December 2023, revenue service 7 January 2024; Muang Thong Thani branch notice to proceed 20 June 2022, trial 20 May 2025)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}
