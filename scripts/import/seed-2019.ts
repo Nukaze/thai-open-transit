@@ -1,30 +1,63 @@
 // scripts/import/seed-2019.ts
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import type { Station, Line, Segment, SourceRef, Milestone } from "schema";
+import type {
+  Station,
+  Line,
+  Segment,
+  SourceRef,
+  Milestone,
+  DatePrecision,
+} from "schema";
 import {
   buildGraph,
   chooseTrace,
   type OsmElement,
   type TraceCandidate,
 } from "./osm-geometry";
-import { resolveCoords, resolveAccessible } from "./osm-stations";
+import {
+  resolveCoords,
+  resolveAccessible,
+  stationCandidates,
+} from "./osm-stations";
 
 /**
- * Extends the network to its 2019-12-31 state: every BTS Sukhumvit/Silom
- * extension that had commercial service running by then, plus the MRT Blue
- * and Purple lines (Blue's original 2004 section, its 2017 single-stop
- * extension to Tao Poon, and its 2019 southern extension - NOT the Bang
- * Sue-Tha Phra northern loop, whose commercial service did not start until
- * 30 March 2020, after this snapshot's cutoff).
+ * Extends the network from the 1999 seed through 2021: every BTS Sukhumvit/
+ * Silom extension, the MRT Blue and Purple lines, and the 2020-2021 additions
+ * to the EXISTING lines (the Blue Line's Tao Poon-Tha Phra northern loop, the
+ * Sukhumvit north extension to Khu Khot, and the Silom infill station Saint
+ * Louis). The file name is historical: it began as the 2019 snapshot and was
+ * extended in place rather than split into a second script, because Tha Phra
+ * (BL01) and Tao Poon (BL10) each have milestones spanning 2019 and 2020 and
+ * must have exactly one writer. Each era is a clearly labelled section below.
+ * New LINES (Gold, Pink, Yellow, Red, ARL, Orange) are out of scope here.
  *
- * This script is the sole owner, going forward, of the BTS_SUKHUMVIT and
- * BTS_SILOM Line entities: it restates their complete milestone history
- * (1999 opening + every extension through 2019) rather than patching the
- * file seed-1999.ts wrote. Run seed-1999.ts first, then this script second -
- * running seed-1999.ts again afterward would revert those two Line files to
- * just their 1999 milestone, requiring this script to be re-run to restore
- * the rest of the history. Station and segment ownership does not have this
- * problem: each id is written by exactly one seed script.
+ * Ownership contract (every entity id is written by exactly one script):
+ *   - seed-1999.ts writes the 1999 stations/segments, and S3__S5 including
+ *     its retirement (validity.to = 2021-02-08, see RETIRED_SEGMENTS there).
+ *   - This script is the sole owner of the BTS_SUKHUMVIT, BTS_SILOM and
+ *     MRT_BLUE Line entities: it restates their complete milestone history
+ *     (opening + every extension through 2021) rather than patching the
+ *     file seed-1999.ts wrote. It also writes every other station/segment
+ *     from 2004 onward, including S4, S3__S4, S4__S5, BL01-BL09 and N14-N24.
+ *   Run order: seed-1999.ts, then this script. Never run seed-1999.ts alone
+ *   afterward: it would revert those Line files to just their 1999
+ *   milestone, requiring this script to be re-run to restore the history.
+ *   data/source/ is never cleared by a seed; an entity a seed stops producing
+ *   (BL32__BL33, see below) is removed by hand in a reviewed `data:` commit.
+ *
+ * Tha Phra (BL01) correction: the original 2019 data skipped Tha Phra and
+ * joined Itsaraphap (BL32) straight to Bang Phai (BL33). Tha Phra sits
+ * between them (Wikipedia's Tha Phra/Bang Phai station pages, MRTA's section
+ * list and OSM relation 7725025 all agree) and opened to
+ * the public with the 2019 southern extension. That was erroneous data, not
+ * history - no era ever had a BL32__BL33 track link - so BL32__BL33 was
+ * deleted rather than given a validity.to, which would assert a false past.
+ *
+ * Segment dates: a segment is dated by whichever endpoint opened LATER
+ * (ties go to the `to` end), never blindly by its destination. Dating by
+ * destination wrongly gave BL10__BL11 a 2004 start although Tao Poon (BL10)
+ * only opened in 2017, and would equally mis-date the loop segments that
+ * join the already-open Tha Phra and Tao Poon.
  *
  * Geometry and Thai/English names come from data/source/osm-raw.json
  * (CLAUDE.md 2.6). Opening dates and station-code assignments are curated
@@ -32,6 +65,12 @@ import { resolveCoords, resolveAccessible } from "./osm-stations";
  * reflect only the current-day map, not which stations existed - or what
  * they were coded - at any past date.
  */
+
+type SeedDate = {
+  date: string;
+  date_precision?: DatePrecision;
+  source_refs: SourceRef[];
+};
 
 type SeedStation = {
   /** Stable id. */
@@ -44,12 +83,21 @@ type SeedStation = {
   structure: Station["structure"];
   /** This station's own opened milestone; carry-over boundary stations from
    * an earlier era (N8, E9, S6, BL10-as-Tao-Poon's Purple half) omit this -
-   * they are listed only so segments can chain to them, not to be rewritten. */
-  opened?: { date: string; source_refs: SourceRef[] };
+   * they are listed only so segments can chain to them, not to be rewritten.
+   * `date_precision` defaults to "exact". */
+  opened?: SeedDate;
   /** Trial service predates commercial `opened` for the 2019 MRT southern
-   * extension (CLAUDE.md 5: trial_run and opened are distinct and both
-   * matter). Segments in that batch use the same pair. */
-  trial_run?: { date: string; source_refs: SourceRef[] };
+   * extension and the 2019-2020 Blue loop (CLAUDE.md 5: trial_run and opened
+   * are distinct and both matter). Segments in that batch use the same pair. */
+  trial_run?: SeedDate;
+  /** Station-only milestones after the first opened, in date order. Tha Phra
+   * (BL01) is one station with two levels: the lower level (2019 southern
+   * extension) is `trial_run`/`opened` above, the upper level (2019-2020
+   * loop) goes here. Not used to date segments. */
+  extraMilestones?: Milestone[];
+  /** Overrides OSM's `name:en` when OSM lacks it (Charan 13). Only for an
+   * official English name from a fetched source, never romanised Thai. */
+  name_en?: string;
   /** Extra code_history entries beyond the default `[{code:id,from:opened,to:null}]`
    * - only Tao Poon needs this, carrying both PP16 (2016) and BL10 (2017) as
    * simultaneously valid codes from two operators. */
@@ -130,10 +178,100 @@ const WIKI_PURPLE: SourceRef = {
   published_at: null,
 };
 
-const opened = (date: string, ...refs: SourceRef[]) => ({
+// --- Sources for the 2019-2021 additions (each URL fetched when curated) ----
+const BTS_HISTORY: SourceRef = {
+  url: "https://www.bts.co.th/eng/info/info-history.html",
+  title: "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+  published_at: null,
+};
+const BTS_GROUP_JUN2020: SourceRef = {
+  url: "https://www.btsgroup.co.th/en/update/news-event/603/bts-skytrain-begins-trial-operations-of-additional-four-stations-of-northern-green-line",
+  title:
+    "BTS Group - On 5 Jun 2020 an additional four stations (N14-N17) of the Northern Green Line extension begin trial operations",
+  published_at: "2020-06-05",
+};
+const WIKI_KHU_KHOT: SourceRef = {
+  url: "https://en.wikipedia.org/wiki/Khu_Khot_BTS_station",
+  title:
+    "Khu Khot BTS station - Wikipedia (N24, opened 16 December 2020, phase 4 of the Sukhumvit northern extension)",
+  published_at: null,
+};
+const WTM_SAINT_LOUIS: SourceRef = {
+  url: "https://en.wtmnews.net/20210208785",
+  title:
+    "New station Saint Louis opens on February 8 - BTS Silom Line in Bangkok (code S4)",
+  published_at: "2021-02-08",
+};
+const MRTA_BLUE: SourceRef = {
+  url: "https://www.mrta.co.th/en/chaloem-ratchamongkhon-line",
+  title:
+    "MRTA - The MRT Blue Line (Hua Lamphong - Bang Khae section: 29 September 2019; Bang Sue - Tha Phra section: 30 March 2020)",
+  published_at: null,
+};
+const RAILWAY_NEWS_BLUE: SourceRef = {
+  url: "https://railway-news.com/blue-line-extension-opens-on-bangkok-metro/",
+  title:
+    "Blue Line Extension Opens on Bangkok Metro (trial 29 July 2019, revenue service 29 September 2019)",
+  published_at: null,
+};
+const MOTHERSHIP_BLUE_TRIAL: SourceRef = {
+  url: "https://mothership.sg/2019/07/bangkok-blue-line-mrt/",
+  title:
+    "New Bangkok Blue Line MRT cuts travel time (free trial from 29 July 2019 to Wat Mangkon, Sam Yot, Sanam Chai, Itsaraphap and Tha Phra; official opening 29 September)",
+  published_at: "2019-07-30",
+};
+const WIKI_THA_PHRA: SourceRef = {
+  url: "https://en.wikipedia.org/wiki/Tha_Phra_MRT_station",
+  title:
+    "Tha Phra MRT station - Wikipedia (BL01; lower platform 29 July 2019, upper platform 23 December 2019)",
+  published_at: null,
+};
+const WIKI_BLUE_LINE: SourceRef = {
+  url: "https://en.wikipedia.org/wiki/Blue_Line_(Bangkok)",
+  title:
+    "Blue Line (Bangkok) - Wikipedia (Tao Poon-Tha Phra: shuttle trial 4 December 2019, to Tha Phra 23 December 2019, through service 1 March 2020, commercial 30 March 2020)",
+  published_at: null,
+};
+const MGR_BLUE_DEC4: SourceRef = {
+  url: "https://mgronline.com/uptodate/detail/9620000115906",
+  title:
+    "Manager Online - free trial of Blue Line Bang Pho-Sirindhorn from 4 December 2019; fares from 30 March 2020",
+  published_at: "2019-12-03",
+};
+const MGR_BLUE_DEC23: SourceRef = {
+  url: "https://mgronline.com/business/detail/9620000120725",
+  title:
+    "Manager Online - MRTA/BEM open Blue Line Tao Poon-Tha Phra trial service on 23 December 2019",
+  published_at: "2019-12-18",
+};
+const RAILWAY_GAZETTE_LOOP: SourceRef = {
+  url: "https://www.railwaygazette.com/urban/2020/01/07/bangkok-blue-line-loop-completed/",
+  title:
+    "Bangkok Blue Line loop completed - Railway Gazette (Section 3 trial operation from 23 December 2019)",
+  published_at: "2020-01-07",
+};
+const THAILAND_CONSTRUCTION_BLUE: SourceRef = {
+  url: "https://thailand-construction.com/bangkoks-mrt-blue-line-launches-full-service-from-30-march-2020/",
+  title: "Bangkok's MRT Blue Line launches full service from 30 March 2020",
+  published_at: "2020-04-01",
+};
+const RAILTRAVEL_THROUGH_SERVICE: SourceRef = {
+  url: "https://railtravelstation.com/mrt-blue-line-tao-poon-tha-phra-extension-tao-poon-to-tha-phra-by-happy-blue-line-train-the-complete-bangkok-circle-line/",
+  title:
+    "RailTravel Station - MRT Blue Line Tao Poon-Tha Phra extension (through services since 1 March 2020)",
+  published_at: "2020-03-05",
+};
+
+const opened = (date: string, ...refs: SourceRef[]): SeedDate => ({
   date,
   source_refs: refs,
 });
+
+const dated = (
+  date: string,
+  date_precision: DatePrecision,
+  ...refs: SourceRef[]
+): SeedDate => ({ date, date_precision, source_refs: refs });
 
 // --- BTS Sukhumvit: north extension (Mo Chit onward) -----------------------
 const SUKHUMVIT_NORTH_2019: SeedStation[] = [
@@ -301,11 +439,11 @@ const SILOM_SOUTH_2019: SeedStation[] = [
   },
 ];
 
-// --- MRT Blue Line: Tao Poon to Lak Song (2019 scope) -----------------------
+// --- MRT Blue Line: Tao Poon to Lak Song (2004-2019 chain) -------------------
 // Order is the real chain: Tao Poon at the north end, then the 2004 original
-// section, then the 2019 southern extension. Excludes BL01-BL09 (the
-// Bang Sue-Tha Phra northern loop) - commercial service there did not begin
-// until 30 March 2020, after this snapshot's cutoff.
+// section, then the 2019 southern extension, with Tha Phra (BL01) between
+// Itsaraphap and Bang Phai. The Bang Sue-Tha Phra northern loop (BL02-BL09)
+// is BLUE_LOOP_2020 further down; it joins this chain at BL10 and BL01.
 const BLUE_2019: SeedStation[] = [
   {
     id: "BL10",
@@ -465,6 +603,35 @@ const BLUE_2019: SeedStation[] = [
     opened: opened("2019-09-29", WIKI_BLUE_SOUTH_EXT),
     trial_run: opened("2019-07-29", WIKI_BLUE_SOUTH_EXT),
   },
+  // Tha Phra: one station, two levels, ONE code (BL01). The lower level is the
+  // 2019 southern-extension station between Itsaraphap and Bang Phai; the
+  // upper level is the northern loop's terminus (2019-2020), recorded in
+  // extraMilestones. Every source checked gives BL01 alone - BL34 is Bang Wa -
+  // so code_history has the single default entry. Written here, not by the
+  // loop group below, so there is one writer for the whole station file.
+  {
+    id: "BL01",
+    osm_ref: "BL01",
+    structure: "elevated",
+    // MRTA's count of the extension stations (4 underground, 16 elevated)
+    // leaves only Wat Mangkon, Sam Yot, Sanam Chai and Itsaraphap below ground.
+    trial_run: opened("2019-07-29", MOTHERSHIP_BLUE_TRIAL, WIKI_THA_PHRA),
+    opened: opened("2019-09-29", MRTA_BLUE, RAILWAY_NEWS_BLUE),
+    extraMilestones: [
+      {
+        date: "2019-12-23",
+        date_precision: "exact",
+        event: "trial_run",
+        source_refs: [MGR_BLUE_DEC23, RAILWAY_GAZETTE_LOOP, WIKI_THA_PHRA],
+      },
+      {
+        date: "2020-03-30",
+        date_precision: "exact",
+        event: "opened",
+        source_refs: [MRTA_BLUE, THAILAND_CONSTRUCTION_BLUE],
+      },
+    ],
+  },
   {
     id: "BL33",
     osm_name: "บางไผ่",
@@ -617,6 +784,196 @@ const PURPLE_2019: SeedStation[] = [
   },
 ];
 
+// =============================================================================
+// 2020-2021 additions to the existing lines
+// =============================================================================
+
+// --- BTS Sukhumvit: north extension, Kasetsart University to Khu Khot -------
+// Two openings: N14-N17 on 2020-06-05, N18-N24 on 2020-12-16. Both were
+// free-ride services. BTS's own press release calls 5 June 2020 "trial
+// operations" while its history page says "commenced operation", and no
+// separate fare-charging date is documented, so that date is marked
+// `disputed` (two refs, per the schema) instead of guessing a trial_run +
+// opened pair. 16 December 2020 is called "commenced operation" by BTS and
+// "opened" by Wikipedia; nothing fetched calls it a trial.
+const SUKHUMVIT_JUN2020 = dated(
+  "2020-06-05",
+  "disputed",
+  BTS_HISTORY,
+  BTS_GROUP_JUN2020,
+);
+const SUKHUMVIT_DEC2020 = opened("2020-12-16", BTS_HISTORY, WIKI_KHU_KHOT);
+const SUKHUMVIT_NORTH_2020: SeedStation[] = [
+  {
+    id: "N13",
+    osm_name: "มหาวิทยาลัยเกษตรศาสตร์",
+    structure: "elevated",
+  }, // 2019 boundary, written by SUKHUMVIT_NORTH_2019
+  {
+    id: "N14",
+    osm_name: "กรมป่าไม้",
+    structure: "elevated",
+    opened: SUKHUMVIT_JUN2020,
+  },
+  {
+    id: "N15",
+    osm_name: "บางบัว",
+    structure: "elevated",
+    opened: SUKHUMVIT_JUN2020,
+  },
+  {
+    id: "N16",
+    osm_name: "กรมทหารราบที่ 11",
+    structure: "elevated",
+    opened: SUKHUMVIT_JUN2020,
+  },
+  {
+    id: "N17",
+    osm_ref: "N17",
+    structure: "elevated",
+    opened: SUKHUMVIT_JUN2020,
+  },
+  {
+    id: "N18",
+    osm_name: "พหลโยธิน 59",
+    structure: "elevated",
+    opened: SUKHUMVIT_DEC2020,
+  },
+  {
+    id: "N19",
+    osm_name: "สายหยุด",
+    structure: "elevated",
+    opened: SUKHUMVIT_DEC2020,
+  },
+  {
+    id: "N20",
+    osm_name: "สะพานใหม่",
+    structure: "elevated",
+    opened: SUKHUMVIT_DEC2020,
+  },
+  {
+    id: "N21",
+    osm_name: "โรงพยาบาลภูมิพลอดุลยเดช",
+    structure: "elevated",
+    opened: SUKHUMVIT_DEC2020,
+  },
+  {
+    id: "N22",
+    osm_name: "พิพิธภัณฑ์กองทัพอากาศ",
+    structure: "elevated",
+    opened: SUKHUMVIT_DEC2020,
+  },
+  {
+    id: "N23",
+    osm_name: "แยก คปอ.",
+    structure: "elevated",
+    opened: SUKHUMVIT_DEC2020,
+  },
+  {
+    id: "N24",
+    osm_name: "คูคต",
+    structure: "elevated",
+    opened: SUKHUMVIT_DEC2020,
+  },
+];
+
+// --- MRT Blue: Tao Poon-Tha Phra northern loop (BL02-BL09) ------------------
+// Free trial from Tao Poon to Sirindhorn on 2019-12-04 (Bang Pho, Bang O, Bang
+// Phlat, Sirindhorn are the stations newly opened that day), the remaining
+// stations to Tha Phra on 2019-12-23, fares from 2020-03-30. Wikipedia's
+// station pages label the free trial dates "opened"; MRTA's 30 March 2020 is
+// the commercial opening, so those are trial_run here. Station `validity`
+// starts at the commercial opening, matching how the 2019 southern extension
+// is dated (a trial_run never starts validity).
+const LOOP_OPENED = opened("2020-03-30", MRTA_BLUE, THAILAND_CONSTRUCTION_BLUE);
+const LOOP_TRIAL_DEC4 = opened("2019-12-04", MGR_BLUE_DEC4, WIKI_BLUE_LINE);
+const LOOP_TRIAL_DEC23 = opened(
+  "2019-12-23",
+  MGR_BLUE_DEC23,
+  RAILWAY_GAZETTE_LOOP,
+);
+const BLUE_LOOP_2020: SeedStation[] = [
+  // Chain order BL01 -> BL10 gives ids BL01__BL02 ... BL09__BL10, the same
+  // ascending direction as the existing BL10__BL11. BL01 and BL10 are both
+  // written by BLUE_2019 (they exist from earlier eras) and appear here
+  // without `opened` so the loop segments are dated by their loop end.
+  { id: "BL01", osm_ref: "BL01", structure: "elevated" },
+  {
+    id: "BL02",
+    osm_name: "จรัญฯ 13",
+    // OSM has no name:en for this node; "Charan 13" is the name Wikipedia's
+    // station page gives, not a romanisation of the Thai.
+    name_en: "Charan 13",
+    structure: "elevated",
+    opened: LOOP_OPENED,
+    trial_run: LOOP_TRIAL_DEC23,
+  },
+  {
+    id: "BL03",
+    osm_name: "ไฟฉาย",
+    structure: "elevated",
+    opened: LOOP_OPENED,
+    trial_run: LOOP_TRIAL_DEC23,
+  },
+  {
+    id: "BL04",
+    osm_name: "บางขุนนนท์",
+    structure: "elevated",
+    opened: LOOP_OPENED,
+    trial_run: LOOP_TRIAL_DEC23,
+  },
+  {
+    id: "BL05",
+    osm_name: "บางยี่ขัน",
+    structure: "elevated",
+    opened: LOOP_OPENED,
+    trial_run: LOOP_TRIAL_DEC23,
+  },
+  {
+    id: "BL06",
+    osm_name: "สิรินธร",
+    structure: "elevated",
+    opened: LOOP_OPENED,
+    trial_run: LOOP_TRIAL_DEC4,
+  },
+  {
+    id: "BL07",
+    osm_name: "บางพลัด",
+    structure: "elevated",
+    opened: LOOP_OPENED,
+    trial_run: LOOP_TRIAL_DEC4,
+  },
+  {
+    id: "BL08",
+    osm_name: "บางอ้อ",
+    structure: "elevated",
+    opened: LOOP_OPENED,
+    trial_run: LOOP_TRIAL_DEC4,
+  },
+  {
+    id: "BL09",
+    osm_name: "บางโพ",
+    structure: "elevated",
+    opened: LOOP_OPENED,
+    trial_run: LOOP_TRIAL_DEC4,
+  },
+  { id: "BL10", osm_ref: "BL10", osm_name: "เตาปูน", structure: "elevated" },
+];
+
+// --- BTS Silom: Saint Louis infill (S4) -------------------------------------
+// S4 splits the existing S3-S5 link. S3 and S5 are 1999 stations written by
+// seed-1999.ts (skipWriteIds); the retired S3__S5 segment is also seed-1999's.
+const SILOM_INFILL_2021: SeedStation[] = [
+  { id: "S3", osm_ref: "S3", structure: "elevated" },
+  {
+    id: "S4",
+    osm_ref: "S4",
+    structure: "elevated",
+    opened: opened("2021-02-08", BTS_HISTORY, WTM_SAINT_LOUIS),
+  },
+  { id: "S5", osm_ref: "S5", structure: "elevated" },
+];
+
 const BTS_SUKHUMVIT_LINE: Line = {
   id: "BTS_SUKHUMVIT",
   operator: "BTS",
@@ -666,9 +1023,21 @@ const BTS_SUKHUMVIT_LINE: Line = {
       event: "extended",
       source_refs: [WIKI_SUKHUMVIT_NORTH_2],
     },
+    {
+      date: SUKHUMVIT_JUN2020.date,
+      date_precision: "disputed",
+      event: "extended",
+      source_refs: SUKHUMVIT_JUN2020.source_refs,
+    },
+    {
+      date: SUKHUMVIT_DEC2020.date,
+      date_precision: "exact",
+      event: "extended",
+      source_refs: SUKHUMVIT_DEC2020.source_refs,
+    },
   ],
   confidence: "high",
-  last_verified_at: "2026-09-01",
+  last_verified_at: "2026-10-06",
 };
 
 const BTS_SILOM_LINE: Line = {
@@ -708,9 +1077,17 @@ const BTS_SILOM_LINE: Line = {
       event: "extended",
       source_refs: [WIKI_SILOM_BANG_WA],
     },
+    {
+      // Saint Louis is an infill station, not an extension; the milestone enum
+      // has no infill event and CLAUDE.md forbids inventing one without an ADR.
+      date: "2021-02-08",
+      date_precision: "exact",
+      event: "extended",
+      source_refs: [BTS_HISTORY, WTM_SAINT_LOUIS],
+    },
   ],
   confidence: "high",
-  last_verified_at: "2026-09-01",
+  last_verified_at: "2026-10-06",
 };
 
 const MRT_BLUE_LINE: Line = {
@@ -744,9 +1121,35 @@ const MRT_BLUE_LINE: Line = {
       event: "extended",
       source_refs: [WIKI_BLUE_SOUTH_EXT],
     },
+    {
+      date: "2019-12-04",
+      date_precision: "exact",
+      event: "trial_run",
+      source_refs: LOOP_TRIAL_DEC4.source_refs,
+    },
+    {
+      date: "2019-12-23",
+      date_precision: "exact",
+      event: "trial_run",
+      source_refs: LOOP_TRIAL_DEC23.source_refs,
+    },
+    {
+      // Through-running from Tha Phra to Lak Song via Bang Sue began, still
+      // free, a month before fares.
+      date: "2020-03-01",
+      date_precision: "exact",
+      event: "trial_run",
+      source_refs: [WIKI_BLUE_LINE, RAILTRAVEL_THROUGH_SERVICE],
+    },
+    {
+      date: LOOP_OPENED.date,
+      date_precision: "exact",
+      event: "extended",
+      source_refs: LOOP_OPENED.source_refs,
+    },
   ],
   confidence: "high",
-  last_verified_at: "2026-09-01",
+  last_verified_at: "2026-10-06",
 };
 
 const MRT_PURPLE_LINE: Line = {
@@ -784,12 +1187,60 @@ function loadOsm(): OsmElement[] {
   return raw.elements;
 }
 
+const VERIFIED_PRE_2020 = "2026-09-01";
+const VERIFIED_2020_21 = "2026-10-06";
+// Entities from before 2020 whose content this revision changed or created,
+// so they carry the newer verification date. Everything dated 2020 or later
+// is new and gets it automatically.
+const REVERIFIED_IDS = new Set([
+  "BL01",
+  "BL10__BL11",
+  "BL32__BL01",
+  "BL01__BL33",
+]);
+const verifiedAt = (id: string, firstDate: string) =>
+  REVERIFIED_IDS.has(id) || firstDate >= "2020-01-01"
+    ? VERIFIED_2020_21
+    : VERIFIED_PRE_2020;
+
+/**
+ * `resolveCoords` averages every OSM node matching a seed's name, so a Thai
+ * name shared with another station would silently pull the coordinate
+ * somewhere between the two. Real candidates for one station sit within a
+ * platform's length of each other; fail loudly instead of publishing a
+ * midpoint.
+ */
+const MAX_CANDIDATE_SPREAD_M = 400;
+function assertCandidatesClustered(
+  seed: SeedStation,
+  elements: OsmElement[],
+): void {
+  const nodes = stationCandidates(seed, elements);
+  for (const a of nodes) {
+    for (const b of nodes) {
+      const dLat = (a.lat! - b.lat!) * 111_320;
+      const dLon =
+        (a.lon! - b.lon!) * 111_320 * Math.cos((a.lat! * Math.PI) / 180);
+      const meters = Math.hypot(dLat, dLon);
+      if (meters > MAX_CANDIDATE_SPREAD_M) {
+        throw new Error(
+          `OSM nodes for seed ${seed.id} are ${Math.round(meters)} m apart (nodes ${a.id}, ${b.id}); the name/ref matches more than one station`,
+        );
+      }
+    }
+  }
+}
+
 function buildStation(
   seed: SeedStation,
   lineId: string,
   elements: OsmElement[],
+  checkSpread: boolean,
 ): Station {
-  const { lat, lon, name_th, name_en } = resolveCoords(seed, elements, seed.id);
+  if (checkSpread) assertCandidatesClustered(seed, elements);
+  const resolved = resolveCoords(seed, elements, seed.id);
+  const { lat, lon, name_th } = resolved;
+  const name_en = seed.name_en ?? resolved.name_en;
 
   const code_history =
     seed.code_history ??
@@ -801,7 +1252,7 @@ function buildStation(
   if (seed.trial_run) {
     milestones.push({
       date: seed.trial_run.date,
-      date_precision: "exact",
+      date_precision: seed.trial_run.date_precision ?? "exact",
       event: "trial_run",
       source_refs: seed.trial_run.source_refs,
     });
@@ -809,7 +1260,7 @@ function buildStation(
   if (seed.opened) {
     milestones.push({
       date: seed.opened.date,
-      date_precision: "exact",
+      date_precision: seed.opened.date_precision ?? "exact",
       event: "opened",
       line: seed.extraValidity ? lineId : undefined,
       source_refs: seed.opened.source_refs,
@@ -826,6 +1277,8 @@ function buildStation(
       });
     }
   }
+
+  milestones.push(...(seed.extraMilestones ?? []));
 
   const validity: Station["validity"] = [
     { line: lineId, from: seed.opened?.date ?? "1999-12-05", to: null },
@@ -847,7 +1300,7 @@ function buildStation(
     milestones,
     status: "operational",
     confidence: "medium",
-    last_verified_at: "2026-09-01",
+    last_verified_at: verifiedAt(seed.id, seed.opened?.date ?? "1999-12-05"),
   };
 }
 
@@ -874,20 +1327,37 @@ function traceCandidates(
   return candidates;
 }
 
+/**
+ * A segment exists from the moment BOTH its stations are open, so it takes its
+ * dates and sources from whichever endpoint opened later; on a tie, from the
+ * `to` end (the historical behaviour). An endpoint with no `opened` in this
+ * seed list is a carry-over boundary from an earlier era and never defines the
+ * date. The trial_run comes from the same defining endpoint, so a segment
+ * joining an already-open station to a loop station that had a trial inherits
+ * the loop station's trial, not a stale one from the other end.
+ */
+function segmentDating(
+  from: SeedStation,
+  to: SeedStation,
+): { opened: SeedDate; trial_run?: SeedDate } {
+  if (!from.opened && !to.opened) {
+    throw new Error(
+      `Segment ${from.id}__${to.id}: neither end has an opened date`,
+    );
+  }
+  const definer =
+    !from.opened || (to.opened && to.opened.date >= from.opened.date)
+      ? to
+      : from;
+  return { opened: definer.opened!, trial_run: definer.trial_run };
+}
+
 function buildSegments(
   lineId: string,
   seeds: SeedStation[],
   stationById: Map<string, Station>,
   elements: OsmElement[],
   namePrefixes: string[],
-  milestoneFor: (
-    fromId: string,
-    toId: string,
-  ) => {
-    date: string;
-    trial_run?: string;
-    source_refs: SourceRef[];
-  },
 ): { segments: Segment[]; traced: number } {
   const nodes = new Map(
     elements.filter((e) => e.type === "node").map((e) => [e.id, e]),
@@ -899,7 +1369,7 @@ function buildSegments(
     const to = seeds[i + 1]!;
     const fromStation = stationById.get(from.id)!;
     const toStation = stationById.get(to.id)!;
-    const m = milestoneFor(from.id, to.id);
+    const m = segmentDating(from, to);
 
     const trace = chooseTrace(
       candidates,
@@ -912,21 +1382,22 @@ function buildSegments(
     const milestones: Milestone[] = [];
     if (m.trial_run) {
       milestones.push({
-        date: m.trial_run,
-        date_precision: "exact",
+        date: m.trial_run.date,
+        date_precision: m.trial_run.date_precision ?? "exact",
         event: "trial_run",
-        source_refs: m.source_refs,
+        source_refs: m.trial_run.source_refs,
       });
     }
     milestones.push({
-      date: m.date,
-      date_precision: "exact",
+      date: m.opened.date,
+      date_precision: m.opened.date_precision ?? "exact",
       event: "opened",
-      source_refs: m.source_refs,
+      source_refs: m.opened.source_refs,
     });
 
+    const id = `${from.id}__${to.id}`;
     return {
-      id: `${from.id}__${to.id}`,
+      id,
       line: lineId,
       from_station: from.id,
       to_station: to.id,
@@ -937,10 +1408,10 @@ function buildSegments(
       geometry_source: (trace === null ? "straight" : "osm") as
         "straight" | "osm",
       osm_way_refs: trace?.wayRefs ?? [],
-      validity: [{ from: m.date, to: null }],
+      validity: [{ from: m.opened.date, to: null }],
       milestones,
       confidence: "medium" as const,
-      last_verified_at: "2026-09-01",
+      last_verified_at: verifiedAt(id, m.opened.date),
     };
   });
 
@@ -958,6 +1429,10 @@ function main() {
     lineId: string;
     namePrefixes: string[];
     skipWriteIds: Set<string>;
+    /** Only the 2020-2021 groups opt in: the older seeds predate the check
+     * and e.g. PP11's two OSM nodes are 548 m apart, which is an existing
+     * data question rather than something to fail this run over. */
+    checkSpread?: true;
   }[] = [
     {
       seeds: SUKHUMVIT_NORTH_2019,
@@ -989,6 +1464,30 @@ function main() {
       namePrefixes: ["MRT Purple Line"],
       skipWriteIds: new Set(["BL10"]), // written once, by the Blue Line group above
     },
+    // --- 2020-2021 additions to existing lines ---
+    {
+      seeds: SUKHUMVIT_NORTH_2020,
+      lineId: "BTS_SUKHUMVIT",
+      namePrefixes: ["BTS Sukhumvit Line"],
+      skipWriteIds: new Set(["N13"]), // written by SUKHUMVIT_NORTH_2019
+      checkSpread: true,
+    },
+    {
+      seeds: BLUE_LOOP_2020,
+      lineId: "MRT_BLUE",
+      namePrefixes: ["MRT Blue Line"],
+      // BL01 and BL10 are written by BLUE_2019 (dedup below ignores these
+      // copies); listed so the loop's end segments chain to them.
+      skipWriteIds: new Set(["BL01", "BL10"]),
+      checkSpread: true,
+    },
+    {
+      seeds: SILOM_INFILL_2021,
+      lineId: "BTS_SILOM",
+      namePrefixes: ["BTS Silom Line"],
+      skipWriteIds: new Set(["S3", "S5"]), // 1999 stations, written by seed-1999.ts
+      checkSpread: true,
+    },
   ];
 
   const allStations = new Map<string, Station>();
@@ -1000,7 +1499,12 @@ function main() {
   for (const group of groups) {
     for (const seed of group.seeds) {
       if (allStations.has(seed.id)) continue; // BL10 seen twice (Blue + Purple)
-      const station = buildStation(seed, group.lineId, elements);
+      const station = buildStation(
+        seed,
+        group.lineId,
+        elements,
+        group.checkSpread === true,
+      );
       allStations.set(seed.id, station);
       if (!group.skipWriteIds.has(seed.id)) {
         stationsToWrite.set(seed.id, station);
@@ -1009,29 +1513,12 @@ function main() {
   }
 
   for (const group of groups) {
-    const openedById = new Map(
-      group.seeds.filter((s) => s.opened).map((s) => [s.id, s.opened!]),
-    );
-    const trialById = new Map(
-      group.seeds.filter((s) => s.trial_run).map((s) => [s.id, s.trial_run!]),
-    );
     const { segments, traced } = buildSegments(
       group.lineId,
       group.seeds,
       allStations,
       elements,
       group.namePrefixes,
-      (_fromId, toId) => {
-        // A segment opens when its destination station opens - the segment
-        // from N8 to N9 exists from the moment N9 (the new station) opens.
-        const m = openedById.get(toId)!;
-        const trial = trialById.get(toId);
-        return {
-          date: m.date,
-          trial_run: trial?.date,
-          source_refs: m.source_refs,
-        };
-      },
     );
     allSegments.push(...segments);
     totalTraced += traced;
@@ -1054,9 +1541,9 @@ function main() {
   }
 
   console.log(
-    `Seeded ${stationsToWrite.size} stations, ${LINES.length} lines (2 restated with full history), ` +
+    `Seeded ${stationsToWrite.size} stations, ${LINES.length} lines (3 restated with full history), ` +
       `${totalSegments} segments (${totalTraced} traced from OSM, ${totalSegments - totalTraced} straight-line fallback) ` +
-      `for the 2019-12-31 network snapshot`,
+      `for the 2021-12-31 network of the pre-existing lines`,
   );
 }
 
