@@ -1,0 +1,79 @@
+{
+  "id": "MT01__MT02",
+  "line": "MRT_PINK",
+  "from_station": "MT01",
+  "to_station": "MT02",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.544248,
+        13.910445
+      ],
+      [
+        100.545652,
+        13.918379
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    766246138
+  ],
+  "validity": [
+    {
+      "from": "2025-06-17",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2022-06-01",
+      "date_precision": "month",
+      "event": "construction_started",
+      "source_refs": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Pink_Line_(Bangkok)",
+          "title": "Pink Line (Bangkok) - Wikipedia (free trial 21 November 2023, official launch 18 December 2023, revenue service 7 January 2024; Muang Thong Thani branch notice to proceed 20 June 2022, trial 20 May 2025)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2025-05-20",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.thaipbsworld.com/around-thailand/free-trail-of-pink-line%E2%80%99s-new-extension-runs-from-today-until-june-16th",
+          "title": "Free trial of Pink Line's new extension runs from today until June 16th - Thai PBS World (commercial service from 17 June 2025)",
+          "published_at": "2025-05-20"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Pink_Line_(Bangkok)",
+          "title": "Pink Line (Bangkok) - Wikipedia (free trial 21 November 2023, official launch 18 December 2023, revenue service 7 January 2024; Muang Thong Thani branch notice to proceed 20 June 2022, trial 20 May 2025)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2025-06-17",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.thaipbsworld.com/around-thailand/free-trail-of-pink-line%E2%80%99s-new-extension-runs-from-today-until-june-16th",
+          "title": "Free trial of Pink Line's new extension runs from today until June 16th - Thai PBS World (commercial service from 17 June 2025)",
+          "published_at": "2025-05-20"
+        },
+        {
+          "url": "https://southeastasiainfra.com/muang-thong-thani-pink-line-extension-begins-commercial-operations/",
+          "title": "Muang Thong Thani Pink Line Extension begins commercial operations - Southeast Asia Infrastructure (trial 20 May to 16 June 2025, commercial from 17 June 2025)",
+          "published_at": "2025-06-19"
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}
