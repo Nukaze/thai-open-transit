@@ -1,0 +1,132 @@
+{
+  "id": "RN01",
+  "name_th": "กรุงเทพอภิวัฒน์",
+  "name_en": "Krung Thep Aphiwat",
+  "code_history": [
+    {
+      "code": "RN01",
+      "from": "2021-11-29",
+      "to": null
+    },
+    {
+      "code": "RW01",
+      "from": "2021-11-29",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.803911450000001,
+      "lon": 100.54166017499999
+    }
+  },
+  "validity": [
+    {
+      "line": "SRT_DARKRED",
+      "from": "2021-11-29",
+      "to": null
+    },
+    {
+      "line": "SRT_LIGHTRED",
+      "from": "2021-11-29",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2021-08-02",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "line": "SRT_DARKRED",
+      "source_refs": [
+        {
+          "url": "https://www.pattayamail.com/thailandnews/bangkok-pushes-start-red-line-rangsit-bang-sue-taling-chan-route-3-months-free-test-run-366095",
+          "title": "Pattaya Mail - Bangkok pushes start 'Red Line' Rangsit-Bang Sue-Taling Chan route, 3 months free test-run (2 August 2021)",
+          "published_at": "2021-08-02"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Dark_Red_Line_(Bangkok)",
+          "title": "Dark Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RN01-RN10)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2021-11-29",
+      "date_precision": "exact",
+      "event": "opened",
+      "line": "SRT_DARKRED",
+      "source_refs": [
+        {
+          "url": "https://thethaiger.com/news/bangkok/bangkoks-red-line-starts-fares-at-12-baht-maximum-at-42-baht",
+          "title": "The Thaiger - Bangkok's Red Line starts fares at 12 baht, maximum at 42 baht (ticket sales from 29 November 2021)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Dark_Red_Line_(Bangkok)",
+          "title": "Dark Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RN01-RN10)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2021-08-02",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "line": "SRT_LIGHTRED",
+      "source_refs": [
+        {
+          "url": "https://www.pattayamail.com/thailandnews/bangkok-pushes-start-red-line-rangsit-bang-sue-taling-chan-route-3-months-free-test-run-366095",
+          "title": "Pattaya Mail - Bangkok pushes start 'Red Line' Rangsit-Bang Sue-Taling Chan route, 3 months free test-run (2 August 2021)",
+          "published_at": "2021-08-02"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Light_Red_Line_(Bangkok)",
+          "title": "Light Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RW01-RW06)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Krung_Thep_Aphiwat_Central_Terminal",
+          "title": "Krung Thep Aphiwat Central Terminal - Wikipedia (codes RN01 and RW01; Red Line trial from the station on 2 August 2021)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2021-11-29",
+      "date_precision": "exact",
+      "event": "opened",
+      "line": "SRT_LIGHTRED",
+      "source_refs": [
+        {
+          "url": "https://thethaiger.com/news/bangkok/bangkoks-red-line-starts-fares-at-12-baht-maximum-at-42-baht",
+          "title": "The Thaiger - Bangkok's Red Line starts fares at 12 baht, maximum at 42 baht (ticket sales from 29 November 2021)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Light_Red_Line_(Bangkok)",
+          "title": "Light Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RW01-RW06)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2022-09-01",
+      "date_precision": "month",
+      "event": "renamed",
+      "source_refs": [
+        {
+          "url": "https://www.thaipbsworld.com/around-thailand/thai-king-renames-bangkoks-main-rail-station-to-krung-thep-aphiwat-central-terminal",
+          "title": "Thai PBS World - Thai King renames Bangkok's main rail station to Krung Thep Aphiwat Central Terminal (new name presented to SRT in September 2022; article 2 January 2023)",
+          "published_at": "2023-01-02"
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

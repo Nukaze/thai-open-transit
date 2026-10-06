@@ -1,13 +1,24 @@
 import { writeFileSync, mkdirSync } from "node:fs";
-import { buildOverpassQuery } from "./overpass-query";
+import { buildOverpassQuery, buildTrainQuery } from "./overpass-query";
 
 const BANGKOK_REGION_BBOX: [number, number, number, number] = [
   13.4, 100.2, 14.2, 100.95,
 ];
 const OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter";
 
+/**
+ * `--train` imports the SRT Red Lines and Airport Rail Link into a separate
+ * file. osm-raw.json feeds every existing seed, so re-importing it would hand
+ * current OSM geometry to lines already published; the train extract is
+ * additive instead.
+ */
+const TRAIN_MODE = process.argv.includes("--train");
+
 async function main() {
-  const query = buildOverpassQuery(BANGKOK_REGION_BBOX);
+  const query = TRAIN_MODE
+    ? buildTrainQuery(BANGKOK_REGION_BBOX)
+    : buildOverpassQuery(BANGKOK_REGION_BBOX);
+  const outName = TRAIN_MODE ? "osm-raw-train.json" : "osm-raw.json";
   const response = await fetch(OVERPASS_ENDPOINT, {
     method: "POST",
     body: `data=${encodeURIComponent(query)}`,
@@ -27,11 +38,11 @@ async function main() {
     recursive: true,
   });
   writeFileSync(
-    new URL("../../data/source/osm-raw.json", import.meta.url),
+    new URL(`../../data/source/${outName}`, import.meta.url),
     JSON.stringify(data, null, 2),
   );
   console.log(
-    `Wrote ${data.elements?.length ?? 0} OSM elements to data/source/osm-raw.json`,
+    `Wrote ${data.elements?.length ?? 0} OSM elements to data/source/${outName}`,
   );
 }
 

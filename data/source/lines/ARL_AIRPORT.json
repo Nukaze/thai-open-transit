@@ -1,0 +1,40 @@
+{
+  "id": "ARL_AIRPORT",
+  "operator": "SRTET",
+  "name_th": "รถไฟฟ้าเชื่อมท่าอากาศยานสุวรรณภูมิ",
+  "name_en": "Airport Rail Link",
+  "color_hex": "#59191F",
+  "milestones": [
+    {
+      "date": "2010-06-01",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.railwaygazette.com/urban/2010/08/24/bangkok-suvarnabhumi-airport-rail-link-opens/",
+          "title": "Railway Gazette - Bangkok Suvarnabhumi airport rail link opens (commercial operations from 23 August 2010; free SRT trial service since 1 June)",
+          "published_at": "2010-08-24"
+        }
+      ]
+    },
+    {
+      "date": "2010-08-23",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.railwaygazette.com/urban/2010/08/24/bangkok-suvarnabhumi-airport-rail-link-opens/",
+          "title": "Railway Gazette - Bangkok Suvarnabhumi airport rail link opens (commercial operations from 23 August 2010; free SRT trial service since 1 June)",
+          "published_at": "2010-08-24"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Airport_Rail_Link_(Bangkok)",
+          "title": "Airport Rail Link (Bangkok) - Wikipedia (opened 23 August 2010; stations A1-A8)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "high",
+  "last_verified_at": "2026-10-06"
+}

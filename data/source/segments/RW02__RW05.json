@@ -1,0 +1,135 @@
+{
+  "id": "RW02__RW05",
+  "line": "SRT_LIGHTRED",
+  "from_station": "RW02",
+  "to_station": "RW05",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.534211,
+        13.822113
+      ],
+      [
+        100.529257,
+        13.822575
+      ],
+      [
+        100.528442,
+        13.822569
+      ],
+      [
+        100.527482,
+        13.822476
+      ],
+      [
+        100.526548,
+        13.822284
+      ],
+      [
+        100.525707,
+        13.822021
+      ],
+      [
+        100.524555,
+        13.82151
+      ],
+      [
+        100.523598,
+        13.820935
+      ],
+      [
+        100.52289,
+        13.820402
+      ],
+      [
+        100.520381,
+        13.81819
+      ],
+      [
+        100.5136,
+        13.812092
+      ],
+      [
+        100.509748,
+        13.808403
+      ],
+      [
+        100.503173,
+        13.802441
+      ],
+      [
+        100.502051,
+        13.801543
+      ],
+      [
+        100.500483,
+        13.800633
+      ],
+      [
+        100.498824,
+        13.799935
+      ],
+      [
+        100.477465,
+        13.792139
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    971385294,
+    971385295,
+    971385296,
+    193411774
+  ],
+  "validity": [
+    {
+      "from": "2021-11-29",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2021-08-02",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.pattayamail.com/thailandnews/bangkok-pushes-start-red-line-rangsit-bang-sue-taling-chan-route-3-months-free-test-run-366095",
+          "title": "Pattaya Mail - Bangkok pushes start 'Red Line' Rangsit-Bang Sue-Taling Chan route, 3 months free test-run (2 August 2021)",
+          "published_at": "2021-08-02"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Light_Red_Line_(Bangkok)",
+          "title": "Light Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RW01-RW06)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Bang_Bamru_railway_station",
+          "title": "Bang Bamru railway station - Wikipedia (code RW05, opened 2 August 2021)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2021-11-29",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://thethaiger.com/news/bangkok/bangkoks-red-line-starts-fares-at-12-baht-maximum-at-42-baht",
+          "title": "The Thaiger - Bangkok's Red Line starts fares at 12 baht, maximum at 42 baht (ticket sales from 29 November 2021)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Light_Red_Line_(Bangkok)",
+          "title": "Light Red Line (Bangkok) - Wikipedia (Phase I trial 2 August 2021, commercial 29 November 2021; stations RW01-RW06)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}
