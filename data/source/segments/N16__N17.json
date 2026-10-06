@@ -1,0 +1,67 @@
+{
+  "id": "N16__N17",
+  "line": "BTS_SUKHUMVIT",
+  "from_station": "N16",
+  "to_station": "N17",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.591993,
+        13.867571
+      ],
+      [
+        100.59433,
+        13.871521
+      ],
+      [
+        100.594795,
+        13.872122
+      ],
+      [
+        100.595881,
+        13.87392
+      ],
+      [
+        100.596447,
+        13.874587
+      ],
+      [
+        100.59682,
+        13.875222
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    815065850,
+    884167052
+  ],
+  "validity": [
+    {
+      "from": "2020-06-05",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2020-06-05",
+      "date_precision": "disputed",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://www.btsgroup.co.th/en/update/news-event/603/bts-skytrain-begins-trial-operations-of-additional-four-stations-of-northern-green-line",
+          "title": "BTS Group - On 5 Jun 2020 an additional four stations (N14-N17) of the Northern Green Line extension begin trial operations",
+          "published_at": "2020-06-05"
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

@@ -1,0 +1,50 @@
+{
+  "id": "N21",
+  "name_th": "โรงพยาบาลภูมิพลอดุลยเดช",
+  "name_en": "Bhumibol Adulyadej Hospital",
+  "code_history": [
+    {
+      "code": "N21",
+      "from": "2020-12-16",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.910713999999999,
+      "lon": 100.61739605
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SUKHUMVIT",
+      "from": "2020-12-16",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2020-12-16",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Khu_Khot_BTS_station",
+          "title": "Khu Khot BTS station - Wikipedia (N24, opened 16 December 2020, phase 4 of the Sukhumvit northern extension)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

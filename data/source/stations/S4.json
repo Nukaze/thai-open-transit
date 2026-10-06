@@ -1,0 +1,50 @@
+{
+  "id": "S4",
+  "name_th": "เซนต์หลุยส์",
+  "name_en": "Saint Louis",
+  "code_history": [
+    {
+      "code": "S4",
+      "from": "2021-02-08",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": true,
+  "coords": {
+    "geo": {
+      "lat": 13.720816,
+      "lon": 100.5266863
+    }
+  },
+  "validity": [
+    {
+      "line": "BTS_SILOM",
+      "from": "2021-02-08",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2021-02-08",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wtmnews.net/20210208785",
+          "title": "New station Saint Louis opens on February 8 - BTS Silom Line in Bangkok (code S4)",
+          "published_at": "2021-02-08"
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}
