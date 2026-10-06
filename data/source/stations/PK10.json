@@ -1,0 +1,67 @@
+{
+  "id": "PK10",
+  "name_th": "เมืองทองธานี",
+  "name_en": "Muang Thong Thani",
+  "code_history": [
+    {
+      "code": "PK10",
+      "from": "2024-01-07",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.8974691,
+      "lon": 100.54846185
+    }
+  },
+  "validity": [
+    {
+      "line": "MRT_PINK",
+      "from": "2024-01-07",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2023-11-21",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.btsgroup.co.th/en/update/news-event/909/prime-minister-srettha-thavisin-joins-trial-run-of-pink-line-mrt",
+          "title": "Prime Minister Srettha Thavisin Joins Trial Run of Pink Line MRT - BTS Group (free public trial from 21 November 2023)",
+          "published_at": "2023-11-21"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Pink_Line_(Bangkok)",
+          "title": "Pink Line (Bangkok) - Wikipedia (free trial 21 November 2023, official launch 18 December 2023, revenue service 7 January 2024; Muang Thong Thani branch notice to proceed 20 June 2022, trial 20 May 2025)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2024-01-07",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://thethaiger.com/news/national/pink-line-monorail-extends-free-service-during-conductor-rail-repair",
+          "title": "Pink line monorail extends free service during conductor rail repair - The Thaiger (free until 6 January 2024, fares from 7 January)",
+          "published_at": "2024-01-01"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Pink_Line_(Bangkok)",
+          "title": "Pink Line (Bangkok) - Wikipedia (free trial 21 November 2023, official launch 18 December 2023, revenue service 7 January 2024; Muang Thong Thani branch notice to proceed 20 June 2022, trial 20 May 2025)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

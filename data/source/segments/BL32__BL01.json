@@ -1,0 +1,93 @@
+{
+  "id": "BL32__BL01",
+  "line": "MRT_BLUE",
+  "from_station": "BL32",
+  "to_station": "BL01",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.485702,
+        13.738327
+      ],
+      [
+        100.483128,
+        13.738202
+      ],
+      [
+        100.48247,
+        13.738019
+      ],
+      [
+        100.481692,
+        13.737598
+      ],
+      [
+        100.481135,
+        13.737083
+      ],
+      [
+        100.477768,
+        13.731844
+      ],
+      [
+        100.477102,
+        13.73128
+      ],
+      [
+        100.474052,
+        13.729628
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    223597841,
+    699315164,
+    909682551
+  ],
+  "validity": [
+    {
+      "from": "2019-09-29",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2019-07-29",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://mothership.sg/2019/07/bangkok-blue-line-mrt/",
+          "title": "New Bangkok Blue Line MRT cuts travel time (free trial from 29 July 2019 to Wat Mangkon, Sam Yot, Sanam Chai, Itsaraphap and Tha Phra; official opening 29 September)",
+          "published_at": "2019-07-30"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Tha_Phra_MRT_station",
+          "title": "Tha Phra MRT station - Wikipedia (BL01; lower platform 29 July 2019, upper platform 23 December 2019)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2019-09-29",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.mrta.co.th/en/chaloem-ratchamongkhon-line",
+          "title": "MRTA - The MRT Blue Line (Hua Lamphong - Bang Khae section: 29 September 2019; Bang Sue - Tha Phra section: 30 March 2020)",
+          "published_at": null
+        },
+        {
+          "url": "https://railway-news.com/blue-line-extension-opens-on-bangkok-metro/",
+          "title": "Blue Line Extension Opens on Bangkok Metro (trial 29 July 2019, revenue service 29 September 2019)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

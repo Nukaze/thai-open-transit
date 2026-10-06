@@ -1,0 +1,62 @@
+{
+  "id": "A4",
+  "name_th": "หัวหมาก",
+  "name_en": "Hua Mak",
+  "code_history": [
+    {
+      "code": "A4",
+      "from": "2010-08-23",
+      "to": null
+    }
+  ],
+  "interchange_group": null,
+  "structure": "elevated",
+  "accessible": false,
+  "coords": {
+    "geo": {
+      "lat": 13.738021100000001,
+      "lon": 100.64522075
+    }
+  },
+  "validity": [
+    {
+      "line": "ARL_AIRPORT",
+      "from": "2010-08-23",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2010-06-01",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.railwaygazette.com/urban/2010/08/24/bangkok-suvarnabhumi-airport-rail-link-opens/",
+          "title": "Railway Gazette - Bangkok Suvarnabhumi airport rail link opens (commercial operations from 23 August 2010; free SRT trial service since 1 June)",
+          "published_at": "2010-08-24"
+        }
+      ]
+    },
+    {
+      "date": "2010-08-23",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.railwaygazette.com/urban/2010/08/24/bangkok-suvarnabhumi-airport-rail-link-opens/",
+          "title": "Railway Gazette - Bangkok Suvarnabhumi airport rail link opens (commercial operations from 23 August 2010; free SRT trial service since 1 June)",
+          "published_at": "2010-08-24"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Airport_Rail_Link_(Bangkok)",
+          "title": "Airport Rail Link (Bangkok) - Wikipedia (opened 23 August 2010; stations A1-A8)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "status": "operational",
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

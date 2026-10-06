@@ -1,0 +1,92 @@
+{
+  "id": "YL12__YL13",
+  "line": "MRT_YELLOW",
+  "from_station": "YL12",
+  "to_station": "YL13",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.641796,
+        13.725343
+      ],
+      [
+        100.642211,
+        13.719796
+      ],
+      [
+        100.642499,
+        13.718245
+      ],
+      [
+        100.64259,
+        13.717171
+      ],
+      [
+        100.643072,
+        13.715061
+      ],
+      [
+        100.643531,
+        13.713816
+      ],
+      [
+        100.644158,
+        13.711144
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    941766421
+  ],
+  "validity": [
+    {
+      "from": "2023-07-03",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2023-06-03",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.nationthailand.com/thailand/general/40028424",
+          "title": "Fares to be collected on Yellow Line from July 3: MRTA - The Nation (free trial started 3 June 2023)",
+          "published_at": "2023-06-11"
+        },
+        {
+          "url": "https://www.thaipbsworld.com/around-thailand/yellow-line-train-free-trial-service-to-be-extended-to-22-stations-from-monday",
+          "title": "Yellow Line train free trial service to be extended to 22 stations from Monday - Thai PBS World (13 stations Hua Mak to Samrong, extended to 22 stations on 12 June 2023)",
+          "published_at": "2023-06-11"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Yellow_Line_(Bangkok)",
+          "title": "Yellow Line (Bangkok) - Wikipedia (trial 3 June 2023 from Hua Mak to Samrong, Phawana-Hua Mak 12 June, Lat Phrao 19 June; opened 3 July 2023)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2023-07-03",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.nationthailand.com/thailand/general/40028424",
+          "title": "Fares to be collected on Yellow Line from July 3: MRTA - The Nation (free trial started 3 June 2023)",
+          "published_at": "2023-06-11"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Yellow_Line_(Bangkok)",
+          "title": "Yellow Line (Bangkok) - Wikipedia (trial 3 June 2023 from Hua Mak to Samrong, Phawana-Hua Mak 12 June, Lat Phrao 19 June; opened 3 July 2023)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

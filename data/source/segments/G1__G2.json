@@ -1,0 +1,110 @@
+{
+  "id": "G1__G2",
+  "line": "BTS_GOLD",
+  "from_station": "G1",
+  "to_station": "G2",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.503714,
+        13.721168
+      ],
+      [
+        100.505575,
+        13.721108
+      ],
+      [
+        100.505862,
+        13.721308
+      ],
+      [
+        100.50613,
+        13.721766
+      ],
+      [
+        100.506451,
+        13.721904
+      ],
+      [
+        100.508574,
+        13.721494
+      ],
+      [
+        100.508732,
+        13.721522
+      ],
+      [
+        100.50886,
+        13.721621
+      ],
+      [
+        100.508932,
+        13.721858
+      ],
+      [
+        100.509135,
+        13.724846
+      ],
+      [
+        100.509052,
+        13.726462
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    909460168,
+    1185513182,
+    852021475
+  ],
+  "validity": [
+    {
+      "from": "2020-12-16",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2020-09-11",
+      "date_precision": "exact",
+      "event": "trial_run",
+      "source_refs": [
+        {
+          "url": "https://www.nationthailand.com/news/30394429",
+          "title": "Gold Line monorail set to roll out in October after successful test run - The Nation (test run on Friday 11 September 2020)",
+          "published_at": "2020-09-12"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Gold_Line_(Bangkok)",
+          "title": "Gold Line (Bangkok) - Wikipedia (preliminary works June 2018, major construction September 2018; test runs from 11 September 2020; opened 16 December 2020)",
+          "published_at": null
+        }
+      ]
+    },
+    {
+      "date": "2020-12-16",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.railwaygazette.com/bangkok-gold-line-peoplemover-opens/58047.article",
+          "title": "Bangkok Gold Line peoplemover opens - Railway Gazette International",
+          "published_at": "2020-12-16"
+        },
+        {
+          "url": "https://www.nationthailand.com/in-focus/30399052",
+          "title": "Gold Line monorail to open Dec 16 at Bt15 per trip - The Nation",
+          "published_at": "2020-12-03"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Gold_Line_(Bangkok)",
+          "title": "Gold Line (Bangkok) - Wikipedia (preliminary works June 2018, major construction September 2018; test runs from 11 September 2020; opened 16 December 2020)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

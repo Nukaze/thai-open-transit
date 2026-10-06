@@ -14,7 +14,7 @@
     "typecheck": "bun run --filter='./packages/*' --filter='./apps/*' --filter='./scripts/*' typecheck",
     "lint": "prettier --check .",
     "data:import": "bun run scripts/import/index.ts",
-    "data:seed": "bun run scripts/import/seed-1999.ts",
+    "data:seed": "bun run scripts/import/seed-all.ts",
     "data:build": "bun run scripts/build/index.ts",
     "data:validate": "bun run scripts/validate/index.ts"
   },

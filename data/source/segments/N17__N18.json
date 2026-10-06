@@ -1,0 +1,59 @@
+{
+  "id": "N17__N18",
+  "line": "BTS_SUKHUMVIT",
+  "from_station": "N17",
+  "to_station": "N18",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [
+        100.59668,
+        13.875339
+      ],
+      [
+        100.598983,
+        13.879267
+      ],
+      [
+        100.599511,
+        13.880418
+      ],
+      [
+        100.600712,
+        13.882458
+      ]
+    ]
+  },
+  "geometry_source": "osm",
+  "osm_way_refs": [
+    815065851,
+    1392015020
+  ],
+  "validity": [
+    {
+      "from": "2020-12-16",
+      "to": null
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2020-12-16",
+      "date_precision": "exact",
+      "event": "opened",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Khu_Khot_BTS_station",
+          "title": "Khu Khot BTS station - Wikipedia (N24, opened 16 December 2020, phase 4 of the Sukhumvit northern extension)",
+          "published_at": null
+        }
+      ]
+    }
+  ],
+  "confidence": "medium",
+  "last_verified_at": "2026-10-06"
+}

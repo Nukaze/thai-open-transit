@@ -76,8 +76,42 @@
           "published_at": null
         }
       ]
+    },
+    {
+      "date": "2020-06-05",
+      "date_precision": "disputed",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://www.btsgroup.co.th/en/update/news-event/603/bts-skytrain-begins-trial-operations-of-additional-four-stations-of-northern-green-line",
+          "title": "BTS Group - On 5 Jun 2020 an additional four stations (N14-N17) of the Northern Green Line extension begin trial operations",
+          "published_at": "2020-06-05"
+        }
+      ]
+    },
+    {
+      "date": "2020-12-16",
+      "date_precision": "exact",
+      "event": "extended",
+      "source_refs": [
+        {
+          "url": "https://www.bts.co.th/eng/info/info-history.html",
+          "title": "BTS Skytrain - History (Bangkok Mass Transit System PCL)",
+          "published_at": null
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Khu_Khot_BTS_station",
+          "title": "Khu Khot BTS station - Wikipedia (N24, opened 16 December 2020, phase 4 of the Sukhumvit northern extension)",
+          "published_at": null
+        }
+      ]
     }
   ],
   "confidence": "high",
-  "last_verified_at": "2026-09-01"
+  "last_verified_at": "2026-10-06"
 }
