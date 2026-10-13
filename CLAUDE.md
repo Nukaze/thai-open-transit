@@ -154,6 +154,7 @@ bangkok-open-transit/
 ├── pnpm-workspace.yaml
 │
 ├── docs/
+│   ├── FEATURES.md              # goal + shipped feature list, keep current
 │   ├── SPEC.md                  # feature spec, read this second
 │   ├── GOVERNANCE.md            # admin roles, promotion, removal
 │   ├── DATA_POLICY.md           # what sources are acceptable
