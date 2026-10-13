@@ -69,8 +69,33 @@ const OVERLAY_COLORS: Record<MapTheme, OverlayColors> = {
   },
 };
 
-// Layers the station-labels toggle shows and hides together.
+// Layers the station-labels toggle shows and hides together, with the paint
+// properties that fade each one.
 const LABEL_LAYER_IDS = ["station-names", "station-badges"] as const;
+type PaintPropertyName = Parameters<maplibregl.Map["setPaintProperty"]>[1];
+const LABEL_OPACITY_PROPS: Record<
+  (typeof LABEL_LAYER_IDS)[number],
+  PaintPropertyName[]
+> = {
+  "station-names": ["text-opacity"],
+  "station-badges": ["text-opacity", "icon-opacity"],
+};
+
+// One duration for every part of the labels toggle - label fade and dot
+// resize - so they read as a single motion. Matches MapLibre's own symbol
+// placement fade (`fadeDuration`, 300ms by default).
+const LABEL_FADE_MS = 300;
+const LABEL_FADE = { duration: LABEL_FADE_MS, delay: 0 };
+
+// Upper bound on waiting for the label layers to finish laying out after
+// they are switched back on (see the toggle effect). Normally a few tens of
+// ms for this source; the fallback only keeps a stalled tile load from
+// leaving the labels at opacity 0 forever.
+const LABEL_READY_FALLBACK_MS = 800;
+
+// How long after the "network" source reports loaded the re-laid-out labels
+// actually start their placement fade. See the toggle effect's `animate`.
+const LABEL_PLACEMENT_LAG_MS = 120;
 
 // Layers that select a station when clicked (see the `load` handler).
 const STATION_HIT_LAYER_IDS = ["stations", "station-badges"];
@@ -355,6 +380,7 @@ function addNetworkLayers(
     source: "network",
     paint: {
       "circle-radius": stationDotRadius(showStationLabels),
+      "circle-radius-transition": LABEL_FADE,
       "circle-color": ringColor,
       "circle-stroke-color": colors.dotStroke,
       "circle-stroke-width": 1,
@@ -362,6 +388,7 @@ function addNetworkLayers(
   });
 
   const labelVisibility = showStationLabels ? "visible" : "none";
+  const labelOpacity = showStationLabels ? 1 : 0;
 
   // Station names: Thai over English, beside the node. Added BELOW the
   // badge layer on purpose - MapLibre places symbols top layer first, so a
@@ -434,6 +461,8 @@ function addNetworkLayers(
       "text-color": colors.nameTh,
       "text-halo-color": colors.halo,
       "text-halo-width": 1.5,
+      "text-opacity": labelOpacity,
+      "text-opacity-transition": LABEL_FADE,
     },
   });
 
@@ -470,6 +499,10 @@ function addNetworkLayers(
     },
     paint: {
       "text-color": colors.badgeText,
+      "text-opacity": labelOpacity,
+      "text-opacity-transition": LABEL_FADE,
+      "icon-opacity": labelOpacity,
+      "icon-opacity-transition": LABEL_FADE,
     },
   });
 
@@ -558,28 +591,131 @@ export function Map({
   selectionRingColorRef.current = selectionRingColor;
   showStationLabelsRef.current = showStationLabels;
 
-  // Station-labels toggle: flips the label layers' visibility in place.
-  // Guarded by `getLayer` like the selection effect below - this can fire
-  // before `style.load` has added the layers, and that first add already
-  // reads `showStationLabelsRef`.
+  // Station-labels toggle, animated as one motion: labels fade while the
+  // dots resize, both over `LABEL_FADE_MS` (paint transitions set in
+  // `addNetworkLayers`).
+  //
+  // `visibility` cannot simply flip with the fade. It is a layout property,
+  // and in maplibre-gl 6.6 any layout change marks the whole "network"
+  // source for reload (`Style#_updateLayer`), so the labels only exist again
+  // a beat after the switch. Flipping it together with the dot resize gave
+  // "dots shrink - pause - labels pop in". So:
+  // - off: fade labels out and grow dots now; drop `visibility` only once
+  //   the labels are invisible, so hidden labels stop blocking basemap
+  //   names without any visible step.
+  // - on: make the layers visible at opacity 0, wait for the source to
+  //   finish re-laying them out, THEN fade in and shrink dots together.
+  //
+  // `labelToggleRunRef` invalidates a pending step when the user toggles
+  // again before it ran. Guarded by `getLayer` like the selection effect
+  // below - this can fire before `style.load` has added the layers, and that
+  // first add already reads `showStationLabelsRef`.
+  const labelToggleRunRef = useRef(0);
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
-    for (const id of LABEL_LAYER_IDS) {
-      if (!map.getLayer(id)) continue;
-      map.setLayoutProperty(
-        id,
-        "visibility",
-        showStationLabels ? "visible" : "none",
-      );
+    if (!map || !map.getLayer("stations")) return;
+    const run = ++labelToggleRunRef.current;
+    const isCurrent = () => labelToggleRunRef.current === run;
+
+    // `afterReload`: the labels were just re-laid out, so MapLibre fades each
+    // newly placed symbol in on its own (placement fade, `LABEL_FADE_MS`).
+    // Running our opacity transition on top of that multiplies two ramps and
+    // the labels visibly trail the dots, so the opacity jumps to 1 instead
+    // and the placement fade alone carries the fade-in - in step with the
+    // dot resize. The opacity transition is restored a frame later, after
+    // the jump has been applied, for the next fade-out.
+    const animate = (on: boolean, afterReload = false) => {
+      for (const id of LABEL_LAYER_IDS) {
+        if (!map.getLayer(id)) continue;
+        for (const prop of LABEL_OPACITY_PROPS[id]) {
+          if (afterReload) {
+            map.setPaintProperty(
+              id,
+              `${prop}-transition` as PaintPropertyName,
+              {
+                duration: 0,
+                delay: 0,
+              },
+            );
+          }
+          map.setPaintProperty(id, prop, on ? 1 : 0);
+        }
+      }
+      if (map.getLayer("stations")) {
+        // After a reload the placement fade starts a beat after the source
+        // reports loaded (measured ~100ms: the new tiles still have to be
+        // uploaded and picked up by the next placement pass), so the dot
+        // resize is held back by that much to land in step with the labels.
+        map.setPaintProperty(
+          "stations",
+          "circle-radius-transition",
+          afterReload
+            ? { ...LABEL_FADE, delay: LABEL_PLACEMENT_LAG_MS }
+            : LABEL_FADE,
+        );
+        map.setPaintProperty("stations", "circle-radius", stationDotRadius(on));
+      }
+      if (afterReload) {
+        map.once("render", () => {
+          for (const id of LABEL_LAYER_IDS) {
+            if (!map.getLayer(id)) continue;
+            for (const prop of LABEL_OPACITY_PROPS[id]) {
+              map.setPaintProperty(
+                id,
+                `${prop}-transition` as PaintPropertyName,
+                LABEL_FADE,
+              );
+            }
+          }
+        });
+      }
+    };
+    const setVisibility = (on: boolean) => {
+      for (const id of LABEL_LAYER_IDS) {
+        if (map.getLayer(id)) {
+          map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+        }
+      }
+    };
+
+    if (!showStationLabels) {
+      animate(false);
+      const timer = window.setTimeout(() => {
+        if (isCurrent()) setVisibility(false);
+      }, LABEL_FADE_MS);
+      return () => window.clearTimeout(timer);
     }
-    if (map.getLayer("stations")) {
-      map.setPaintProperty(
-        "stations",
-        "circle-radius",
-        stationDotRadius(showStationLabels),
-      );
+
+    // Already visible (e.g. toggled back on mid-fade-out, before the
+    // deferred `visibility: none` ran): no reload pending, fade straight in.
+    if (map.getLayoutProperty("station-badges", "visibility") !== "none") {
+      animate(true);
+      return;
     }
+
+    setVisibility(true);
+    let started = false;
+    const start = () => {
+      if (started || !isCurrent()) return;
+      started = true;
+      map.off("sourcedata", onSourceData);
+      window.clearTimeout(fallback);
+      animate(true, true);
+    };
+    // Only the reload just triggered emits "network" sourcedata from here on
+    // (the source's data is not changing), so the first event that finds
+    // the source fully loaded marks the labels as laid out. Not `idle`: the
+    // selection ring's pulse repaints every frame, so the map is never idle
+    // while a station is selected.
+    const onSourceData = (e: maplibregl.MapSourceDataEvent) => {
+      if (e.sourceId === "network" && map.isSourceLoaded("network")) start();
+    };
+    map.on("sourcedata", onSourceData);
+    const fallback = window.setTimeout(start, LABEL_READY_FALLBACK_MS);
+    return () => {
+      map.off("sourcedata", onSourceData);
+      window.clearTimeout(fallback);
+    };
   }, [showStationLabels]);
 
   // Data updates flow into the already-running map via `source.setData`
