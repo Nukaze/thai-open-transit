@@ -1,27 +1,70 @@
 // apps/web/components/StationSearch.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, type RefObject } from "react";
 import Fuse from "fuse.js";
-import type { Station } from "schema";
+import type { Line, Station } from "schema";
+import { t } from "../lib/i18n";
+import { ChevronIcon, CloseIcon, SearchIcon } from "./icons";
 
-// Generic over `T extends Station` rather than hardcoding `Station` (the
-// brief's literal Step 6 signature): the caller in this app, `HomeClient.tsx`,
-// holds `StationWithStatus[]` (`Station & { status: Status }`, see
-// `apps/web/lib/types.ts`) and needs `onSelect` to hand back the full
-// `StationWithStatus` so it can feed `setSelectedStation` (typed
-// `StationWithStatus | null`) without a cast. `T extends Station` keeps the
-// brief's `Station[]` / `(station: Station) => void` shape as the default
-// instantiation while staying exact for callers with a richer station type.
-export function StationSearch<T extends Station>({
+// The search field lives in the sheet header (Waymo's "Where to?") and its
+// results replace the sheet body, so field and results are two components
+// sharing a query that the parent owns.
+export function StationSearchField({
+  query,
+  onQueryChange,
+  onFocus,
+  inputRef,
+}: {
+  query: string;
+  onQueryChange: (q: string) => void;
+  onFocus: () => void;
+  inputRef?: RefObject<HTMLInputElement | null>;
+}) {
+  return (
+    <div className="search" role="search">
+      <SearchIcon />
+      <label className="visually-hidden" htmlFor="station-search">
+        {t("search_placeholder", "en")}
+      </label>
+      <input
+        ref={inputRef}
+        id="station-search"
+        type="search"
+        autoComplete="off"
+        enterKeyHint="search"
+        value={query}
+        onFocus={onFocus}
+        onChange={(e) => onQueryChange(e.target.value)}
+        placeholder={t("search_where", "en")}
+      />
+      {query && (
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label="Clear search"
+          onClick={() => onQueryChange("")}
+        >
+          <CloseIcon size={12} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Generic over `T extends Station` so callers holding a richer station type
+// (`StationWithStatus`) get that exact type back from `onSelect`.
+export function StationSearchResults<T extends Station>({
   stations,
+  lines,
+  query,
   onSelect,
 }: {
   stations: T[];
+  lines: Line[];
+  query: string;
   onSelect: (station: T) => void;
 }) {
-  const [query, setQuery] = useState("");
-
   const fuse = useMemo(
     () =>
       new Fuse(stations, {
@@ -36,33 +79,56 @@ export function StationSearch<T extends Station>({
       }),
     [stations],
   );
+  const colorByLine = useMemo(
+    () => new Map(lines.map((l) => [l.id, l.color_hex])),
+    [lines],
+  );
 
-  const results = query ? fuse.search(query).slice(0, 8) : [];
+  const results = fuse.search(query).slice(0, 12);
+
+  if (results.length === 0) {
+    return <p className="empty">{t("no_results", "en")}</p>;
+  }
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: 16,
-        right: 16,
-        background: "white",
-        padding: 8,
-      }}
-    >
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search stations..."
-      />
-      <ul>
-        {results.map(({ item }) => (
+    <ul className="list fade-in" aria-label="Search results">
+      {results.map(({ item }) => {
+        const lineIds = [...new Set(item.validity.map((v) => v.line))];
+        return (
           <li key={item.id}>
-            <button onClick={() => onSelect(item)}>
-              {item.name_en ?? item.name_th} ({item.id})
+            <button
+              type="button"
+              className="row"
+              onClick={() => onSelect(item)}
+            >
+              <span className="row-leading" aria-hidden="true">
+                <span style={{ display: "flex", gap: 3 }}>
+                  {lineIds.slice(0, 3).map((id) => (
+                    <span
+                      key={id}
+                      className="dot"
+                      style={{
+                        width: 9,
+                        height: 9,
+                        background: colorByLine.get(id) ?? "currentColor",
+                      }}
+                    />
+                  ))}
+                </span>
+              </span>
+              <span className="row-main">
+                <span className="row-title" style={{ display: "block" }}>
+                  {item.name_en ?? item.name_th}
+                </span>
+                <span className="row-sub" style={{ display: "block" }}>
+                  <span lang="th">{item.name_th}</span> · {item.id}
+                </span>
+              </span>
+              <ChevronIcon />
             </button>
           </li>
-        ))}
-      </ul>
-    </div>
+        );
+      })}
+    </ul>
   );
 }
