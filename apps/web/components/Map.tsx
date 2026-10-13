@@ -26,14 +26,187 @@ export type MapTheme = "light" | "dark";
 type MapStyle = NonNullable<maplibregl.MapOptions["style"]>;
 
 // The network overlay sits on top of the basemap, so its colors have to move
-// with the flavor: the light flavor's near-white land makes dark navy dots
-// readable, and on the dark flavor those same dots disappear into the
-// background. Kept adjacent to the flavor name so the two cannot drift apart.
-const OVERLAY_COLORS: Record<MapTheme, { station: string; suspended: string }> =
-  {
-    light: { station: "#1e3a8a", suspended: "#9ca3af" },
-    dark: { station: "#bfdbfe", suspended: "#6b7280" },
+// with the flavor: what reads against the light flavor's near-white land
+// disappears into the dark flavor's near-black land, and vice versa. Kept
+// adjacent to the flavor name so the two cannot drift apart.
+//
+// Station dots and badge rings take their own line's color (`ring_color`,
+// resolved in HomeClient); `interchange` is the neutral ring for a station
+// two visible lines share, where picking one line's color would misstate it.
+// Badge TEXT is never line-colored: yellow (#FFD400) and gold (#A58704) on a
+// white badge are unreadable, so the line color stays on the ring and the
+// code uses the theme's ink.
+interface OverlayColors {
+  suspended: string;
+  interchange: string;
+  dotStroke: string;
+  badgeFill: string;
+  badgeText: string;
+  nameTh: string;
+  nameEn: string;
+  halo: string;
+}
+const OVERLAY_COLORS: Record<MapTheme, OverlayColors> = {
+  light: {
+    suspended: "#9ca3af",
+    interchange: "#111827",
+    dotStroke: "#ffffff",
+    badgeFill: "#ffffff",
+    badgeText: "#111827",
+    nameTh: "#111827",
+    nameEn: "#4b5563",
+    halo: "#ffffff",
+  },
+  dark: {
+    suspended: "#6b7280",
+    interchange: "#e5e7eb",
+    dotStroke: "#0f172a",
+    badgeFill: "#0f172a",
+    badgeText: "#f8fafc",
+    nameTh: "#f1f5f9",
+    nameEn: "#94a3b8",
+    halo: "#0b1220",
+  },
+};
+
+// Layers the station-labels toggle shows and hides together, with the paint
+// properties that fade each one.
+const LABEL_LAYER_IDS = ["station-names", "station-badges"] as const;
+type PaintPropertyName = Parameters<maplibregl.Map["setPaintProperty"]>[1];
+const LABEL_OPACITY_PROPS: Record<
+  (typeof LABEL_LAYER_IDS)[number],
+  PaintPropertyName[]
+> = {
+  "station-names": ["text-opacity"],
+  "station-badges": ["text-opacity", "icon-opacity"],
+};
+
+// One duration for every part of the labels toggle - label fade and dot
+// resize - so they read as a single motion. Matches MapLibre's own symbol
+// placement fade (`fadeDuration`, 300ms by default).
+const LABEL_FADE_MS = 300;
+const LABEL_FADE = { duration: LABEL_FADE_MS, delay: 0 };
+
+// Upper bound on waiting for the label layers to be placed again after they
+// are switched back on (see the toggle effect). Normally ~250ms; the
+// fallback covers a view with no label in it to detect, and keeps a stalled
+// tile load from leaving the labels at opacity 0 forever.
+const LABEL_READY_FALLBACK_MS = 600;
+
+// Layers that select a station when clicked (see the `load` handler).
+const STATION_HIT_LAYER_IDS = ["stations", "station-badges"];
+
+// With labels on, the dot shrinks to fit inside the code badge drawn over
+// it, and the badge takes over as the click target. With labels off the dot
+// is the only target, so it keeps the original, touch-friendly size.
+function stationDotRadius(showStationLabels: boolean): PaintExpression {
+  return showStationLabels
+    ? ["interpolate", ["linear"], ["zoom"], 8, 2.5, 12, 5, 16, 7]
+    : ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 8, 16, 16];
+}
+
+// The selection ring follows the same toggle. With labels on it clears the
+// code badge (about 18px tall, 36px wide for a four-character code) rather
+// than the dot under it, so it reads around the badge instead of slicing
+// through its text; a stacked two-code badge (PP16 over BL10) is twice as
+// tall, so its ring scales up with it. With labels off there is no badge,
+// so the ring hugs the larger dot as it always did.
+function selectionRingRadius(showStationLabels: boolean): PaintExpression {
+  if (!showStationLabels) {
+    return ["interpolate", ["linear"], ["zoom"], 8, 8, 12, 14, 16, 22];
+  }
+  const stacked: PaintExpression = [
+    "case",
+    ["in", "\n", ["coalesce", ["get", "codes"], ""]],
+    1.45,
+    1,
+  ];
+  return [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    8,
+    ["*", 10, stacked],
+    12,
+    ["*", 19, stacked],
+    16,
+    ["*", 26, stacked],
+  ];
+}
+
+function setLabelOpacityTransition(
+  map: maplibregl.Map,
+  transition: { duration: number; delay: number },
+): void {
+  for (const id of LABEL_LAYER_IDS) {
+    if (!map.getLayer(id)) continue;
+    for (const prop of LABEL_OPACITY_PROPS[id]) {
+      map.setPaintProperty(
+        id,
+        `${prop}-transition` as PaintPropertyName,
+        transition,
+      );
+    }
+  }
+}
+
+// Badge images are generated on demand (see `drawBadgeImage`) under an id
+// that encodes both colors, so the style can request any fill/ring pair by
+// expression and the `styleimagemissing` handler can rebuild it from the id
+// alone - including after a theme switch's `setStyle`, which drops every
+// image added at runtime.
+const BADGE_IMAGE_PREFIX = "badge|";
+
+// A rounded rectangle drawn at 2x and declared stretchable, so
+// `icon-text-fit` grows it around a 2-character code ("A1"), a 4-character
+// one ("BL15"), or a stacked two-code interchange (PP16 over BL10) without
+// distorting the corners. Coordinates below are in 2x image pixels.
+const BADGE_PX = 40;
+const BADGE_RADIUS = 14;
+const BADGE_BORDER = 5;
+
+function drawBadgeImage(
+  fill: string,
+  ring: string,
+): {
+  image: ImageData;
+  options: Parameters<maplibregl.Map["addImage"]>[2];
+} | null {
+  const canvas = document.createElement("canvas");
+  canvas.width = BADGE_PX;
+  canvas.height = BADGE_PX;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  // Traced with `arcTo` rather than `ctx.roundRect`, which Safari < 16 and
+  // Firefox < 112 lack: there it would throw inside the image resolver and
+  // leave every badge blank.
+  const lo = BADGE_BORDER / 2;
+  const hi = BADGE_PX - BADGE_BORDER / 2;
+  ctx.beginPath();
+  ctx.moveTo(lo + BADGE_RADIUS, lo);
+  ctx.arcTo(hi, lo, hi, hi, BADGE_RADIUS);
+  ctx.arcTo(hi, hi, lo, hi, BADGE_RADIUS);
+  ctx.arcTo(lo, hi, lo, lo, BADGE_RADIUS);
+  ctx.arcTo(lo, lo, hi, lo, BADGE_RADIUS);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.lineWidth = BADGE_BORDER;
+  ctx.strokeStyle = ring;
+  ctx.stroke();
+  return {
+    image: ctx.getImageData(0, 0, BADGE_PX, BADGE_PX),
+    options: {
+      pixelRatio: 2,
+      // Only the straight middle band stretches; the corners stay fixed.
+      stretchX: [[BADGE_RADIUS + 2, BADGE_PX - BADGE_RADIUS - 2]],
+      stretchY: [[BADGE_RADIUS + 2, BADGE_PX - BADGE_RADIUS - 2]],
+      // The box the code text is fitted into: inside the border, with a
+      // little more side padding than top/bottom, like a printed roundel.
+      content: [12, 8, BADGE_PX - 12, BADGE_PX - 8],
+    },
   };
+}
 
 // Fallback only - `HomeClient` always passes an explicit `selectionRingColor`
 // (one value per `MapTheme`, user-configurable via `SelectionRingColorPicker`),
@@ -55,6 +228,14 @@ const PULSE_STROKE_OPACITY = { min: 0.45, max: 1 };
 // that already carries the type, rather than depending on the package
 // directly.
 type MapFilter = NonNullable<Parameters<maplibregl.Map["setFilter"]>[1]>;
+
+// `ExpressionSpecification` isn't re-exported either; the array (expression)
+// branch of a circle paint property is the same type (any paint expression,
+// not only colors), reached through `AddLayerObject`.
+type CirclePaint = NonNullable<
+  Extract<maplibregl.AddLayerObject, { type: "circle" }>["paint"]
+>;
+type PaintExpression = Extract<CirclePaint["circle-color"], unknown[]>;
 
 function selectionFilter(id: string | null): MapFilter {
   return ["==", ["get", "id"], id ?? ""];
@@ -132,6 +313,7 @@ function addNetworkLayers(
   collection: FeatureCollection<Point | LineString>,
   selectedStationId: string | null,
   selectionRingColor: string,
+  showStationLabels: boolean,
 ): void {
   // Idempotent: `style.load` can fire more than once per style if the theme
   // is toggled again while the previous style is still loading (a full sprite
@@ -142,6 +324,17 @@ function addNetworkLayers(
 
   const { points, lines } = splitFeatures(collection);
   const colors = OVERLAY_COLORS[theme];
+
+  // One expression for a station's line color, shared by the dot and the
+  // badge ring so the two can never disagree: grey when suspended, the
+  // line's own color when one visible line serves it, the neutral
+  // interchange color when two do (`ring_color` is null then).
+  const ringColor: PaintExpression = [
+    "case",
+    ["==", ["get", "status"], "suspended"],
+    colors.suspended,
+    ["coalesce", ["get", "ring_color"], colors.interchange],
+  ];
 
   map.addSource("network", {
     type: "geojson",
@@ -220,23 +413,140 @@ function addNetworkLayers(
   // rather than being merged into an unlabelled aggregate dot. Radius
   // interpolates down at low zoom instead, so dense interchanges (e.g. Siam)
   // don't fully overlap when zoomed out to the whole metro region.
+  //
+  // The dot is the one marker guaranteed for every station: the code badge
+  // drawn over it (below) takes part in label collision and can be dropped
+  // in a crowded view, so the dot stays small enough to sit inside a badge
+  // when one does show, and still marks the station when one doesn't.
   map.addLayer({
     id: "stations",
     type: "circle",
     source: "network",
     paint: {
-      "circle-radius": [
-        "interpolate",
-        ["linear"],
+      "circle-radius": stationDotRadius(showStationLabels),
+      "circle-radius-transition": LABEL_FADE,
+      "circle-color": ringColor,
+      "circle-stroke-color": colors.dotStroke,
+      "circle-stroke-width": 1,
+    },
+  });
+
+  const labelVisibility = showStationLabels ? "visible" : "none";
+  const labelOpacity = showStationLabels ? 1 : 0;
+
+  // Station names: Thai over English, beside the node. Added BELOW the
+  // badge layer on purpose - MapLibre places symbols top layer first, so a
+  // badge claims its space before a name does, and the name then tries the
+  // other anchors in `text-variable-anchor-offset` to get out of its way
+  // rather than covering it. Collision (`text-overlap` left at its default
+  // "never") also lets our names push the basemap's place labels aside,
+  // since the basemap's layers sit below these.
+  //
+  // `show_name` (HomeClient's `pickLabelledStations`) is false for all but one
+  // member of a same-name interchange, so Lat Phrao (BL15 + YL01) prints once.
+  //
+  // Every `text-font` is a single fontstack, never a fallback list: glyph
+  // requests go to `/basemap/fonts/{fontstack}/...`, and a list is requested
+  // as ONE comma-joined fontstack directory that does not exist in the static
+  // export, which would 404 and drop the labels with no error shown.
+  map.addLayer({
+    id: "station-names",
+    type: "symbol",
+    source: "network",
+    minzoom: 12,
+    filter: ["==", ["get", "show_name"], true],
+    layout: {
+      visibility: labelVisibility,
+      // Thai only at 12, the English line joins from 13 - at 12 a
+      // two-line label per station crowds out more names than it adds.
+      "text-field": [
+        "step",
         ["zoom"],
-        8,
-        2,
-        12,
-        8,
-        16,
-        16,
+        ["format", ["get", "name_th"], {}],
+        13,
+        [
+          "format",
+          ["get", "name_th"],
+          {},
+          "\n",
+          {},
+          ["coalesce", ["get", "name_en"], ""],
+          {
+            "text-font": ["literal", ["Noto Sans Regular"]],
+            "font-scale": 0.8,
+            "text-color": colors.nameEn,
+          },
+        ],
       ],
-      "circle-color": colors.station,
+      "text-font": ["Noto Sans Medium"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 12, 12, 16, 15],
+      "text-line-height": 1.15,
+      "text-max-width": 14,
+      // Offsets in ems, measured from the station point: far enough sideways
+      // to clear a four-character badge ("BL15"), less far above/below,
+      // where the badge is only one text line tall.
+      "text-variable-anchor-offset": [
+        "literal",
+        [
+          "left",
+          [2.2, 0],
+          "right",
+          [-2.2, 0],
+          "top",
+          [0, 1.1],
+          "bottom",
+          [0, -1.1],
+        ],
+      ],
+      "text-justify": "auto",
+      "symbol-sort-key": ["get", "label_rank"],
+    },
+    paint: {
+      "text-color": colors.nameTh,
+      "text-halo-color": colors.halo,
+      "text-halo-width": 1.5,
+      "text-opacity": labelOpacity,
+      "text-opacity-transition": LABEL_FADE,
+    },
+  });
+
+  // Code badges: the station's current code(s) - A1, YL12, BL20, N3, CEN,
+  // RN06 - in a rounded roundel ringed in the line's color, drawn over the
+  // dot. The badge image is generated per (fill, ring) pair on first request
+  // (see the `styleimagemissing` handler in the init effect).
+  //
+  // Badges collide with each other: at the default zoom-11 overview, letting
+  // all 192 overlap would bury the map in a pile of pills, so the busiest
+  // spots show a subset and fill in as the user zooms. `label_rank` places
+  // interchange badges first so they are the last to drop out.
+  map.addLayer({
+    id: "station-badges",
+    type: "symbol",
+    source: "network",
+    filter: ["!=", ["get", "codes"], ""],
+    layout: {
+      visibility: labelVisibility,
+      "text-field": ["get", "codes"],
+      "text-font": ["Noto Sans Medium"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 16, 12],
+      "text-line-height": 1.1,
+      "icon-image": [
+        "concat",
+        BADGE_IMAGE_PREFIX,
+        colors.badgeFill,
+        "|",
+        ringColor,
+      ],
+      "icon-text-fit": "both",
+      "icon-text-fit-padding": [1, 2, 1, 2],
+      "symbol-sort-key": ["get", "label_rank"],
+    },
+    paint: {
+      "text-color": colors.badgeText,
+      "text-opacity": labelOpacity,
+      "text-opacity-transition": LABEL_FADE,
+      "icon-opacity": labelOpacity,
+      "icon-opacity-transition": LABEL_FADE,
     },
   });
 
@@ -252,17 +562,7 @@ function addNetworkLayers(
     source: "network",
     filter: selectionFilter(selectedStationId),
     paint: {
-      "circle-radius": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        8,
-        8,
-        12,
-        14,
-        16,
-        22,
-      ],
+      "circle-radius": selectionRingRadius(showStationLabels),
       "circle-color": "transparent",
       "circle-stroke-color": selectionRingColor,
       "circle-stroke-width": PULSE_STROKE_WIDTH.min,
@@ -277,6 +577,7 @@ export function Map({
   theme = "light",
   selectedStationId = null,
   selectionRingColor = DEFAULT_SELECTION_RING_COLOR,
+  showStationLabels = true,
   onUserLocation,
   onGeolocateError,
 }: {
@@ -285,6 +586,7 @@ export function Map({
   theme?: MapTheme;
   selectedStationId?: string | null;
   selectionRingColor?: string;
+  showStationLabels?: boolean;
   onUserLocation?: (coords: {
     lat: number;
     lon: number;
@@ -309,6 +611,10 @@ export function Map({
   const themeRef = useRef(theme);
   const selectedStationIdRef = useRef(selectedStationId);
   const selectionRingColorRef = useRef(selectionRingColor);
+  // Read by the `style.load` handler, so a theme switch (which rebuilds every
+  // layer) recreates the label layers in the toggle's current state instead
+  // of silently turning labels back on.
+  const showStationLabelsRef = useRef(showStationLabels);
   // Same ref pattern as `onStationClickRef`: the geolocate listeners are bound
   // once in the init effect, so they must read the latest handlers via refs.
   const onUserLocationRef = useRef(onUserLocation);
@@ -319,6 +625,117 @@ export function Map({
   networkGeoJsonRef.current = networkGeoJson;
   selectedStationIdRef.current = selectedStationId;
   selectionRingColorRef.current = selectionRingColor;
+  showStationLabelsRef.current = showStationLabels;
+
+  // Station-labels toggle, animated as one motion: labels fade while the
+  // dots resize, both over `LABEL_FADE_MS` (paint transitions set in
+  // `addNetworkLayers`).
+  //
+  // `visibility` cannot simply flip with the fade. It is a layout property,
+  // and in maplibre-gl 6.6 any layout change marks the whole "network"
+  // source for reload (`Style#_updateLayer`), so the labels only exist again
+  // a beat after the switch. Flipping it together with the dot resize gave
+  // "dots shrink - pause - labels pop in". So:
+  // - off: fade labels out and grow dots now; drop `visibility` only once
+  //   the labels are invisible, so hidden labels stop blocking basemap
+  //   names without any visible step.
+  // - on: make the layers visible at opacity 0, wait for the source to
+  //   finish re-laying them out, THEN fade in and shrink dots together.
+  //
+  // `labelToggleRunRef` invalidates a pending step when the user toggles
+  // again before it ran. Guarded by `getLayer` like the selection effect
+  // below - this can fire before `style.load` has added the layers, and that
+  // first add already reads `showStationLabelsRef`.
+  const labelToggleRunRef = useRef(0);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.getLayer("stations")) return;
+    const run = ++labelToggleRunRef.current;
+    const isCurrent = () => labelToggleRunRef.current === run;
+
+    // `afterReload`: the labels were just re-laid out, so MapLibre fades each
+    // newly placed symbol in on its own (placement fade, `LABEL_FADE_MS`).
+    // Running our opacity transition on top of that multiplies two ramps and
+    // the labels visibly trail the dots, so the opacity jumps to 1 instead
+    // and the placement fade alone carries the fade-in - in step with the
+    // dot resize. The opacity transition is restored a frame later, after
+    // the jump has been applied, for the next fade-out.
+    const animate = (on: boolean, afterReload = false) => {
+      if (afterReload)
+        setLabelOpacityTransition(map, { duration: 0, delay: 0 });
+      for (const id of LABEL_LAYER_IDS) {
+        if (!map.getLayer(id)) continue;
+        for (const prop of LABEL_OPACITY_PROPS[id]) {
+          map.setPaintProperty(id, prop, on ? 1 : 0);
+        }
+      }
+      if (map.getLayer("stations")) {
+        map.setPaintProperty("stations", "circle-radius", stationDotRadius(on));
+      }
+      if (map.getLayer("station-selection")) {
+        map.setPaintProperty(
+          "station-selection",
+          "circle-radius",
+          selectionRingRadius(on),
+        );
+      }
+      if (afterReload) {
+        map.once("render", () => setLabelOpacityTransition(map, LABEL_FADE));
+      }
+    };
+    const setVisibility = (on: boolean) => {
+      for (const id of LABEL_LAYER_IDS) {
+        if (map.getLayer(id)) {
+          map.setLayoutProperty(id, "visibility", on ? "visible" : "none");
+        }
+      }
+    };
+
+    if (!showStationLabels) {
+      animate(false);
+      const timer = window.setTimeout(() => {
+        if (isCurrent()) setVisibility(false);
+      }, LABEL_FADE_MS);
+      return () => window.clearTimeout(timer);
+    }
+
+    // Already visible (e.g. toggled back on mid-fade-out, before the
+    // deferred `visibility: none` ran): no reload pending, fade straight in.
+    if (map.getLayoutProperty("station-badges", "visibility") !== "none") {
+      animate(true);
+      return;
+    }
+
+    setVisibility(true);
+    let started = false;
+    const start = () => {
+      if (started || !isCurrent()) return;
+      started = true;
+      map.off("render", onRender);
+      window.clearTimeout(fallback);
+      animate(true, true);
+    };
+    // Ready = the re-laid-out labels have been PLACED, checked each frame:
+    // placement is the moment MapLibre's own fade-in starts, so starting
+    // the dot resize there keeps the two in step without a tuned delay.
+    // Source events are not used: a concurrent `setData` (year slider, line
+    // filter) emits the same "network loaded" event and fired this early.
+    // `idle` is not used either: the selection ring's pulse repaints every
+    // frame, so the map is never idle while a station is selected.
+    const onRender = () => {
+      if (!map.isSourceLoaded("network")) return;
+      const placed = map.queryRenderedFeatures({
+        layers: [...LABEL_LAYER_IDS].filter((id) => map.getLayer(id)),
+      });
+      if (placed.length > 0) start();
+    };
+    map.on("render", onRender);
+    const fallback = window.setTimeout(start, LABEL_READY_FALLBACK_MS);
+    return () => {
+      map.off("render", onRender);
+      window.clearTimeout(fallback);
+    };
+  }, [showStationLabels]);
 
   // Data updates flow into the already-running map via `source.setData`
   // instead of remounting. Guarded by `getSource` because this can fire
@@ -443,7 +860,8 @@ export function Map({
   // place, keeping camera position, so toggling does not re-run the init
   // effect (see why that matters above). It also drops every runtime-added
   // source and layer, hence the re-add once the new style has loaded.
-  // The delegated listeners registered on `"stations"` in the init effect do
+  // The delegated listeners registered on the station layers in the init
+  // effect do
   // survive: MapLibre resolves the layer at dispatch time, not at bind time,
   // so a layer re-added under the same id keeps working.
   useEffect(() => {
@@ -475,6 +893,25 @@ export function Map({
       center: BANGKOK_CENTER,
       zoom: 11,
       style: buildStyle(initialTheme),
+    });
+
+    // Code-badge images, built the first time the style asks for one. The
+    // `station-badges` layer requests `badge|<fill>|<ring>` by expression, so
+    // every fill/ring pair it can produce - per line, per theme, suspended,
+    // interchange - is drawn exactly when first needed and never listed by
+    // hand. Registered on the map, not the style, so it keeps working after
+    // a theme switch's `setStyle` has dropped the previously added images.
+    //
+    // A resolver, not a `styleimagemissing` listener: since maplibre-gl v6
+    // that event is notify-only and an `addImage` inside it no longer
+    // satisfies the pending request (v5-to-v6 migration guide) - every badge
+    // stayed blank with "Image ... could not be loaded" until this moved.
+    map.setMissingStyleImageResolver((id) => {
+      if (!id.startsWith(BADGE_IMAGE_PREFIX) || map.hasImage(id)) return;
+      const [fill, ring] = id.slice(BADGE_IMAGE_PREFIX.length).split("|");
+      if (!fill || !ring) return;
+      const badge = drawBadgeImage(fill, ring);
+      if (badge) map.addImage(id, badge.image, badge.options);
     });
 
     // bottom-right: top-right hosts the search/station panel overlays,
@@ -516,6 +953,7 @@ export function Map({
         networkGeoJsonRef.current,
         selectedStationIdRef.current,
         selectionRingColorRef.current,
+        showStationLabelsRef.current,
       );
       // A theme toggle runs `setStyle`, which fires `style.load` again and
       // destroys/recreates every layer `addNetworkLayers` just re-added -
@@ -536,14 +974,25 @@ export function Map({
       // through the ref (rather than closing over the `onStationClick` prop
       // directly) means this listener, registered once at init, always
       // calls the latest handler even though the init effect never re-runs.
-      map.on("click", "stations", (e) => {
-        const id = e.features?.[0]?.properties?.id;
+      //
+      // Bound to the badge layer as well as the dot: the dot shrank to sit
+      // inside a badge, so a click on the visible badge's edge would
+      // otherwise miss. Badges hidden by collision or by the labels toggle
+      // are not rendered and so never answer the hit test - the dot does.
+      map.on("click", STATION_HIT_LAYER_IDS, (e) => {
+        // While labels fade out they are still laid out at falling opacity
+        // and still answer hit tests; once the toggle is off, only a dot
+        // counts, so a click on the space a fading badge filled does nothing.
+        const hit = e.features?.find(
+          (f) => showStationLabelsRef.current || f.layer.id === "stations",
+        );
+        const id = hit?.properties?.id;
         if (typeof id === "string") onStationClickRef.current?.(id);
       });
-      map.on("mouseenter", "stations", () => {
+      map.on("mouseenter", STATION_HIT_LAYER_IDS, () => {
         map.getCanvas().style.cursor = "pointer";
       });
-      map.on("mouseleave", "stations", () => {
+      map.on("mouseleave", STATION_HIT_LAYER_IDS, () => {
         map.getCanvas().style.cursor = "";
       });
     });

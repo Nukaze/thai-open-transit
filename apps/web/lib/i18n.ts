@@ -7,6 +7,7 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   download_dataset: { th: "ดาวน์โหลดชุดข้อมูล", en: "Download dataset" },
   theme_to_dark: { th: "โหมดมืด", en: "Dark map" },
   theme_to_light: { th: "โหมดสว่าง", en: "Light map" },
+  station_labels: { th: "ป้ายสถานี", en: "Station labels" },
   nearest_station: { th: "สถานีใกล้สุด", en: "Nearest" },
   geolocate_denied: {
     th: "ไม่ได้รับอนุญาตให้เข้าถึงตำแหน่ง",

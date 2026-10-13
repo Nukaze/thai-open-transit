@@ -13,6 +13,13 @@ import { NearestStationChip } from "./NearestStationChip";
 import { nearestStations } from "../lib/nearest-station";
 import { getStationIdFromUrl, buildStationDeepLink } from "../lib/deep-link";
 import { isValidAt } from "../lib/asOf";
+import {
+  buildPrefixLineIndex,
+  lineColorIndex,
+  pickLabelledStations,
+  resolveStationLabel,
+} from "../lib/stationLabel";
+import { StationLabelsToggle } from "./StationLabelsToggle";
 import type { Line } from "schema";
 import type { FeatureCollection, Point, LineString } from "geojson";
 import type { StationWithStatus } from "../lib/types";
@@ -66,6 +73,9 @@ export function HomeClient({
   // disagrees with the client's first paint. The effect below applies the
   // OS preference after mount, and any explicit toggle then wins.
   const [theme, setTheme] = useState<MapTheme>("dark");
+  // Station code badges and name labels. On by default; per-viewer and not
+  // persisted, the same as theme and ring color.
+  const [showStationLabels, setShowStationLabels] = useState(true);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-color-scheme: light)");
@@ -115,6 +125,8 @@ export function HomeClient({
     () => new Map(stations.map((s) => [s.id, s])),
     [stations],
   );
+  const lineColorById = useMemo(() => lineColorIndex(lines), [lines]);
+  const prefixLine = useMemo(() => buildPrefixLineIndex(stations), [stations]);
   // Deep-link write: selecting a station - from the map or from search -
   // opens its panel and pushes a shareable `?station=` URL via
   // `buildStationDeepLink`, so a copied URL reopens the same station on load
@@ -183,22 +195,78 @@ export function HomeClient({
 
   const filteredGeoJson = useMemo(() => {
     const visibleStationIds = new Set(visibleStations.map((s) => s.id));
+
+    // Station labels (code badge + name) depend on the same date and line
+    // filter as visibility - a code changes on renumbering, a two-line
+    // station's ring and codes change with the line filter - so they are
+    // resolved here, per render of the filter, and written onto the feature
+    // properties the map's symbol layers read. Nothing label-related is baked
+    // into network.geojson at build time; `stations` already carries it.
+    const labels = new Map(
+      visibleStations.map((s) => [
+        s.id,
+        resolveStationLabel(
+          s,
+          selectedDate,
+          activeLineIds,
+          lineColorById,
+          prefixLine,
+        ),
+      ]),
+    );
+    const labelled = pickLabelledStations(
+      visibleStations.map((s) => ({
+        id: s.id,
+        name_th: s.name_th,
+        interchange_group: s.interchange_group,
+        openedFrom: labels.get(s.id)?.openedFrom ?? "",
+      })),
+    );
+
     return {
       ...networkGeoJson,
-      features: networkGeoJson.features.filter((f) => {
+      features: networkGeoJson.features.flatMap((f) => {
         if (f.geometry.type === "LineString") {
-          if (!activeLineIds.has(f.properties?.line)) return false;
-          if (selectedDate === null) return true;
+          if (!activeLineIds.has(f.properties?.line)) return [];
+          if (selectedDate === null) return [f];
           const validity = (f.properties?.validity ?? []) as {
             from: string;
             to: string | null;
           }[];
-          return validity.some((v) => isValidAt(v, selectedDate));
+          return validity.some((v) => isValidAt(v, selectedDate)) ? [f] : [];
         }
-        return visibleStationIds.has(f.properties?.id);
+        const id = f.properties?.id as string;
+        if (!visibleStationIds.has(id)) return [];
+        const label = labels.get(id)!;
+        return [
+          {
+            ...f,
+            properties: {
+              ...f.properties,
+              status: stationById.get(id)?.status,
+              // Newline-joined: a two-code station (PP16 over BL10) renders
+              // as a stacked badge, the way printed Bangkok maps show it.
+              codes: label.codes.join("\n"),
+              ring_color: label.ringColor,
+              show_name: labelled.has(id),
+              // Lower places first in MapLibre symbol collision, so
+              // interchanges (multi-code or multi-line) keep their badge
+              // when a crowded zoom has to drop some.
+              label_rank: label.codes.length > 1 || label.interchange ? 0 : 1,
+            },
+          },
+        ];
       }),
     } as FeatureCollection<Point | LineString>;
-  }, [visibleStations, networkGeoJson, selectedDate, activeLineIds]);
+  }, [
+    visibleStations,
+    stationById,
+    networkGeoJson,
+    selectedDate,
+    activeLineIds,
+    lineColorById,
+    prefixLine,
+  ]);
 
   // Device position from the map's geolocate control. Never leaves the
   // browser: the public plane is static (CLAUDE.md 2.4), so there is nowhere
@@ -236,10 +304,16 @@ export function HomeClient({
         theme={theme}
         selectedStationId={selectedStation?.id ?? null}
         selectionRingColor={selectionRingColors[theme]}
+        showStationLabels={showStationLabels}
         onUserLocation={handleUserLocation}
         onGeolocateError={setGeolocateError}
       />
       <ThemeToggle theme={theme} onChange={setTheme} />
+      <StationLabelsToggle
+        theme={theme}
+        on={showStationLabels}
+        onChange={setShowStationLabels}
+      />
       <SelectionRingColorPicker
         theme={theme}
         color={selectionRingColors[theme]}

@@ -36,11 +36,13 @@ export function NearestStationChip({
 
   const style = {
     // Bottom-center, above the whole bottom-left stack (`ThemeToggle` at 64,
-    // `SelectionRingColorPicker` at 104): at bottom 64 it sat beside them and
-    // collided with the picker on a 390px phone. The bottom-right corner
-    // belongs to MapLibre's geolocate + attribution controls.
+    // `SelectionRingColorPicker` at 104, `StationLabelsToggle` at 144, whose
+    // top edge is at 174): at bottom 64 it sat beside them and collided with
+    // the picker on a 390px phone, and at 152 it covered the labels toggle
+    // on a 375px phone. The bottom-right corner belongs to MapLibre's
+    // geolocate + attribution controls.
     position: "absolute" as const,
-    bottom: 152,
+    bottom: 192,
     left: "50%",
     transform: "translateX(-50%)",
     maxWidth: "min(60vw, 320px)",
