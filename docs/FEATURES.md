@@ -9,6 +9,7 @@ contributors and for the AI coding agents they work with.
 | Architectural rules you must not break | [CLAUDE.md](../CLAUDE.md) |
 | The full roadmap and data model        | [SPEC.md](../SPEC.md)     |
 | How to build and run locally           | [README.md](../README.md) |
+| Proposed and accepted design decisions | [adr/](adr/README.md)     |
 
 Last reviewed against `main` at PR #11 (2026-10-13). When you ship a
 user-visible feature, update the tables below in the same PR.
