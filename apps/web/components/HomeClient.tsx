@@ -252,8 +252,7 @@ export function HomeClient({
               // Lower places first in MapLibre symbol collision, so
               // interchanges (multi-code or multi-line) keep their badge
               // when a crowded zoom has to drop some.
-              label_rank:
-                label.codes.length > 1 || label.ringColor === null ? 0 : 1,
+              label_rank: label.codes.length > 1 || label.interchange ? 0 : 1,
             },
           },
         ];

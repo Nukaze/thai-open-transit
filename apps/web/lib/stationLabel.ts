@@ -4,14 +4,30 @@ import type { StationWithStatus } from "./types";
 import { isValidAt } from "./asOf";
 
 // `selectedDate === null` is HomeClient's "unfiltered by date" state (before
-// the mount effect resolves the visitor's year). Treated as "open-ended
-// windows only", i.e. the network as it stands today, so a code that was
-// retired (S4 -> S5) never shows in the unfiltered view.
-function windowActive(
+// the mount effect resolves the visitor's year). Line windows follow
+// HomeClient's own visibility rule there - ANY window on an active line
+// counts - so a station the map draws is never treated as unserved here.
+function lineWindowActive(
   window: { from: string; to: string | null },
   date: string | null,
 ): boolean {
-  return date === null ? window.to === null : isValidAt(window, date);
+  return date === null || isValidAt(window, date);
+}
+
+// Codes on a null date: the current (open-ended) ones, so a retired code
+// (S4 -> S5) never shows in the unfiltered view - or, for a station with no
+// open-ended code at all, its latest one rather than none.
+function activeCodes(
+  history: { code: string; from: string; to: string | null }[],
+  date: string | null,
+): { code: string; from: string; to: string | null }[] {
+  if (date !== null) return history.filter((e) => isValidAt(e, date));
+  const current = history.filter((e) => e.to === null);
+  if (current.length > 0) return current;
+  const latest = [...history]
+    .sort((a, b) => a.from.localeCompare(b.from))
+    .at(-1);
+  return latest ? [latest] : [];
 }
 
 function codePrefix(code: string): string {
@@ -52,9 +68,13 @@ export interface StationLabel {
   // in `code_history` order. Usually one; two at a cross-line station that
   // carries a code per line.
   codes: string[];
-  // The ring color: the line's own color when exactly one visible line
-  // serves the station, `null` for a multi-line station so the map can draw
-  // its neutral interchange ring instead of picking one line arbitrarily.
+  // True when two or more visible lines serve the station: the map draws its
+  // neutral interchange ring and gives it collision priority.
+  interchange: boolean;
+  // The line's own color when exactly one visible line serves the station.
+  // `null` for an interchange, and also when that line has no known color -
+  // which is why `interchange` is a separate field rather than inferred
+  // from `ringColor === null`.
   ringColor: string | null;
   // Earliest `from` among the windows that make the station visible - the
   // tie-breaker `pickLabelledStations` uses. `null` when not visible.
@@ -69,12 +89,11 @@ export function resolveStationLabel(
   prefixLine: ReadonlyMap<string, string>,
 ): StationLabel {
   const visibleWindows = station.validity.filter(
-    (v) => activeLineIds.has(v.line) && windowActive(v, date),
+    (v) => activeLineIds.has(v.line) && lineWindowActive(v, date),
   );
   const visibleLines = new Set(visibleWindows.map((v) => v.line));
 
-  const codes = station.code_history
-    .filter((entry) => windowActive(entry, date))
+  const codes = activeCodes(station.code_history, date)
     .filter((entry) => {
       const line = prefixLine.get(codePrefix(entry.code));
       return line === undefined || visibleLines.has(line);
@@ -91,7 +110,12 @@ export function resolveStationLabel(
       ? null
       : visibleWindows.map((v) => v.from).sort()[0]!;
 
-  return { codes, ringColor, openedFrom };
+  return {
+    codes,
+    interchange: visibleLines.size > 1,
+    ringColor,
+    openedFrom,
+  };
 }
 
 export function lineColorIndex(lines: Line[]): Map<string, string> {

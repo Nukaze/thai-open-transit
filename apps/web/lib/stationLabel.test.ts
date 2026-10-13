@@ -106,6 +106,40 @@ describe("resolveStationLabel", () => {
     expect(label.codes).toEqual(["S5"]);
   });
 
+  it("keeps a closed line's station served in the null-date view", () => {
+    // HomeClient draws a station on a null date if ANY window is on an
+    // active line, closed or not; the label must agree, not fall back to
+    // the neutral interchange ring and top collision priority.
+    const closed = station(
+      "X1",
+      [{ code: "X1", from: "2000-01-01", to: "2010-01-01" }],
+      [{ line: "BTS_SILOM", from: "2000-01-01", to: "2010-01-01" }],
+    );
+    const label = resolveStationLabel(
+      closed,
+      null,
+      allLines,
+      colors,
+      prefixLine,
+    );
+    expect(label.codes).toEqual(["X1"]);
+    expect(label.ringColor).toBe("#02817D");
+    expect(label.interchange).toBe(false);
+    expect(label.openedFrom).toBe("2000-01-01");
+  });
+
+  it("does not mark a single-line station with no known color as an interchange", () => {
+    const label = resolveStationLabel(
+      S5,
+      "2022-12-31",
+      allLines,
+      new Map(),
+      prefixLine,
+    );
+    expect(label.ringColor).toBeNull();
+    expect(label.interchange).toBe(false);
+  });
+
   it("shows only the code of the line open on the date", () => {
     const label = resolveStationLabel(
       BL10,
@@ -129,6 +163,7 @@ describe("resolveStationLabel", () => {
     );
     expect(label.codes).toEqual(["PP16", "BL10"]);
     expect(label.ringColor).toBeNull();
+    expect(label.interchange).toBe(true);
   });
 
   it("hides a filtered-off line's code and takes the remaining line's color", () => {

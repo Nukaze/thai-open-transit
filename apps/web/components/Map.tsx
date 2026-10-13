@@ -87,15 +87,11 @@ const LABEL_OPACITY_PROPS: Record<
 const LABEL_FADE_MS = 300;
 const LABEL_FADE = { duration: LABEL_FADE_MS, delay: 0 };
 
-// Upper bound on waiting for the label layers to finish laying out after
-// they are switched back on (see the toggle effect). Normally a few tens of
-// ms for this source; the fallback only keeps a stalled tile load from
-// leaving the labels at opacity 0 forever.
-const LABEL_READY_FALLBACK_MS = 800;
-
-// How long after the "network" source reports loaded the re-laid-out labels
-// actually start their placement fade. See the toggle effect's `animate`.
-const LABEL_PLACEMENT_LAG_MS = 120;
+// Upper bound on waiting for the label layers to be placed again after they
+// are switched back on (see the toggle effect). Normally ~250ms; the
+// fallback covers a view with no label in it to detect, and keeps a stalled
+// tile load from leaving the labels at opacity 0 forever.
+const LABEL_READY_FALLBACK_MS = 600;
 
 // Layers that select a station when clicked (see the `load` handler).
 const STATION_HIT_LAYER_IDS = ["stations", "station-badges"];
@@ -107,6 +103,51 @@ function stationDotRadius(showStationLabels: boolean): PaintExpression {
   return showStationLabels
     ? ["interpolate", ["linear"], ["zoom"], 8, 2.5, 12, 5, 16, 7]
     : ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 8, 16, 16];
+}
+
+// The selection ring follows the same toggle. With labels on it clears the
+// code badge (about 18px tall, 36px wide for a four-character code) rather
+// than the dot under it, so it reads around the badge instead of slicing
+// through its text; a stacked two-code badge (PP16 over BL10) is twice as
+// tall, so its ring scales up with it. With labels off there is no badge,
+// so the ring hugs the larger dot as it always did.
+function selectionRingRadius(showStationLabels: boolean): PaintExpression {
+  if (!showStationLabels) {
+    return ["interpolate", ["linear"], ["zoom"], 8, 8, 12, 14, 16, 22];
+  }
+  const stacked: PaintExpression = [
+    "case",
+    ["in", "\n", ["coalesce", ["get", "codes"], ""]],
+    1.45,
+    1,
+  ];
+  return [
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    8,
+    ["*", 10, stacked],
+    12,
+    ["*", 19, stacked],
+    16,
+    ["*", 26, stacked],
+  ];
+}
+
+function setLabelOpacityTransition(
+  map: maplibregl.Map,
+  transition: { duration: number; delay: number },
+): void {
+  for (const id of LABEL_LAYER_IDS) {
+    if (!map.getLayer(id)) continue;
+    for (const prop of LABEL_OPACITY_PROPS[id]) {
+      map.setPaintProperty(
+        id,
+        `${prop}-transition` as PaintPropertyName,
+        transition,
+      );
+    }
+  }
 }
 
 // Badge images are generated on demand (see `drawBadgeImage`) under an id
@@ -136,15 +177,18 @@ function drawBadgeImage(
   canvas.height = BADGE_PX;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
-  const inset = BADGE_BORDER / 2;
+  // Traced with `arcTo` rather than `ctx.roundRect`, which Safari < 16 and
+  // Firefox < 112 lack: there it would throw inside the image resolver and
+  // leave every badge blank.
+  const lo = BADGE_BORDER / 2;
+  const hi = BADGE_PX - BADGE_BORDER / 2;
   ctx.beginPath();
-  ctx.roundRect(
-    inset,
-    inset,
-    BADGE_PX - BADGE_BORDER,
-    BADGE_PX - BADGE_BORDER,
-    BADGE_RADIUS,
-  );
+  ctx.moveTo(lo + BADGE_RADIUS, lo);
+  ctx.arcTo(hi, lo, hi, hi, BADGE_RADIUS);
+  ctx.arcTo(hi, hi, lo, hi, BADGE_RADIUS);
+  ctx.arcTo(lo, hi, lo, lo, BADGE_RADIUS);
+  ctx.arcTo(lo, lo, hi, lo, BADGE_RADIUS);
+  ctx.closePath();
   ctx.fillStyle = fill;
   ctx.fill();
   ctx.lineWidth = BADGE_BORDER;
@@ -512,35 +556,13 @@ function addNetworkLayers(
   // Starts filtered to match nothing (`selectionFilter(null)`) rather than
   // omitted, so the layer exists and `setFilter` (below) always has a target
   // even before a station is ever clicked.
-  const stackedBadgeScale: PaintExpression = [
-    "case",
-    ["in", "\n", ["coalesce", ["get", "codes"], ""]],
-    1.45,
-    1,
-  ];
   map.addLayer({
     id: "station-selection",
     type: "circle",
     source: "network",
     filter: selectionFilter(selectedStationId),
     paint: {
-      // Sized to clear a code badge (about 18px tall, 36px wide for a
-      // four-character code) rather than just the dot under it, so the ring
-      // reads around the badge instead of slicing through its text. A
-      // stacked two-code badge (PP16 over BL10) is twice as tall, so its
-      // ring scales up with it - at the single-badge size it only hugged
-      // the badge's edge and read as an outline, not a selection.
-      "circle-radius": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        8,
-        ["*", 10, stackedBadgeScale],
-        12,
-        ["*", 19, stackedBadgeScale],
-        16,
-        ["*", 26, stackedBadgeScale],
-      ],
+      "circle-radius": selectionRingRadius(showStationLabels),
       "circle-color": "transparent",
       "circle-stroke-color": selectionRingColor,
       "circle-stroke-width": PULSE_STROKE_WIDTH.min,
@@ -639,49 +661,26 @@ export function Map({
     // dot resize. The opacity transition is restored a frame later, after
     // the jump has been applied, for the next fade-out.
     const animate = (on: boolean, afterReload = false) => {
+      if (afterReload)
+        setLabelOpacityTransition(map, { duration: 0, delay: 0 });
       for (const id of LABEL_LAYER_IDS) {
         if (!map.getLayer(id)) continue;
         for (const prop of LABEL_OPACITY_PROPS[id]) {
-          if (afterReload) {
-            map.setPaintProperty(
-              id,
-              `${prop}-transition` as PaintPropertyName,
-              {
-                duration: 0,
-                delay: 0,
-              },
-            );
-          }
           map.setPaintProperty(id, prop, on ? 1 : 0);
         }
       }
       if (map.getLayer("stations")) {
-        // After a reload the placement fade starts a beat after the source
-        // reports loaded (measured ~100ms: the new tiles still have to be
-        // uploaded and picked up by the next placement pass), so the dot
-        // resize is held back by that much to land in step with the labels.
-        map.setPaintProperty(
-          "stations",
-          "circle-radius-transition",
-          afterReload
-            ? { ...LABEL_FADE, delay: LABEL_PLACEMENT_LAG_MS }
-            : LABEL_FADE,
-        );
         map.setPaintProperty("stations", "circle-radius", stationDotRadius(on));
       }
+      if (map.getLayer("station-selection")) {
+        map.setPaintProperty(
+          "station-selection",
+          "circle-radius",
+          selectionRingRadius(on),
+        );
+      }
       if (afterReload) {
-        map.once("render", () => {
-          for (const id of LABEL_LAYER_IDS) {
-            if (!map.getLayer(id)) continue;
-            for (const prop of LABEL_OPACITY_PROPS[id]) {
-              map.setPaintProperty(
-                id,
-                `${prop}-transition` as PaintPropertyName,
-                LABEL_FADE,
-              );
-            }
-          }
-        });
+        map.once("render", () => setLabelOpacityTransition(map, LABEL_FADE));
       }
     };
     const setVisibility = (on: boolean) => {
@@ -712,22 +711,28 @@ export function Map({
     const start = () => {
       if (started || !isCurrent()) return;
       started = true;
-      map.off("sourcedata", onSourceData);
+      map.off("render", onRender);
       window.clearTimeout(fallback);
       animate(true, true);
     };
-    // Only the reload just triggered emits "network" sourcedata from here on
-    // (the source's data is not changing), so the first event that finds
-    // the source fully loaded marks the labels as laid out. Not `idle`: the
-    // selection ring's pulse repaints every frame, so the map is never idle
-    // while a station is selected.
-    const onSourceData = (e: maplibregl.MapSourceDataEvent) => {
-      if (e.sourceId === "network" && map.isSourceLoaded("network")) start();
+    // Ready = the re-laid-out labels have been PLACED, checked each frame:
+    // placement is the moment MapLibre's own fade-in starts, so starting
+    // the dot resize there keeps the two in step without a tuned delay.
+    // Source events are not used: a concurrent `setData` (year slider, line
+    // filter) emits the same "network loaded" event and fired this early.
+    // `idle` is not used either: the selection ring's pulse repaints every
+    // frame, so the map is never idle while a station is selected.
+    const onRender = () => {
+      if (!map.isSourceLoaded("network")) return;
+      const placed = map.queryRenderedFeatures({
+        layers: [...LABEL_LAYER_IDS].filter((id) => map.getLayer(id)),
+      });
+      if (placed.length > 0) start();
     };
-    map.on("sourcedata", onSourceData);
+    map.on("render", onRender);
     const fallback = window.setTimeout(start, LABEL_READY_FALLBACK_MS);
     return () => {
-      map.off("sourcedata", onSourceData);
+      map.off("render", onRender);
       window.clearTimeout(fallback);
     };
   }, [showStationLabels]);
@@ -975,7 +980,13 @@ export function Map({
       // otherwise miss. Badges hidden by collision or by the labels toggle
       // are not rendered and so never answer the hit test - the dot does.
       map.on("click", STATION_HIT_LAYER_IDS, (e) => {
-        const id = e.features?.[0]?.properties?.id;
+        // While labels fade out they are still laid out at falling opacity
+        // and still answer hit tests; once the toggle is off, only a dot
+        // counts, so a click on the space a fading badge filled does nothing.
+        const hit = e.features?.find(
+          (f) => showStationLabelsRef.current || f.layer.id === "stations",
+        );
+        const id = hit?.properties?.id;
         if (typeof id === "string") onStationClickRef.current?.(id);
       });
       map.on("mouseenter", STATION_HIT_LAYER_IDS, () => {
