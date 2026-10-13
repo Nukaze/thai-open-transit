@@ -7,6 +7,7 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   download_dataset: { th: "ดาวน์โหลดชุดข้อมูล", en: "Download dataset" },
   theme_to_dark: { th: "โหมดมืด", en: "Dark map" },
   theme_to_light: { th: "โหมดสว่าง", en: "Light map" },
+  station_labels: { th: "ป้ายสถานี", en: "Station labels" },
 };
 
 export function t(key: string, lang: "th" | "en"): string {

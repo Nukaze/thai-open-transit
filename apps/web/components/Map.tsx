@@ -26,14 +26,106 @@ export type MapTheme = "light" | "dark";
 type MapStyle = NonNullable<maplibregl.MapOptions["style"]>;
 
 // The network overlay sits on top of the basemap, so its colors have to move
-// with the flavor: the light flavor's near-white land makes dark navy dots
-// readable, and on the dark flavor those same dots disappear into the
-// background. Kept adjacent to the flavor name so the two cannot drift apart.
-const OVERLAY_COLORS: Record<MapTheme, { station: string; suspended: string }> =
-  {
-    light: { station: "#1e3a8a", suspended: "#9ca3af" },
-    dark: { station: "#bfdbfe", suspended: "#6b7280" },
+// with the flavor: what reads against the light flavor's near-white land
+// disappears into the dark flavor's near-black land, and vice versa. Kept
+// adjacent to the flavor name so the two cannot drift apart.
+//
+// Station dots and badge rings take their own line's color (`ring_color`,
+// resolved in HomeClient); `interchange` is the neutral ring for a station
+// two visible lines share, where picking one line's color would misstate it.
+// Badge TEXT is never line-colored: yellow (#FFD400) and gold (#A58704) on a
+// white badge are unreadable, so the line color stays on the ring and the
+// code uses the theme's ink.
+interface OverlayColors {
+  suspended: string;
+  interchange: string;
+  dotStroke: string;
+  badgeFill: string;
+  badgeText: string;
+  nameTh: string;
+  nameEn: string;
+  halo: string;
+}
+const OVERLAY_COLORS: Record<MapTheme, OverlayColors> = {
+  light: {
+    suspended: "#9ca3af",
+    interchange: "#111827",
+    dotStroke: "#ffffff",
+    badgeFill: "#ffffff",
+    badgeText: "#111827",
+    nameTh: "#111827",
+    nameEn: "#4b5563",
+    halo: "#ffffff",
+  },
+  dark: {
+    suspended: "#6b7280",
+    interchange: "#e5e7eb",
+    dotStroke: "#0f172a",
+    badgeFill: "#0f172a",
+    badgeText: "#f8fafc",
+    nameTh: "#f1f5f9",
+    nameEn: "#94a3b8",
+    halo: "#0b1220",
+  },
+};
+
+// Layers the station-labels toggle shows and hides together.
+const LABEL_LAYER_IDS = ["station-names", "station-badges"] as const;
+
+// Badge images are generated on demand (see `drawBadgeImage`) under an id
+// that encodes both colors, so the style can request any fill/ring pair by
+// expression and the `styleimagemissing` handler can rebuild it from the id
+// alone - including after a theme switch's `setStyle`, which drops every
+// image added at runtime.
+const BADGE_IMAGE_PREFIX = "badge|";
+
+// A rounded rectangle drawn at 2x and declared stretchable, so
+// `icon-text-fit` grows it around a 2-character code ("A1"), a 4-character
+// one ("BL15"), or a stacked two-code interchange (PP16 over BL10) without
+// distorting the corners. Coordinates below are in 2x image pixels.
+const BADGE_PX = 40;
+const BADGE_RADIUS = 14;
+const BADGE_BORDER = 5;
+
+function drawBadgeImage(
+  fill: string,
+  ring: string,
+): {
+  image: ImageData;
+  options: Parameters<maplibregl.Map["addImage"]>[2];
+} | null {
+  const canvas = document.createElement("canvas");
+  canvas.width = BADGE_PX;
+  canvas.height = BADGE_PX;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  const inset = BADGE_BORDER / 2;
+  ctx.beginPath();
+  ctx.roundRect(
+    inset,
+    inset,
+    BADGE_PX - BADGE_BORDER,
+    BADGE_PX - BADGE_BORDER,
+    BADGE_RADIUS,
+  );
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.lineWidth = BADGE_BORDER;
+  ctx.strokeStyle = ring;
+  ctx.stroke();
+  return {
+    image: ctx.getImageData(0, 0, BADGE_PX, BADGE_PX),
+    options: {
+      pixelRatio: 2,
+      // Only the straight middle band stretches; the corners stay fixed.
+      stretchX: [[BADGE_RADIUS + 2, BADGE_PX - BADGE_RADIUS - 2]],
+      stretchY: [[BADGE_RADIUS + 2, BADGE_PX - BADGE_RADIUS - 2]],
+      // The box the code text is fitted into: inside the border, with a
+      // little more side padding than top/bottom, like a printed roundel.
+      content: [12, 8, BADGE_PX - 12, BADGE_PX - 8],
+    },
   };
+}
 
 // Fallback only - `HomeClient` always passes an explicit `selectionRingColor`
 // (one value per `MapTheme`, user-configurable via `SelectionRingColorPicker`),
@@ -55,6 +147,13 @@ const PULSE_STROKE_OPACITY = { min: 0.45, max: 1 };
 // that already carries the type, rather than depending on the package
 // directly.
 type MapFilter = NonNullable<Parameters<maplibregl.Map["setFilter"]>[1]>;
+
+// `ExpressionSpecification` isn't re-exported either; the array (expression)
+// branch of a circle color is the same type, reached through `AddLayerObject`.
+type CirclePaint = NonNullable<
+  Extract<maplibregl.AddLayerObject, { type: "circle" }>["paint"]
+>;
+type ColorExpression = Extract<CirclePaint["circle-color"], unknown[]>;
 
 function selectionFilter(id: string | null): MapFilter {
   return ["==", ["get", "id"], id ?? ""];
@@ -132,6 +231,7 @@ function addNetworkLayers(
   collection: FeatureCollection<Point | LineString>,
   selectedStationId: string | null,
   selectionRingColor: string,
+  showStationLabels: boolean,
 ): void {
   // Idempotent: `style.load` can fire more than once per style if the theme
   // is toggled again while the previous style is still loading (a full sprite
@@ -142,6 +242,17 @@ function addNetworkLayers(
 
   const { points, lines } = splitFeatures(collection);
   const colors = OVERLAY_COLORS[theme];
+
+  // One expression for a station's line color, shared by the dot and the
+  // badge ring so the two can never disagree: grey when suspended, the
+  // line's own color when one visible line serves it, the neutral
+  // interchange color when two do (`ring_color` is null then).
+  const ringColor: ColorExpression = [
+    "case",
+    ["==", ["get", "status"], "suspended"],
+    colors.suspended,
+    ["coalesce", ["get", "ring_color"], colors.interchange],
+  ];
 
   map.addSource("network", {
     type: "geojson",
@@ -220,6 +331,11 @@ function addNetworkLayers(
   // rather than being merged into an unlabelled aggregate dot. Radius
   // interpolates down at low zoom instead, so dense interchanges (e.g. Siam)
   // don't fully overlap when zoomed out to the whole metro region.
+  //
+  // The dot is the one marker guaranteed for every station: the code badge
+  // drawn over it (below) takes part in label collision and can be dropped
+  // in a crowded view, so the dot stays small enough to sit inside a badge
+  // when one does show, and still marks the station when one doesn't.
   map.addLayer({
     id: "stations",
     type: "circle",
@@ -230,13 +346,127 @@ function addNetworkLayers(
         ["linear"],
         ["zoom"],
         8,
-        2,
+        2.5,
         12,
-        8,
+        5,
         16,
-        16,
+        7,
       ],
-      "circle-color": colors.station,
+      "circle-color": ringColor,
+      "circle-stroke-color": colors.dotStroke,
+      "circle-stroke-width": 1,
+    },
+  });
+
+  const labelVisibility = showStationLabels ? "visible" : "none";
+
+  // Station names: Thai over English, beside the node. Added BELOW the
+  // badge layer on purpose - MapLibre places symbols top layer first, so a
+  // badge claims its space before a name does, and the name then tries the
+  // other anchors in `text-variable-anchor-offset` to get out of its way
+  // rather than covering it. Collision (`text-overlap` left at its default
+  // "never") also lets our names push the basemap's place labels aside,
+  // since the basemap's layers sit below these.
+  //
+  // `show_name` (HomeClient's `pickLabelledStations`) is false for all but one
+  // member of a same-name interchange, so Lat Phrao (BL15 + YL01) prints once.
+  //
+  // Every `text-font` is a single fontstack, never a fallback list: glyph
+  // requests go to `/basemap/fonts/{fontstack}/...`, and a list is requested
+  // as ONE comma-joined fontstack directory that does not exist in the static
+  // export, which would 404 and drop the labels with no error shown.
+  map.addLayer({
+    id: "station-names",
+    type: "symbol",
+    source: "network",
+    minzoom: 12,
+    filter: ["==", ["get", "show_name"], true],
+    layout: {
+      visibility: labelVisibility,
+      // Thai only at 12, the English line joins from 13 - at 12 a
+      // two-line label per station crowds out more names than it adds.
+      "text-field": [
+        "step",
+        ["zoom"],
+        ["format", ["get", "name_th"], {}],
+        13,
+        [
+          "format",
+          ["get", "name_th"],
+          {},
+          "\n",
+          {},
+          ["coalesce", ["get", "name_en"], ""],
+          {
+            "text-font": ["literal", ["Noto Sans Regular"]],
+            "font-scale": 0.8,
+            "text-color": colors.nameEn,
+          },
+        ],
+      ],
+      "text-font": ["Noto Sans Medium"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 12, 12, 16, 15],
+      "text-line-height": 1.15,
+      "text-max-width": 14,
+      // Offsets in ems, measured from the station point: far enough sideways
+      // to clear a four-character badge ("BL15"), less far above/below,
+      // where the badge is only one text line tall.
+      "text-variable-anchor-offset": [
+        "literal",
+        [
+          "left",
+          [2.2, 0],
+          "right",
+          [-2.2, 0],
+          "top",
+          [0, 1.1],
+          "bottom",
+          [0, -1.1],
+        ],
+      ],
+      "text-justify": "auto",
+      "symbol-sort-key": ["get", "label_rank"],
+    },
+    paint: {
+      "text-color": colors.nameTh,
+      "text-halo-color": colors.halo,
+      "text-halo-width": 1.5,
+    },
+  });
+
+  // Code badges: the station's current code(s) - A1, YL12, BL20, N3, CEN,
+  // RN06 - in a rounded roundel ringed in the line's color, drawn over the
+  // dot. The badge image is generated per (fill, ring) pair on first request
+  // (see the `styleimagemissing` handler in the init effect).
+  //
+  // Badges collide with each other: at the default zoom-11 overview, letting
+  // all 192 overlap would bury the map in a pile of pills, so the busiest
+  // spots show a subset and fill in as the user zooms. `label_rank` places
+  // interchange badges first so they are the last to drop out.
+  map.addLayer({
+    id: "station-badges",
+    type: "symbol",
+    source: "network",
+    filter: ["!=", ["get", "codes"], ""],
+    layout: {
+      visibility: labelVisibility,
+      "text-field": ["get", "codes"],
+      "text-font": ["Noto Sans Medium"],
+      "text-size": ["interpolate", ["linear"], ["zoom"], 10, 9, 14, 11, 16, 12],
+      "text-line-height": 1.1,
+      "icon-image": [
+        "concat",
+        BADGE_IMAGE_PREFIX,
+        colors.badgeFill,
+        "|",
+        ringColor,
+      ],
+      "icon-text-fit": "both",
+      "icon-text-fit-padding": [1, 2, 1, 2],
+      "symbol-sort-key": ["get", "label_rank"],
+    },
+    paint: {
+      "text-color": colors.badgeText,
     },
   });
 
@@ -256,12 +486,15 @@ function addNetworkLayers(
         "interpolate",
         ["linear"],
         ["zoom"],
+        // Sized to clear a code badge (about 18px tall, 36px wide for a
+        // four-character code) rather than just the dot under it, so the
+        // ring reads around the badge instead of slicing through its text.
         8,
-        8,
+        9,
         12,
-        14,
+        17,
         16,
-        22,
+        24,
       ],
       "circle-color": "transparent",
       "circle-stroke-color": selectionRingColor,
@@ -277,12 +510,14 @@ export function Map({
   theme = "light",
   selectedStationId = null,
   selectionRingColor = DEFAULT_SELECTION_RING_COLOR,
+  showStationLabels = true,
 }: {
   networkGeoJson: FeatureCollection<Point | LineString>;
   onStationClick?: (id: string) => void;
   theme?: MapTheme;
   selectedStationId?: string | null;
   selectionRingColor?: string;
+  showStationLabels?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -301,10 +536,32 @@ export function Map({
   const themeRef = useRef(theme);
   const selectedStationIdRef = useRef(selectedStationId);
   const selectionRingColorRef = useRef(selectionRingColor);
+  // Read by the `style.load` handler, so a theme switch (which rebuilds every
+  // layer) recreates the label layers in the toggle's current state instead
+  // of silently turning labels back on.
+  const showStationLabelsRef = useRef(showStationLabels);
   onStationClickRef.current = onStationClick;
   networkGeoJsonRef.current = networkGeoJson;
   selectedStationIdRef.current = selectedStationId;
   selectionRingColorRef.current = selectionRingColor;
+  showStationLabelsRef.current = showStationLabels;
+
+  // Station-labels toggle: flips the label layers' visibility in place.
+  // Guarded by `getLayer` like the selection effect below - this can fire
+  // before `style.load` has added the layers, and that first add already
+  // reads `showStationLabelsRef`.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    for (const id of LABEL_LAYER_IDS) {
+      if (!map.getLayer(id)) continue;
+      map.setLayoutProperty(
+        id,
+        "visibility",
+        showStationLabels ? "visible" : "none",
+      );
+    }
+  }, [showStationLabels]);
 
   // Data updates flow into the already-running map via `source.setData`
   // instead of remounting. Guarded by `getSource` because this can fire
@@ -463,6 +720,25 @@ export function Map({
       style: buildStyle(initialTheme),
     });
 
+    // Code-badge images, built the first time the style asks for one. The
+    // `station-badges` layer requests `badge|<fill>|<ring>` by expression, so
+    // every fill/ring pair it can produce - per line, per theme, suspended,
+    // interchange - is drawn exactly when first needed and never listed by
+    // hand. Registered on the map, not the style, so it keeps working after
+    // a theme switch's `setStyle` has dropped the previously added images.
+    //
+    // A resolver, not a `styleimagemissing` listener: since maplibre-gl v6
+    // that event is notify-only and an `addImage` inside it no longer
+    // satisfies the pending request (v5-to-v6 migration guide) - every badge
+    // stayed blank with "Image ... could not be loaded" until this moved.
+    map.setMissingStyleImageResolver((id) => {
+      if (!id.startsWith(BADGE_IMAGE_PREFIX) || map.hasImage(id)) return;
+      const [fill, ring] = id.slice(BADGE_IMAGE_PREFIX.length).split("|");
+      if (!fill || !ring) return;
+      const badge = drawBadgeImage(fill, ring);
+      if (badge) map.addImage(id, badge.image, badge.options);
+    });
+
     // `style.load` fires for the initial style and again after every
     // `setStyle`, so one registration covers both the first paint and each
     // theme swap - no second re-add path to keep in sync, and no pile-up of
@@ -474,6 +750,7 @@ export function Map({
         networkGeoJsonRef.current,
         selectedStationIdRef.current,
         selectionRingColorRef.current,
+        showStationLabelsRef.current,
       );
       // A theme toggle runs `setStyle`, which fires `style.load` again and
       // destroys/recreates every layer `addNetworkLayers` just re-added -
