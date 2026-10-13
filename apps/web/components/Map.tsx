@@ -556,6 +556,8 @@ export function Map({
   selectedStationId = null,
   selectionRingColor = DEFAULT_SELECTION_RING_COLOR,
   showStationLabels = true,
+  onUserLocation,
+  onGeolocateError,
 }: {
   networkGeoJson: FeatureCollection<Point | LineString>;
   onStationClick?: (id: string) => void;
@@ -563,6 +565,12 @@ export function Map({
   selectedStationId?: string | null;
   selectionRingColor?: string;
   showStationLabels?: boolean;
+  onUserLocation?: (coords: {
+    lat: number;
+    lon: number;
+    accuracy: number;
+  }) => void;
+  onGeolocateError?: (code: number) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -585,7 +593,13 @@ export function Map({
   // layer) recreates the label layers in the toggle's current state instead
   // of silently turning labels back on.
   const showStationLabelsRef = useRef(showStationLabels);
+  // Same ref pattern as `onStationClickRef`: the geolocate listeners are bound
+  // once in the init effect, so they must read the latest handlers via refs.
+  const onUserLocationRef = useRef(onUserLocation);
+  const onGeolocateErrorRef = useRef(onGeolocateError);
   onStationClickRef.current = onStationClick;
+  onUserLocationRef.current = onUserLocation;
+  onGeolocateErrorRef.current = onGeolocateError;
   networkGeoJsonRef.current = networkGeoJson;
   selectedStationIdRef.current = selectedStationId;
   selectionRingColorRef.current = selectionRingColor;
@@ -895,6 +909,34 @@ export function Map({
       if (badge) map.addImage(id, badge.image, badge.options);
     });
 
+    // bottom-right: top-right hosts the search/station panel overlays,
+    // bottom-left the theme toggle and ring color picker, bottom-center the
+    // year selector. MapLibre stacks it above the attribution control.
+    //
+    // Survives the theme toggle's `setStyle(..., { diff: false })`: the control
+    // is a DOM element owned by the map's control container, and the user dot
+    // and accuracy circle are DOM `Marker`s (`_updateMarker` calls
+    // `marker.addTo(map)`), not style layers. `setStyle` only swaps the style
+    // object, never calling `removeControl` or `Marker.remove`, so nothing
+    // here needs re-adding on `style.load`.
+    const geolocate = new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true, timeout: 10000 },
+      trackUserLocation: true,
+      showAccuracyCircle: true,
+      fitBoundsOptions: { maxZoom: 15 },
+    });
+    map.addControl(geolocate, "bottom-right");
+    geolocate.on("geolocate", (e) => {
+      onUserLocationRef.current?.({
+        lat: e.coords.latitude,
+        lon: e.coords.longitude,
+        accuracy: e.coords.accuracy,
+      });
+    });
+    geolocate.on("error", (e) => {
+      onGeolocateErrorRef.current?.(e.code);
+    });
+
     // `style.load` fires for the initial style and again after every
     // `setStyle`, so one registration covers both the first paint and each
     // theme swap - no second re-add path to keep in sync, and no pile-up of
@@ -955,5 +997,16 @@ export function Map({
     // refs above instead, see the comment on those refs.
   }, []);
 
-  return <div ref={containerRef} style={{ width: "100%", height: "100vh" }} />;
+  return (
+    <>
+      {/* MapLibre's control buttons are 29px, below a comfortable touch
+          target; enlarge only the geolocate button on coarse pointers. The
+          centered YearSelector (~200px wide) leaves room on 320px+ screens,
+          so no extra offset is needed for this bottom-right control. */}
+      <style>{`@media (pointer: coarse) {
+  .maplibregl-ctrl-group button.maplibregl-ctrl-geolocate { width: 44px; height: 44px; }
+}`}</style>
+      <div ref={containerRef} style={{ width: "100%", height: "100vh" }} />
+    </>
+  );
 }
