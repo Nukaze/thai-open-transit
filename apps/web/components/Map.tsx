@@ -72,6 +72,18 @@ const OVERLAY_COLORS: Record<MapTheme, OverlayColors> = {
 // Layers the station-labels toggle shows and hides together.
 const LABEL_LAYER_IDS = ["station-names", "station-badges"] as const;
 
+// Layers that select a station when clicked (see the `load` handler).
+const STATION_HIT_LAYER_IDS = ["stations", "station-badges"];
+
+// With labels on, the dot shrinks to fit inside the code badge drawn over
+// it, and the badge takes over as the click target. With labels off the dot
+// is the only target, so it keeps the original, touch-friendly size.
+function stationDotRadius(showStationLabels: boolean): PaintExpression {
+  return showStationLabels
+    ? ["interpolate", ["linear"], ["zoom"], 8, 2.5, 12, 5, 16, 7]
+    : ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 8, 16, 16];
+}
+
 // Badge images are generated on demand (see `drawBadgeImage`) under an id
 // that encodes both colors, so the style can request any fill/ring pair by
 // expression and the `styleimagemissing` handler can rebuild it from the id
@@ -149,11 +161,12 @@ const PULSE_STROKE_OPACITY = { min: 0.45, max: 1 };
 type MapFilter = NonNullable<Parameters<maplibregl.Map["setFilter"]>[1]>;
 
 // `ExpressionSpecification` isn't re-exported either; the array (expression)
-// branch of a circle color is the same type, reached through `AddLayerObject`.
+// branch of a circle paint property is the same type (any paint expression,
+// not only colors), reached through `AddLayerObject`.
 type CirclePaint = NonNullable<
   Extract<maplibregl.AddLayerObject, { type: "circle" }>["paint"]
 >;
-type ColorExpression = Extract<CirclePaint["circle-color"], unknown[]>;
+type PaintExpression = Extract<CirclePaint["circle-color"], unknown[]>;
 
 function selectionFilter(id: string | null): MapFilter {
   return ["==", ["get", "id"], id ?? ""];
@@ -247,7 +260,7 @@ function addNetworkLayers(
   // badge ring so the two can never disagree: grey when suspended, the
   // line's own color when one visible line serves it, the neutral
   // interchange color when two do (`ring_color` is null then).
-  const ringColor: ColorExpression = [
+  const ringColor: PaintExpression = [
     "case",
     ["==", ["get", "status"], "suspended"],
     colors.suspended,
@@ -341,17 +354,7 @@ function addNetworkLayers(
     type: "circle",
     source: "network",
     paint: {
-      "circle-radius": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        8,
-        2.5,
-        12,
-        5,
-        16,
-        7,
-      ],
+      "circle-radius": stationDotRadius(showStationLabels),
       "circle-color": ringColor,
       "circle-stroke-color": colors.dotStroke,
       "circle-stroke-width": 1,
@@ -476,25 +479,34 @@ function addNetworkLayers(
   // Starts filtered to match nothing (`selectionFilter(null)`) rather than
   // omitted, so the layer exists and `setFilter` (below) always has a target
   // even before a station is ever clicked.
+  const stackedBadgeScale: PaintExpression = [
+    "case",
+    ["in", "\n", ["coalesce", ["get", "codes"], ""]],
+    1.45,
+    1,
+  ];
   map.addLayer({
     id: "station-selection",
     type: "circle",
     source: "network",
     filter: selectionFilter(selectedStationId),
     paint: {
+      // Sized to clear a code badge (about 18px tall, 36px wide for a
+      // four-character code) rather than just the dot under it, so the ring
+      // reads around the badge instead of slicing through its text. A
+      // stacked two-code badge (PP16 over BL10) is twice as tall, so its
+      // ring scales up with it - at the single-badge size it only hugged
+      // the badge's edge and read as an outline, not a selection.
       "circle-radius": [
         "interpolate",
         ["linear"],
         ["zoom"],
-        // Sized to clear a code badge (about 18px tall, 36px wide for a
-        // four-character code) rather than just the dot under it, so the
-        // ring reads around the badge instead of slicing through its text.
         8,
-        9,
+        ["*", 10, stackedBadgeScale],
         12,
-        17,
+        ["*", 19, stackedBadgeScale],
         16,
-        24,
+        ["*", 26, stackedBadgeScale],
       ],
       "circle-color": "transparent",
       "circle-stroke-color": selectionRingColor,
@@ -559,6 +571,13 @@ export function Map({
         id,
         "visibility",
         showStationLabels ? "visible" : "none",
+      );
+    }
+    if (map.getLayer("stations")) {
+      map.setPaintProperty(
+        "stations",
+        "circle-radius",
+        stationDotRadius(showStationLabels),
       );
     }
   }, [showStationLabels]);
@@ -686,7 +705,8 @@ export function Map({
   // place, keeping camera position, so toggling does not re-run the init
   // effect (see why that matters above). It also drops every runtime-added
   // source and layer, hence the re-add once the new style has loaded.
-  // The delegated listeners registered on `"stations"` in the init effect do
+  // The delegated listeners registered on the station layers in the init
+  // effect do
   // survive: MapLibre resolves the layer at dispatch time, not at bind time,
   // so a layer re-added under the same id keeps working.
   useEffect(() => {
@@ -771,14 +791,19 @@ export function Map({
       // through the ref (rather than closing over the `onStationClick` prop
       // directly) means this listener, registered once at init, always
       // calls the latest handler even though the init effect never re-runs.
-      map.on("click", "stations", (e) => {
+      //
+      // Bound to the badge layer as well as the dot: the dot shrank to sit
+      // inside a badge, so a click on the visible badge's edge would
+      // otherwise miss. Badges hidden by collision or by the labels toggle
+      // are not rendered and so never answer the hit test - the dot does.
+      map.on("click", STATION_HIT_LAYER_IDS, (e) => {
         const id = e.features?.[0]?.properties?.id;
         if (typeof id === "string") onStationClickRef.current?.(id);
       });
-      map.on("mouseenter", "stations", () => {
+      map.on("mouseenter", STATION_HIT_LAYER_IDS, () => {
         map.getCanvas().style.cursor = "pointer";
       });
-      map.on("mouseleave", "stations", () => {
+      map.on("mouseleave", STATION_HIT_LAYER_IDS, () => {
         map.getCanvas().style.cursor = "";
       });
     });
