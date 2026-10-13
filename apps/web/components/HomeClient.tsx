@@ -9,6 +9,8 @@ import { StationSearch } from "./StationSearch";
 import { ThemeToggle } from "./ThemeToggle";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
+import { NearestStationChip } from "./NearestStationChip";
+import { nearestStations } from "../lib/nearest-station";
 import { getStationIdFromUrl, buildStationDeepLink } from "../lib/deep-link";
 import { isValidAt } from "../lib/asOf";
 import type { Line } from "schema";
@@ -164,18 +166,23 @@ export function HomeClient({
   // travel together on one window), a segment when any of its own validity
   // windows - denormalized onto the geojson feature by `assembleNetwork` -
   // covers the date.
+  // Hoisted out of `filteredGeoJson` so the nearest-station lookup below
+  // searches exactly the stations the map is drawing, not a second copy of
+  // the filter that could drift from it.
+  const visibleStations = useMemo(
+    () =>
+      stations.filter((s) =>
+        s.validity.some(
+          (v) =>
+            activeLineIds.has(v.line) &&
+            (selectedDate === null || isValidAt(v, selectedDate)),
+        ),
+      ),
+    [activeLineIds, stations, selectedDate],
+  );
+
   const filteredGeoJson = useMemo(() => {
-    const visibleStationIds = new Set(
-      stations
-        .filter((s) =>
-          s.validity.some(
-            (v) =>
-              activeLineIds.has(v.line) &&
-              (selectedDate === null || isValidAt(v, selectedDate)),
-          ),
-        )
-        .map((s) => s.id),
-    );
+    const visibleStationIds = new Set(visibleStations.map((s) => s.id));
     return {
       ...networkGeoJson,
       features: networkGeoJson.features.filter((f) => {
@@ -191,7 +198,35 @@ export function HomeClient({
         return visibleStationIds.has(f.properties?.id);
       }),
     } as FeatureCollection<Point | LineString>;
-  }, [activeLineIds, stations, networkGeoJson, selectedDate]);
+  }, [visibleStations, networkGeoJson, selectedDate, activeLineIds]);
+
+  // Device position from the map's geolocate control. Never leaves the
+  // browser: the public plane is static (CLAUDE.md 2.4), so there is nowhere
+  // to send it, and nothing here should start doing so.
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
+  const [geolocateError, setGeolocateError] = useState<number | null>(null);
+
+  const handleUserLocation = useCallback(
+    (coords: { lat: number; lon: number; accuracy: number }) => {
+      setUserLocation({ lat: coords.lat, lon: coords.lon });
+      setGeolocateError(null);
+    },
+    [],
+  );
+
+  // A GPS fix answers "where can I board now", so only stations a rider can
+  // actually use today count, on top of whatever the map is showing.
+  // `status` is the build-time derived current state (CLAUDE.md 9).
+  const nearest = useMemo(() => {
+    if (!userLocation) return null;
+    const boardable = visibleStations.filter(
+      (s) => s.status === "operational" || s.status === "trial",
+    );
+    return nearestStations(userLocation, boardable, 1)[0] ?? null;
+  }, [userLocation, visibleStations]);
 
   return (
     <>
@@ -201,6 +236,8 @@ export function HomeClient({
         theme={theme}
         selectedStationId={selectedStation?.id ?? null}
         selectionRingColor={selectionRingColors[theme]}
+        onUserLocation={handleUserLocation}
+        onGeolocateError={setGeolocateError}
       />
       <ThemeToggle theme={theme} onChange={setTheme} />
       <SelectionRingColorPicker
@@ -230,6 +267,12 @@ export function HomeClient({
           onChange={setSelectedYear}
         />
       )}
+      <NearestStationChip
+        theme={theme}
+        nearest={nearest}
+        errorCode={geolocateError}
+        onSelect={handleSelectStation}
+      />
       <StationPanel
         station={selectedStation}
         lines={lines}
