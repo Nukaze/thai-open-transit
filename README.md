@@ -24,8 +24,8 @@ cd apps/web && bun run dev
 `data/dist/network.json` and `data/dist/network.geojson` at build time, and
 they are generated, not committed.
 
-`data/source/` is not yet populated, so a fresh build currently produces an
-empty network and the map renders no stations. That is expected at this stage.
+`data/source/` holds the full current network (10 lines, 192 stations), so a
+fresh build renders the complete map.
 
 ## Other useful commands
 
@@ -38,13 +38,14 @@ empty network and the map renders no stations. That is expected at this stage.
 | `bun run data:import`          | Fetch raw OSM data into `data/source/`                      |
 | `cd apps/web && bun run build` | Static export to `apps/web/out/`                            |
 
-`data:validate` fails on an empty network by design. While `data/source/` is
-still unpopulated, run it as `ALLOW_EMPTY=1 bun run data:validate`.
+`data:validate` fails on an empty network by design. If you are testing
+against an empty `data/source/`, run it as `ALLOW_EMPTY=1 bun run data:validate`.
 
 ## Repository layout
 
-See [CLAUDE.md](./CLAUDE.md) for the full architecture, and [SPEC.md](./SPEC.md)
-for the feature spec. In short: `packages/schema` is the single source of truth
+See [docs/FEATURES.md](./docs/FEATURES.md) for the project goal and the list of
+shipped features, [CLAUDE.md](./CLAUDE.md) for the full architecture, and
+[SPEC.md](./SPEC.md) for the feature spec and roadmap. In short: `packages/schema` is the single source of truth
 for entity shapes, `scripts/build` generates the published artifacts, and
 `apps/web` is the public static site.
 
