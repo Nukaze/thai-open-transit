@@ -44,14 +44,6 @@ export const MoonIcon = ({ size = 20 }: P) => (
 
 // The favicon's mark (app/favicon.ico) redrawn as a vector: an S-curve line
 // between two station dots, the same primitive Map.tsx draws stations with.
-export const LogoIcon = ({ size = 18 }: P) => (
-  <svg {...base(size)} strokeWidth={2.4}>
-    <path d="M4 6h11a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h11" />
-    <circle cx="4" cy="6" r="2.5" fill="currentColor" stroke="none" />
-    <circle cx="20" cy="18" r="2.5" fill="currentColor" stroke="none" />
-  </svg>
-);
-
 export const PinIcon = ({ size = 18 }: P) => (
   <svg {...base(size)}>
     <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z" />

@@ -15,7 +15,6 @@ import { LineFilter } from "./LineFilter";
 import { StationSearchField, StationSearchResults } from "./StationSearch";
 import { ThemeSegmented, ThemeToggle } from "./ThemeToggle";
 import { Sheet, type Detent } from "./Sheet";
-import { LogoIcon } from "./icons";
 import { t } from "../lib/i18n";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
@@ -452,7 +451,9 @@ export function HomeClient({
           <>
             <div className="brand">
               <span className="brand-mark" aria-hidden="true">
-                <LogoIcon size={22} />
+                {/* The favicon itself, so the panel and the tab can't drift
+                    apart. Root-relative per CLAUDE.md 3 (no hardcoded domain). */}
+                <img src="/favicon.ico" alt="" width={22} height={22} />
               </span>
               <span className="brand-name">Bangkok Open Transit</span>
             </div>
