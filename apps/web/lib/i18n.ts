@@ -25,6 +25,17 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   no_results: { th: "ไม่พบสถานี", en: "No stations found" },
   lines: { th: "สายรถไฟ", en: "Lines" },
   show_all: { th: "แสดงทั้งหมด", en: "Show all" },
+  lines_hint: {
+    th: "แตะสายเพื่อแสดงหรือซ่อนบนแผนที่",
+    en: "Tap a line to show or hide it on the map.",
+  },
+  lines_shown: {
+    th: "แสดง {shown}/{total}",
+    en: "{shown} of {total} shown",
+  },
+  group_bts: { th: "รถไฟฟ้าบีทีเอส", en: "BTS Skytrain" },
+  group_mrt: { th: "รถไฟฟ้ามหานคร (MRT)", en: "MRT" },
+  group_srt: { th: "รถไฟชานเมือง (SRT)", en: "SRT & Airport Rail Link" },
   time_travel: { th: "ย้อนเวลา", en: "Time travel" },
   today: { th: "วันนี้", en: "Today" },
   network_as_of: { th: "สิ้นปี", en: "Network at year end" },
@@ -42,6 +53,13 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   details: { th: "รายละเอียด", en: "Details" },
   share: { th: "แชร์", en: "Share" },
   copied: { th: "คัดลอกแล้ว", en: "Link copied" },
+  locate_me: { th: "ตำแหน่งของฉัน", en: "Show my location" },
+  locate_stop: { th: "หยุดติดตามตำแหน่ง", en: "Stop following my location" },
+  view_3d: { th: "มุมมอง 3 มิติ", en: "Tilt to 3D view" },
+  view_2d: { th: "มุมมอง 2 มิติ", en: "Flatten to 2D view" },
+  reset_north: { th: "หันทิศเหนือขึ้น", en: "Point north up" },
+  zoom_in: { th: "ซูมเข้า", en: "Zoom in" },
+  zoom_out: { th: "ซูมออก", en: "Zoom out" },
 };
 
 export function t(key: string, lang: "th" | "en"): string {
