@@ -20,6 +20,15 @@ const BANGKOK_CENTER: [number, number] = [100.5018, 13.7563];
 
 export type MapTheme = "light" | "dark";
 
+/** A camera target; `n` makes each request distinct, even to the same spot. */
+export type MapFocus = { lon: number; lat: number; n: number };
+// Close enough to read the station's badge and its neighbours; never zooms
+// out if the user is already closer.
+const FOCUS_MIN_ZOOM = 14;
+// Half the desktop panel's footprint (320px wide + 16px inset each side),
+// so the station lands in the middle of the map area right of it.
+const FOCUS_PANEL_OFFSET_X = 176;
+
 // `StyleSpecification` lives in `@maplibre/maplibre-gl-style-spec`, which is a
 // transitive dependency here, not a declared one - importing it directly would
 // mean depending on a package apps/web never installed. `MapOptions["style"]`
@@ -592,6 +601,7 @@ export function Map({
   showStationLabels = true,
   onUserLocation,
   onGeolocateError,
+  focus = null,
 }: {
   networkGeoJson: FeatureCollection<Point | LineString>;
   onStationClick?: (id: string) => void;
@@ -605,6 +615,8 @@ export function Map({
     accuracy: number;
   }) => void;
   onGeolocateError?: (code: number) => void;
+  /** Fly the camera here; a new object each time, even for the same spot. */
+  focus?: MapFocus | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -1045,6 +1057,25 @@ export function Map({
     // design; `networkGeoJson`, `onStationClick` and `theme` flow through the
     // refs above instead, see the comment on those refs.
   }, []);
+
+  // Fly to a station picked from a list. Declared after the init effect so
+  // a deep link's first focus finds the map already created. The offset
+  // centres the station in the part of the map left visible: right of the
+  // floating panel on desktop, above the half-raised sheet on phones.
+  // `flyTo` honours prefers-reduced-motion by jumping instead.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !focus) return;
+    const desktop = window.matchMedia("(min-width: 768px)").matches;
+    map.flyTo({
+      center: [focus.lon, focus.lat],
+      zoom: Math.max(map.getZoom(), FOCUS_MIN_ZOOM),
+      offset: desktop
+        ? [FOCUS_PANEL_OFFSET_X, 0]
+        : [0, -window.innerHeight * 0.25],
+      speed: 1.6,
+    });
+  }, [focus]);
 
   return (
     <>
