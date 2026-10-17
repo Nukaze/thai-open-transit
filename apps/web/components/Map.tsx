@@ -1010,14 +1010,7 @@ export function Map({
 
   return (
     <>
-      {/* MapLibre's control buttons are 29px, below a comfortable touch
-          target; enlarge only the geolocate button on coarse pointers. The
-          centered YearSelector (~200px wide) leaves room on 320px+ screens,
-          so no extra offset is needed for this bottom-right control. */}
-      <style>{`@media (pointer: coarse) {
-  .maplibregl-ctrl-group button.maplibregl-ctrl-geolocate { width: 44px; height: 44px; }
-}`}</style>
-      <div ref={containerRef} style={{ width: "100%", height: "100vh" }} />
+      <div ref={containerRef} className="map-canvas" />
     </>
   );
 }

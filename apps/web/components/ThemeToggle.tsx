@@ -3,7 +3,12 @@
 
 import type { MapTheme } from "./Map";
 import { t } from "../lib/i18n";
+import { MoonIcon, SunIcon } from "./icons";
 
+// Floating round button over the map (top-right, above the locate button).
+// An action button, not a toggle: the label names what activating it does
+// ("Dark map" while the map is light), so no `aria-pressed` - a flipping
+// label and a pressed state cannot both be right.
 export function ThemeToggle({
   theme,
   onChange,
@@ -11,36 +16,52 @@ export function ThemeToggle({
   theme: MapTheme;
   onChange: (theme: MapTheme) => void;
 }) {
-  const next: MapTheme = theme === "light" ? "dark" : "light";
   const dark = theme === "dark";
-
+  const label = t(dark ? "theme_to_light" : "theme_to_dark", "en");
   return (
     <button
       type="button"
-      onClick={() => onChange(next)}
-      // An action button, not a toggle: the label names what activating it
-      // does ("Dark map" while the map is light). `aria-pressed` was here too,
-      // which contradicted that - a screen reader announced "Light map, toggle
-      // button, pressed" in dark mode, which reads as "Light is on", the
-      // opposite of the state. A flipping label and a pressed state cannot
-      // both be right; the label is the one users can see.
-      style={{
-        // Bottom-left, clearing MapLibre's own logo control: `LineFilter`
-        // holds top-left, `StationSearch` holds top-right (and its results
-        // list grows downward over anything placed under it), and the
-        // attribution control sits bottom-right.
-        position: "absolute",
-        bottom: 64,
-        left: 16,
-        padding: "6px 12px",
-        border: `1px solid ${dark ? "#4b5563" : "#d1d5db"}`,
-        borderRadius: 6,
-        background: dark ? "#1f2937" : "white",
-        color: dark ? "#f9fafb" : "#111827",
-        cursor: "pointer",
-      }}
+      className="fab"
+      aria-label={label}
+      title={label}
+      onClick={() => onChange(dark ? "light" : "dark")}
     >
-      {t(dark ? "theme_to_light" : "theme_to_dark", "en")}
+      {dark ? <SunIcon /> : <MoonIcon />}
     </button>
+  );
+}
+
+// The same choice as a segmented control, for the settings list in the sheet.
+export function ThemeSegmented({
+  theme,
+  onChange,
+}: {
+  theme: MapTheme;
+  onChange: (theme: MapTheme) => void;
+}) {
+  return (
+    <div className="row">
+      <span className="row-main row-title">{t("appearance", "en")}</span>
+      {/* `data-value` drives the sliding thumb (globals.css): one moving
+          surface, the way UISegmentedControl reads, instead of two buttons
+          swapping fills. */}
+      <div
+        className="segmented"
+        role="group"
+        aria-label={t("appearance", "en")}
+        data-value={theme}
+      >
+        {(["light", "dark"] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={theme === value}
+            onClick={() => onChange(value)}
+          >
+            {t(value === "light" ? "light" : "dark", "en")}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
