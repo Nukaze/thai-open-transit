@@ -32,7 +32,7 @@ import { StationLabelsToggle } from "./StationLabelsToggle";
 import type { Line } from "schema";
 import type { FeatureCollection, Point, LineString } from "geojson";
 import type { StationWithStatus } from "../lib/types";
-import type { MapTheme } from "./Map";
+import type { MapFocus, MapTheme } from "./Map";
 
 // `maplibre-gl` and friends (pmtiles, @protomaps/basemaps) are ~270KB gzipped
 // on their own - CLAUDE.md 7's "First load, compressed: < 300 KB" budget
@@ -162,11 +162,16 @@ export function HomeClient({
   // on every render. Uses `setSelectedStation` directly rather than
   // `handleSelectStation` - the URL already has this param, so rewriting it
   // via `replaceState` here would be a harmless but pointless no-op.
+  // Remembers which station the link opened, so the map flies to it (below).
+  const deepLinkIdRef = useRef<string | null>(null);
   useEffect(() => {
     const stationId = getStationIdFromUrl(window.location.href);
     if (stationId) {
       const station = stationById.get(stationId);
-      if (station) setSelectedStation(station);
+      if (station) {
+        deepLinkIdRef.current = station.id;
+        setSelectedStation(station);
+      }
     }
   }, [stationById]);
 
@@ -307,28 +312,55 @@ export function HomeClient({
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const selectFromSheet = useCallback(
-    (station: StationWithStatus) => {
+  // Where the map should fly to. A fresh object per request (with `n`), so
+  // picking the same station twice still re-centres on it.
+  const [focus, setFocus] = useState<MapFocus | null>(null);
+  const flyTo = useCallback((station: StationWithStatus) => {
+    const { lon, lat } = station.coords.geo;
+    setFocus((prev) => ({ lon, lat, n: (prev?.n ?? 0) + 1 }));
+  }, []);
+
+  const openStation = useCallback(
+    (station: StationWithStatus, fly: boolean) => {
       setQuery("");
       searchRef.current?.blur();
       handleSelectStation(station);
+      if (fly) flyTo(station);
       // Drop out of the full-height search state so the map is visible again.
       setDetent("half");
     },
-    [handleSelectStation],
+    [handleSelectStation, flyTo],
+  );
+
+  // Picked from a list (search results, nearest station): the station may be
+  // anywhere, so the map flies to it.
+  const selectFromSheet = useCallback(
+    (station: StationWithStatus) => openStation(station, true),
+    [openStation],
   );
 
   // A station clicked on the map wins over an in-progress search: the body
   // shows search results whenever `query` is non-empty, so without clearing
   // it here the clicked station's details would stay hidden behind them.
+  // The map doesn't move: the station is already where the user clicked.
   const selectFromMap = useCallback(
     (id: string) => {
       const station = stationById.get(id);
-      if (station) selectFromSheet(station);
+      if (station) openStation(station, false);
       else setSelectedStation(null);
     },
-    [stationById, selectFromSheet],
+    [stationById, openStation],
   );
+
+  // A shared `?station=` link: fly there once on load, like a search pick.
+  // Keyed on the id the deep-link read recorded, not on the URL, because
+  // every later selection writes the same `?station=` param.
+  useEffect(() => {
+    if (selectedStation && selectedStation.id === deepLinkIdRef.current) {
+      deepLinkIdRef.current = null;
+      flyTo(selectedStation);
+    }
+  }, [selectedStation, flyTo]);
 
   // Opening a station from the map (or a deep link) raises the sheet so its
   // details are visible; closing drops it back to the peek.
@@ -432,6 +464,7 @@ export function HomeClient({
       <NetworkMap
         networkGeoJson={filteredGeoJson}
         onStationClick={selectFromMap}
+        focus={focus}
         theme={theme}
         selectedStationId={selectedStation?.id ?? null}
         selectionRingColor={selectionRingColors[theme]}
