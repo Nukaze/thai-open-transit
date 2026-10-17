@@ -150,44 +150,104 @@ button {
   transform: scale(0.94);
 }
 
-/* MapLibre's geolocate button, restyled to match the round buttons and
- * docked bottom-right, above the attribution. */
-.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
-  margin: 0 12px 12px 0 !important;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--surface-glass);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: var(--shadow-float) !important;
+/* MapLibre's geolocate control stays mounted for its tracking and user dot,
+ * but its button is replaced by the glass one in MapControls.tsx. */
+.maplibregl-ctrl-bottom-right
+  .maplibregl-ctrl-group:has(.maplibregl-ctrl-geolocate) {
+  display: none;
 }
 
-.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button {
+/* ---------- Map controls (MapControls.tsx) ---------- */
+
+/* One row bottom-right, clear of the attribution "i" below it
+   (which reaches 34px up from the bottom; 44px leaves a 10px gap). Rides the sheet on
+   phones with the same cap as MapLibre's controls (see below). */
+.map-controls {
+  position: fixed;
+  right: 12px;
+  bottom: calc(
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 180px)) + 44px
+  );
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-btn {
   width: 44px;
   height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 100ms ease-out;
 }
 
-:root[data-theme="dark"] .maplibregl-ctrl-group .maplibregl-ctrl-icon {
-  filter: invert(1);
+.map-btn:active:not(:disabled) {
+  transform: scale(0.92);
 }
 
-:root[data-theme="dark"]
-  .maplibregl-ctrl-group
-  .maplibregl-ctrl-geolocate-active
-  .maplibregl-ctrl-icon,
-:root[data-theme="dark"]
-  .maplibregl-ctrl-group
-  .maplibregl-ctrl-geolocate-background
-  .maplibregl-ctrl-icon {
-  filter: none;
+.map-btn:disabled {
+  color: var(--ink-3);
+  cursor: default;
 }
 
-/* Attribution and the locate button ride on top of the sheet instead of
-   hiding under it, but stop well below the top-right theme button: past
+.map-btn-text {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Following the user: systemBlue, as in Apple Maps. */
+.map-btn[data-state="active"],
+.map-btn[data-state="background"],
+.map-btn[data-state="waiting"] {
+  color: var(--accent);
+}
+
+.map-btn[data-state="waiting"] svg {
+  animation: locate-wait 1.2s ease-in-out infinite;
+}
+
+@keyframes locate-wait {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.compass {
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+}
+
+/* Zoom out / in share one capsule. */
+.map-zoom {
+  display: flex;
+  border-radius: 22px;
+}
+
+.map-zoom .map-btn {
+  width: 48px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-btn[data-state="waiting"] svg {
+    animation: none;
+  }
+}
+
+/* Attribution (and .map-controls above it) ride on top of the sheet instead
+   of hiding under it, but stop well below the top-right theme button: past
    that point (the sheet near full height) they slide under the sheet
    rather than landing on it. 180px = theme button (12 + 44), the
-   bottom-right stack (locate + attribution, ~102px measured) and a gap,
-   which also keeps the stack fully under a full-height sheet (top 56px). */
+   attribution plus the controls row (44 + 44) and a gap, which also keeps
+   both fully under a full-height sheet (top 56px). */
 .maplibregl-ctrl-bottom-right,
 .maplibregl-ctrl-bottom-left {
   bottom: min(
@@ -951,7 +1011,8 @@ a.row:active {
 
 @media (prefers-reduced-transparency: reduce) {
   .fab,
-  .maplibregl-ctrl-top-right .maplibregl-ctrl-group {
+  .map-controls > .map-btn,
+  .map-zoom {
     background: var(--surface);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -1184,7 +1245,8 @@ a.row:active {
 
 /* Floating map buttons share the panel's glass and edge. */
 .fab,
-.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
+.map-controls > .map-btn,
+.map-zoom {
   background: var(--glass-panel) !important;
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
@@ -1266,7 +1328,8 @@ a.row:active {
 }
 
 .fab,
-.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
+.map-controls > .map-btn,
+.map-zoom {
   box-shadow:
     var(--glass-highlight),
     0 1px 2px rgba(0, 0, 0, 0.06),
@@ -1384,4 +1447,140 @@ a.row:active {
   .row-sub {
     color: var(--ink);
   }
+}
+
+/* ---------- Line logos (LineLogo.tsx) ---------- */
+
+.line-logo {
+  flex: none;
+  object-fit: contain;
+}
+
+/* Helper line under a section title: what the controls below do. */
+.section-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+/* Decorative: the sentence beside it carries the meaning. */
+.section-hint svg {
+  flex: none;
+  color: var(--ink-3);
+}
+
+/* Phones: one line, so the collapsed sheet's fixed height (PEEK_HEIGHT in
+   HomeClient.tsx) always fits the chip row below it. */
+@media (max-width: 767px) {
+  .section-hint span {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* ---------- Line groups (LineFilter.tsx) ---------- */
+
+/* Count + "Show all", right of the section title. */
+.section-head-aside {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Phones: the groups dissolve into one horizontally scrolling chip row with
+   full names, the row the collapsed sheet is sized for. */
+.line-groups {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 2px 16px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.line-groups::-webkit-scrollbar {
+  display: none;
+}
+
+.line-group,
+.line-group .chips {
+  display: contents;
+}
+
+.line-group-label,
+.chip-name-short {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .line-groups {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    touch-action: auto;
+  }
+
+  .line-group {
+    display: block;
+  }
+
+  .line-group .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .line-group-label {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-2);
+  }
+
+  .chip-name-full {
+    display: none;
+  }
+
+  .chip-name-short {
+    display: inline;
+  }
+}
+
+/* Distance haze over the far part of a tilted map (Map.tsx sets the
+   opacity from the pitch and --haze to the basemap's land color). Covers
+   the area past the basemap extract, which a tilted camera can see. */
+.map-haze {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 42vh;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--haze) 0%,
+    var(--haze) 18%,
+    color-mix(in srgb, var(--haze) 60%, transparent) 45%,
+    transparent 100%
+  );
 }

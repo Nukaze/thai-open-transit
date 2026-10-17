@@ -69,3 +69,44 @@ export const ChevronIcon = ({ size = 16 }: P) => (
     <path d="m9 6 6 6-6 6" />
   </svg>
 );
+
+// Location arrow; `filled` marks the map as following the user.
+export const LocateIcon = ({
+  size = 20,
+  filled = false,
+}: P & { filled?: boolean }) => (
+  <svg {...base(size)}>
+    <path
+      d="M20 4 4 11.2l7 1.8 1.8 7L20 4Z"
+      fill={filled ? "currentColor" : "none"}
+    />
+  </svg>
+);
+
+// Same arrow, struck through: location is unavailable or was denied.
+export const LocateOffIcon = ({ size = 20 }: P) => (
+  <svg {...base(size)}>
+    <path d="M20 4 4 11.2l7 1.8 1.8 7L20 4Z" />
+    <path d="M3 3l18 18" />
+  </svg>
+);
+
+export const PlusIcon = ({ size = 20 }: P) => (
+  <svg {...base(size)}>
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+
+export const MinusIcon = ({ size = 20 }: P) => (
+  <svg {...base(size)}>
+    <path d="M5 12h14" />
+  </svg>
+);
+
+export const InfoIcon = ({ size = 14 }: P) => (
+  <svg {...base(size)}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v5.5" />
+    <circle cx="12" cy="7.75" r=".6" fill="currentColor" />
+  </svg>
+);

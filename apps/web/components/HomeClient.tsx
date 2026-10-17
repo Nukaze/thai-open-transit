@@ -49,9 +49,10 @@ const NetworkMap = dynamic(
   },
 );
 
-// Visible sheet height on phones when collapsed: grabber, search field and
-// the line chip row, so filtering lines never needs the sheet raised.
-const PEEK_HEIGHT = 180;
+// Visible sheet height on phones when collapsed: grabber, search field, the
+// one-line lines hint (+28px) and the line chip row, so filtering lines never
+// needs the sheet raised.
+const PEEK_HEIGHT = 208;
 
 export function HomeClient({
   stations,
@@ -151,15 +152,6 @@ export function HomeClient({
     setSelectedStation(station);
     window.history.replaceState(null, "", buildStationDeepLink(station.id));
   }, []);
-
-  const handleStationClick = useCallback(
-    (id: string) => {
-      const station = stationById.get(id);
-      if (station) handleSelectStation(station);
-      else setSelectedStation(null);
-    },
-    [stationById, handleSelectStation],
-  );
 
   // Deep-link read: on mount, check the URL for a `?station=` param (per
   // brief Step 7 - originally written against `page.tsx`, redirected here
@@ -326,6 +318,18 @@ export function HomeClient({
     [handleSelectStation],
   );
 
+  // A station clicked on the map wins over an in-progress search: the body
+  // shows search results whenever `query` is non-empty, so without clearing
+  // it here the clicked station's details would stay hidden behind them.
+  const selectFromMap = useCallback(
+    (id: string) => {
+      const station = stationById.get(id);
+      if (station) selectFromSheet(station);
+      else setSelectedStation(null);
+    },
+    [stationById, selectFromSheet],
+  );
+
   // Opening a station from the map (or a deep link) raises the sheet so its
   // details are visible; closing drops it back to the peek.
   useEffect(() => {
@@ -427,7 +431,7 @@ export function HomeClient({
     <>
       <NetworkMap
         networkGeoJson={filteredGeoJson}
-        onStationClick={handleStationClick}
+        onStationClick={selectFromMap}
         theme={theme}
         selectedStationId={selectedStation?.id ?? null}
         selectionRingColor={selectionRingColors[theme]}

@@ -1,7 +1,7 @@
 // apps/web/components/Map.tsx
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 // maplibre-gl@6 ships ESM-only with no default export (verified against the
 // installed package's .d.ts - Turbopack: "Export default doesn't exist");
 // the brief's `import maplibregl from 'maplibre-gl'` doesn't resolve. A
@@ -14,6 +14,7 @@ import { Protocol } from "pmtiles";
 import { layers, namedFlavor } from "@protomaps/basemaps";
 import { PUBLIC_BASE_URL } from "../lib/constants";
 import type { Feature, FeatureCollection, Point, LineString } from "geojson";
+import { MapControls } from "./MapControls";
 
 const BANGKOK_CENTER: [number, number] = [100.5018, 13.7563];
 
@@ -299,8 +300,19 @@ function buildStyle(theme: MapTheme): MapStyle {
         attribution: "© OpenStreetMap contributors",
       },
     },
-    layers: layers("protomaps", namedFlavor(theme), { lang: "en" }),
+    layers: layers("protomaps", basemapFlavor(theme), { lang: "en" }),
   };
+}
+
+// The basemap only covers the Bangkok extract (bangkok.pmtiles bounds:
+// lon 100.2-100.95, lat 13.4-14.2). A tilted camera sees well past that, and
+// the flavor's `background` (a mid grey, lighter than the land in dark mode)
+// showed there as a hard-edged band. Painting the background in the land
+// color makes past-the-edge read as plain land; the `.map-haze` overlay then
+// fades the far distance into that same color.
+function basemapFlavor(theme: MapTheme) {
+  const flavor = namedFlavor(theme);
+  return { ...flavor, background: flavor.earth };
 }
 
 // Every source and layer below is added at runtime rather than declared in the
@@ -596,6 +608,12 @@ export function Map({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const hazeRef = useRef<HTMLDivElement>(null);
+  // State, not just a ref: the glass controls render once the map exists.
+  const [controls, setControls] = useState<{
+    map: maplibregl.Map;
+    geolocate: maplibregl.GeolocateControl;
+  } | null>(null);
 
   // `onStationClick`, `networkGeoJson` and `theme` are read through refs
   // inside the init effect below instead of being listed in its dependency
@@ -921,9 +939,9 @@ export function Map({
       if (badge) map.addImage(id, badge.image, badge.options);
     });
 
-    // bottom-right: top-right hosts the search/station panel overlays,
-    // bottom-left the theme toggle and ring color picker, bottom-center the
-    // year selector. MapLibre stacks it above the attribution control.
+    // Added for its tracking, user dot and accuracy circle only: its own
+    // button is hidden (globals.css) and `MapControls` triggers it from a
+    // button that matches the rest of the glass controls.
     //
     // Survives the theme toggle's `setStyle(..., { diff: false })`: the control
     // is a DOM element owned by the map's control container, and the user dot
@@ -1005,7 +1023,20 @@ export function Map({
     });
 
     mapRef.current = map;
+    setControls({ map, geolocate });
+
+    // Distance haze strengthens with the tilt: invisible in 2D, full by 45°,
+    // where the far edge of the basemap extract starts showing. Written to
+    // the DOM on every pitch frame, never through React state.
+    const syncHaze = () => {
+      const haze = hazeRef.current;
+      if (haze) haze.style.opacity = String(Math.min(1, map.getPitch() / 45));
+    };
+    map.on("pitch", syncHaze);
+    syncHaze();
+
     return () => {
+      setControls(null);
       map.remove();
       mapRef.current = null;
       maplibregl.removeProtocol("pmtiles");
@@ -1018,6 +1049,15 @@ export function Map({
   return (
     <>
       <div ref={containerRef} className="map-canvas" />
+      <div
+        ref={hazeRef}
+        className="map-haze"
+        aria-hidden="true"
+        style={{ "--haze": basemapFlavor(theme).earth } as CSSProperties}
+      />
+      {controls && (
+        <MapControls map={controls.map} geolocate={controls.geolocate} />
+      )}
     </>
   );
 }

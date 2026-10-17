@@ -6,6 +6,7 @@ import type { Line, Status } from "schema";
 import type { StationWithStatus } from "../lib/types";
 import { t } from "../lib/i18n";
 import { ReportErrorButton } from "./ReportErrorButton";
+import { LineLogo } from "./LineLogo";
 import { CloseIcon, LinkIcon } from "./icons";
 
 // Same copy as `ui`'s StatusBadge; rendered locally so the badge can carry
@@ -128,6 +129,7 @@ export function StationPanel({
                     aria-hidden="true"
                     style={{ background: line.color_hex }}
                   />
+                  <LineLogo line={line} size={28} />
                   <span className="row-main">
                     <span className="row-title" style={{ display: "block" }}>
                       {line.name_en}
