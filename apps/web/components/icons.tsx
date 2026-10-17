@@ -42,12 +42,13 @@ export const MoonIcon = ({ size = 20 }: P) => (
   </svg>
 );
 
-export const TrainIcon = ({ size = 18 }: P) => (
-  <svg {...base(size)}>
-    <rect x="5" y="3" width="14" height="14" rx="3" />
-    <path d="M5 11h14M9 21l-2-4M15 21l2-4" />
-    <circle cx="9" cy="14" r=".6" fill="currentColor" />
-    <circle cx="15" cy="14" r=".6" fill="currentColor" />
+// The favicon's mark (app/favicon.ico) redrawn as a vector: an S-curve line
+// between two station dots, the same primitive Map.tsx draws stations with.
+export const LogoIcon = ({ size = 18 }: P) => (
+  <svg {...base(size)} strokeWidth={2.4}>
+    <path d="M4 6h11a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h11" />
+    <circle cx="4" cy="6" r="2.5" fill="currentColor" stroke="none" />
+    <circle cx="20" cy="18" r="2.5" fill="currentColor" stroke="none" />
   </svg>
 );
 

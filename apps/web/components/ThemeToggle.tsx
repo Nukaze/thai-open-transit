@@ -42,10 +42,14 @@ export function ThemeSegmented({
   return (
     <div className="row">
       <span className="row-main row-title">{t("appearance", "en")}</span>
+      {/* `data-value` drives the sliding thumb (globals.css): one moving
+          surface, the way UISegmentedControl reads, instead of two buttons
+          swapping fills. */}
       <div
         className="segmented"
         role="group"
         aria-label={t("appearance", "en")}
+        data-value={theme}
       >
         {(["light", "dark"] as const).map((value) => (
           <button

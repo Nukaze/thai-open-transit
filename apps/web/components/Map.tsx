@@ -930,7 +930,7 @@ export function Map({
       showAccuracyCircle: true,
       fitBoundsOptions: { maxZoom: 15 },
     });
-    map.addControl(geolocate, "top-right");
+    map.addControl(geolocate, "bottom-right");
     geolocate.on("geolocate", (e) => {
       onUserLocationRef.current?.({
         lat: e.coords.latitude,

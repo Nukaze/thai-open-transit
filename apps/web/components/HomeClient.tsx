@@ -15,7 +15,7 @@ import { LineFilter } from "./LineFilter";
 import { StationSearchField, StationSearchResults } from "./StationSearch";
 import { ThemeSegmented, ThemeToggle } from "./ThemeToggle";
 import { Sheet, type Detent } from "./Sheet";
-import { TrainIcon } from "./icons";
+import { LogoIcon } from "./icons";
 import { t } from "../lib/i18n";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
@@ -365,11 +365,9 @@ export function HomeClient({
   } else {
     body = (
       <>
-        <NearestStationChip
-          nearest={nearest}
-          errorCode={geolocateError}
-          onSelect={selectFromSheet}
-        />
+        {/* Line chips come first: PEEK_HEIGHT only fits the chip row, and a
+            nearest-station row above it would push the chips out of the
+            collapsed sheet once a location fix (or error) arrives. */}
         <LineFilter
           lines={lines}
           activeLineIds={activeLineIds}
@@ -381,6 +379,11 @@ export function HomeClient({
             })
           }
           onShowAll={() => setActiveLineIds(new Set(lines.map((l) => l.id)))}
+        />
+        <NearestStationChip
+          nearest={nearest}
+          errorCode={geolocateError}
+          onSelect={selectFromSheet}
         />
         {selectedYear !== null && (
           <YearSelector
@@ -440,11 +443,12 @@ export function HomeClient({
         detent={detent}
         onDetentChange={setDetent}
         peekHeight={PEEK_HEIGHT}
+        expandKey={selectedStation?.id ?? null}
         header={
           <>
             <div className="brand">
               <span className="brand-mark" aria-hidden="true">
-                <TrainIcon />
+                <LogoIcon size={22} />
               </span>
               <span className="brand-name">Bangkok Open Transit</span>
             </div>

@@ -7,8 +7,10 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
+import { ChevronIcon } from "./icons";
 
 export type Detent = "peek" | "half" | "full";
 
@@ -47,6 +49,7 @@ export function Sheet({
   detent,
   onDetentChange,
   peekHeight,
+  expandKey,
   header,
   children,
 }: {
@@ -54,6 +57,8 @@ export function Sheet({
   onDetentChange: (detent: Detent) => void;
   /** Visible height in the collapsed state. */
   peekHeight: number;
+  /** Any change unfolds a collapsed desktop panel (e.g. a new selection). */
+  expandKey?: string | null;
   header: ReactNode;
   children: ReactNode;
 }) {
@@ -61,6 +66,9 @@ export function Sheet({
   const bodyRef = useRef<HTMLDivElement>(null);
   const [desktop, setDesktop] = useState(false);
   const [viewport, setViewport] = useState(0);
+  // Desktop only: the floating panel folds down to its header so the map
+  // gets the whole screen. Phones already collapse via the peek detent.
+  const [collapsed, setCollapsed] = useState(false);
 
   // Live spring state. Kept in refs: it changes every frame and must never
   // cause a React render.
@@ -159,6 +167,10 @@ export function Sheet({
 
   // Place the sheet on first layout without animating in from nowhere.
   const placed = useRef(false);
+  // Set on release when the drag itself already started the spring toward
+  // the new detent, so the detent change below doesn't restart it with the
+  // default (bounce-free) spring and lose the flick's momentum.
+  const settling = useRef<Detent | null>(null);
   useLayoutEffect(() => {
     if (desktop || !viewport) {
       document.documentElement.style.setProperty("--sheet-offset", "0px");
@@ -168,15 +180,35 @@ export function Sheet({
     if (!placed.current) {
       placed.current = true;
       write(target);
+    } else if (settling.current === detent) {
+      settling.current = null;
     } else if (!drag.current?.active) {
       animateTo(target);
     }
   }, [detent, desktop, viewport, detentY, write, animateTo]);
 
+  // At full height the body scrolls. While it is scrolled to the top it
+  // hands the browser only upward swipes (`pan-down` = scroll the content
+  // down), so a downward drag stays a pointer drag that moves the sheet
+  // instead of the browser claiming it and firing pointercancel.
+  const syncAtTop = useCallback(() => {
+    const body = bodyRef.current;
+    if (body) body.toggleAttribute("data-at-top", body.scrollTop <= 0);
+  }, []);
+  useLayoutEffect(syncAtTop, [syncAtTop, detent, children]);
+
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
+
+  // Opening a station unfolds the panel, or its details would land in a
+  // hidden body. Keyed on the selection itself, not the detent, because
+  // picking a second station leaves the detent unchanged.
+  useEffect(() => {
+    if (expandKey) setCollapsed(false);
+  }, [expandKey]);
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (desktop || e.button !== 0) return;
+    settling.current = null;
     const target = e.target as HTMLElement;
     // Inputs keep their own gestures (text selection, slider, color).
     if (target.closest("input, textarea, [data-no-drag]")) return;
@@ -247,7 +279,10 @@ export function Sheet({
     );
     // A little bounce only when the gesture carried momentum.
     animateTo(detentY(nearest), Math.abs(velocity) > 400 ? 0.82 : 1, 0.34);
-    if (nearest !== detent) onDetentChange(nearest);
+    if (nearest !== detent) {
+      settling.current = nearest;
+      onDetentChange(nearest);
+    }
   };
 
   return (
@@ -255,9 +290,17 @@ export function Sheet({
       ref={sheetRef}
       className="sheet"
       data-detent={desktop ? "full" : detent}
+      data-collapsed={desktop && collapsed ? "true" : undefined}
       role="region"
       aria-label="Map panel"
-      style={desktop ? undefined : { height: sheetHeight || "90dvh" }}
+      // The prerendered HTML has no measurements, so CSS places the sheet at
+      // the peek from `--peek-height` until JS takes over with exact pixels.
+      style={
+        {
+          "--peek-height": `${peekHeight}px`,
+          height: !desktop && sheetHeight ? sheetHeight : undefined,
+        } as CSSProperties
+      }
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -269,9 +312,25 @@ export function Sheet({
         aria-label={detent === "peek" ? "Expand panel" : "Collapse panel"}
         onClick={() => onDetentChange(detent === "peek" ? "half" : "peek")}
       />
-      <div className="sheet-head">{header}</div>
-      <div ref={bodyRef} className="sheet-body">
-        {children}
+      <button
+        type="button"
+        className="sheet-collapse"
+        aria-label={collapsed ? "Expand panel" : "Collapse panel"}
+        aria-expanded={!collapsed}
+        onClick={() => setCollapsed((c) => !c)}
+      >
+        <ChevronIcon size={16} />
+      </button>
+      {/* Focusing search unfolds the panel so results have somewhere to go. */}
+      <div className="sheet-head" onFocus={() => setCollapsed(false)}>
+        {header}
+      </div>
+      {/* The fold wrapper animates the collapse (globals.css); `hidden` would
+          snap shut. `inert` keeps the folded body out of the tab order. */}
+      <div className="sheet-fold" inert={desktop && collapsed}>
+        <div ref={bodyRef} className="sheet-body" onScroll={syncAtTop}>
+          {children}
+        </div>
       </div>
     </div>
   );

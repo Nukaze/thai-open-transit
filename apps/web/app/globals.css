@@ -35,7 +35,14 @@
   --shadow-sheet: 0 -1px 0 rgba(0, 0, 0, 0.04), 0 -8px 32px rgba(0, 0, 0, 0.14);
   --radius-sheet: 28px;
   --radius-card: 18px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --sheet-offset: 0px;
+  /* Icon-toolbar language: a tinted track with a raised, solid active item. */
+  --track: color-mix(in srgb, var(--ink) 7%, transparent);
+  --raised-bg: #ffffff;
+  --raised-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.08);
+  --radius-control: 10px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   color-scheme: light;
@@ -54,6 +61,9 @@
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-sheet:
     0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 32px rgba(0, 0, 0, 0.6);
+  --track: color-mix(in srgb, var(--ink) 9%, transparent);
+  --raised-bg: #3a3a3e;
+  --raised-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.35);
   color-scheme: dark;
 }
 
@@ -100,7 +110,10 @@ button {
   outline-offset: 2px;
 }
 
-.map-canvas {
+/* Doubled class so this outranks maplibre-gl.css's
+   `.maplibregl-map { position: relative }`, which loads later with equal
+   specificity and would otherwise collapse the map to 0px tall. */
+.map-canvas.map-canvas {
   position: fixed;
   inset: 0;
 }
@@ -138,13 +151,9 @@ button {
 }
 
 /* MapLibre's geolocate button, restyled to match the round buttons and
- * docked under them. */
-.maplibregl-ctrl-top-right {
-  top: calc(var(--safe-top) + 56px) !important;
-  right: 2px !important;
-}
-
-.maplibregl-ctrl-top-right .maplibregl-ctrl-group {
+ * docked bottom-right, above the attribution. */
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
+  margin: 0 12px 12px 0 !important;
   border-radius: 50%;
   overflow: hidden;
   background: var(--surface-glass);
@@ -153,7 +162,7 @@ button {
   box-shadow: var(--shadow-float) !important;
 }
 
-.maplibregl-ctrl-top-right .maplibregl-ctrl-group button {
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group button {
   width: 44px;
   height: 44px;
 }
@@ -173,10 +182,18 @@ button {
   filter: none;
 }
 
-/* Attribution rides on top of the sheet instead of hiding under it. */
+/* Attribution and the locate button ride on top of the sheet instead of
+   hiding under it, but stop well below the top-right theme button: past
+   that point (the sheet near full height) they slide under the sheet
+   rather than landing on it. 180px = theme button (12 + 44), the
+   bottom-right stack (locate + attribution, ~102px measured) and a gap,
+   which also keeps the stack fully under a full-height sheet (top 56px). */
 .maplibregl-ctrl-bottom-right,
 .maplibregl-ctrl-bottom-left {
-  bottom: var(--sheet-offset) !important;
+  bottom: min(
+    var(--sheet-offset),
+    calc(100dvh - var(--safe-top) - 180px)
+  ) !important;
 }
 
 /* ---------- Sheet ---------- */
@@ -194,10 +211,11 @@ button {
   box-shadow: var(--shadow-sheet);
   touch-action: none;
   will-change: transform;
-}
-
-.sheet[data-detent="full"] {
-  touch-action: auto;
+  /* Pre-hydration placement at the peek detent, so the prerendered page
+     doesn't show the sheet covering the map until JS measures the screen.
+     56px mirrors TOP_GAP in Sheet.tsx; JS then writes exact inline values. */
+  height: calc(100dvh - 56px);
+  transform: translate3d(0, calc(100dvh - 56px - var(--peek-height)), 0);
 }
 
 .sheet-grabber {
@@ -239,8 +257,46 @@ button {
   touch-action: pan-y;
 }
 
+/* Scrolled to the top, a downward swipe belongs to the sheet (see
+   syncAtTop in Sheet.tsx), so the browser only gets upward ones. */
+.sheet[data-detent="full"] .sheet-body[data-at-top] {
+  touch-action: pan-down;
+}
+
 .brand {
   display: none;
+}
+
+/* Desktop-only toggle; phones collapse to the peek detent instead. */
+.sheet-collapse {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.sheet-collapse svg {
+  transform: rotate(-90deg);
+  transition: transform 260ms var(--ease-drawer);
+}
+
+/* Phones: the wrapper is layout-transparent, the bottom sheet is unchanged. */
+.sheet-fold {
+  display: contents;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-collapse svg {
+    transition: none;
+  }
 }
 
 @media (min-width: 768px) {
@@ -249,12 +305,25 @@ button {
     left: 16px;
     right: auto;
     bottom: auto;
-    width: 392px;
+    width: 320px;
+    height: auto;
     max-height: calc(100dvh - 32px);
-    border-radius: 24px;
+    border-radius: 20px;
     box-shadow: var(--shadow-float);
     transform: none !important;
     touch-action: auto;
+    /* Slides in once on load. `translate` rather than `transform`, which is
+       pinned to none above. */
+    transition:
+      opacity 320ms var(--ease-out),
+      translate 320ms var(--ease-drawer);
+  }
+
+  @starting-style {
+    .sheet {
+      opacity: 0;
+      translate: -16px 0;
+    }
   }
 
   .sheet-grabber {
@@ -262,19 +331,62 @@ button {
   }
 
   .sheet-head {
-    padding-top: 18px;
+    padding: 14px 12px 8px;
+  }
+
+  /* Collapse folds the body away. Grid rows 1fr -> 0fr is the one way to
+     animate to and from content height without measuring it in JS. */
+  .sheet-fold {
+    display: grid;
+    grid-template-rows: 1fr;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    transition: grid-template-rows 300ms var(--ease-drawer);
+  }
+
+  .sheet[data-collapsed="true"] .sheet-fold {
+    grid-template-rows: 0fr;
   }
 
   .sheet-body {
     overflow-y: auto;
-    padding-bottom: 20px;
+    padding: 2px 12px 14px;
+    /* Expanding: content fades in just behind the fold so it reads as
+       revealed, not popped. */
+    transition:
+      opacity 220ms var(--ease-out) 60ms,
+      translate 300ms var(--ease-drawer),
+      padding-block 300ms var(--ease-drawer);
+  }
+
+  .sheet[data-collapsed="true"] .sheet-body {
+    opacity: 0;
+    translate: 0 -8px;
+    /* A 0fr row still can't shrink below the body's padding, so it folds
+       away alongside the rows. */
+    padding-block: 0;
+    /* Collapsing: fade out fast, ahead of the fold closing. */
+    transition:
+      opacity 140ms var(--ease-out),
+      translate 300ms var(--ease-drawer),
+      padding-block 300ms var(--ease-drawer);
   }
 
   .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-right: 36px;
+  }
+
+  .sheet-collapse {
+    display: grid;
+  }
+
+  .sheet[data-collapsed="true"] .sheet-collapse svg {
+    transform: rotate(90deg);
   }
 
   .maplibregl-ctrl-bottom-right,
@@ -286,11 +398,10 @@ button {
 .brand-mark {
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  background: var(--ink);
-  color: var(--surface);
   display: grid;
   place-items: center;
+  /* Same amethyst as app/favicon.ico, so the tab and the panel match. */
+  color: #9966cc;
 }
 
 .brand-name {
@@ -781,6 +892,7 @@ a.row:active {
   border-radius: 14px;
   font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
   transition: transform 120ms ease-out;
 }
 
@@ -790,7 +902,8 @@ a.row:active {
 
 .btn-primary {
   background: var(--ink);
-  color: var(--surface);
+  /* --bg, not --surface: inside the glass panel --surface is translucent. */
+  color: var(--bg);
 }
 
 .btn-secondary {
@@ -863,4 +976,414 @@ a.row:active {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* ---------- Compact desktop panel ----------
+   Last in the file so these win over the touch-sized base rules above at
+   equal specificity. Phones keep the larger tap targets. */
+
+@media (min-width: 768px) {
+  .brand-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+  }
+
+  .brand-name {
+    font-size: 15px;
+  }
+
+  .search {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 12px;
+    gap: 8px;
+  }
+
+  .search input {
+    font-size: 15px;
+  }
+
+  .section {
+    margin-top: 16px;
+  }
+
+  .section-title {
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+
+  .chips {
+    gap: 6px;
+    margin: 0;
+  }
+
+  .chip {
+    height: 28px;
+    padding: 0 10px 0 8px;
+    gap: 6px;
+    border-radius: 14px;
+    font-size: 12.5px;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+  }
+
+  .row {
+    min-height: 42px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .year-card {
+    padding: 12px;
+  }
+
+  .year-value {
+    font-size: 26px;
+  }
+
+  .year-value small {
+    font-size: 13px;
+  }
+
+  .range {
+    height: 26px;
+    margin-top: 6px;
+  }
+
+  .range::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+  }
+
+  .range::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+  }
+
+  .range-ends {
+    font-size: 11px;
+  }
+
+  .station-title {
+    font-size: 22px;
+  }
+
+  .station-th {
+    font-size: 15px;
+  }
+
+  .actions {
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .btn {
+    height: 40px;
+    padding: 0 12px;
+    gap: 6px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+}
+
+/* Reduced motion: the panel still fades in and its body still crossfades,
+   but nothing slides and the fold snaps instead of travelling. */
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition: opacity 200ms ease;
+  }
+
+  @starting-style {
+    .sheet {
+      translate: none;
+    }
+  }
+
+  .sheet-fold {
+    transition: none;
+  }
+
+  .sheet-body,
+  .sheet[data-collapsed="true"] .sheet-body {
+    /* Snaps with the rows; the opacity crossfade alone carries the change. */
+    translate: none;
+    transition: opacity 160ms ease;
+  }
+}
+
+/* ---------- Frosted glass ----------
+   The panel and map controls let the map show through, blurred, so the UI
+   reads as a layer over the map rather than a wall beside it. Opacity is
+   kept high on purpose: the map behind is busy, and text over it must stay
+   as legible as on a solid panel. */
+
+:root {
+  --glass-panel: rgba(246, 246, 248, 0.76);
+  /* Inner cards are near-solid: light glass stacked on light glass loses
+     legibility, so the stacking stops at the panel. Defined here, before
+     the solid fallbacks below, so those still win when they apply. */
+  --glass-card: rgba(255, 255, 255, 0.82);
+  --glass-raised: rgba(255, 255, 255, 0.92);
+  --glass-edge: rgba(255, 255, 255, 0.55);
+  --glass-blur: blur(24px) saturate(180%);
+}
+
+:root[data-theme="dark"] {
+  --glass-panel: rgba(28, 28, 31, 0.74);
+  --glass-card: rgba(255, 255, 255, 0.07);
+  --glass-raised: rgba(255, 255, 255, 0.16);
+  --glass-edge: rgba(255, 255, 255, 0.08);
+}
+
+.sheet {
+  background: var(--glass-panel);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  /* Everything inside that drew on a solid surface now draws on glass. */
+  --surface-2: var(--glass-card);
+  --surface: var(--glass-raised);
+  --raised-bg: var(--glass-raised);
+  --track: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+/* Inactive chips sit on the glass itself; active ones get the frosted card. */
+.chip {
+  border-color: transparent;
+  background: var(--glass-card);
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--glass-raised);
+  box-shadow: var(--raised-shadow);
+}
+
+.segmented {
+  padding: 3px;
+  border-radius: var(--radius-control);
+  background: var(--track);
+}
+
+.segmented button {
+  border-radius: calc(var(--radius-control) - 3px);
+  color: var(--ink-2);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.segmented button[aria-pressed="true"] {
+  background: var(--raised-bg);
+  color: var(--ink);
+  box-shadow: var(--raised-shadow);
+}
+
+/* Floating map buttons share the panel's glass and edge. */
+.fab,
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
+  background: var(--glass-panel) !important;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+}
+
+/* No blur support, or the viewer asked for less transparency: solid
+   surfaces, which are always the most legible. */
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  :root {
+    --glass-panel: #f6f6f8;
+    --glass-card: #ffffff;
+    --glass-raised: #ffffff;
+  }
+
+  :root[data-theme="dark"] {
+    --glass-panel: #1c1c1f;
+    --glass-card: #26262a;
+    --glass-raised: #3a3a3e;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-panel: #f6f6f8;
+    --glass-card: #ffffff;
+    --glass-raised: #ffffff;
+  }
+
+  :root[data-theme="dark"] {
+    --glass-panel: #1c1c1f;
+    --glass-card: #26262a;
+    --glass-raised: #3a3a3e;
+  }
+}
+
+/* ---------- Apple pass ----------
+   Material, controls and type tuned after Apple's HIG / WWDC guidance. */
+
+:root {
+  /* systemBlue, so links and focus rings read as the platform's own. */
+  --accent: #007aff;
+  /* Light catching the top edge of the material. */
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+:root[data-theme="dark"] {
+  --accent: #0a84ff;
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* The panel is the largest surface, so it reads as the thickest material:
+   the strongest blur and the deepest shadow on screen. */
+@media (min-width: 768px) {
+  .sheet {
+    border-radius: 22px;
+    box-shadow:
+      var(--glass-highlight),
+      0 1px 3px rgba(0, 0, 0, 0.06),
+      0 12px 40px rgba(0, 0, 0, 0.16);
+  }
+
+  /* Concentric corners: inner radius = panel radius minus its 12px inset. */
+  .search,
+  .list,
+  .year-card {
+    border-radius: 12px;
+  }
+
+  /* Content scrolling up under the header fades out instead of meeting a
+     hard edge. The extra top padding keeps the first row clear at rest. */
+  .sheet-body {
+    padding-top: 8px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 10px);
+  }
+}
+
+.fab,
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group {
+  box-shadow:
+    var(--glass-highlight),
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 4px 14px rgba(0, 0, 0, 0.14) !important;
+}
+
+/* Theme switches ease the panel's material rather than flashing it. */
+.sheet {
+  transition-property: opacity, translate, background-color, border-color;
+  transition-duration: 320ms;
+}
+
+/* Vibrancy: on glass, secondary text gets more contrast and a touch more
+   weight instead of the flat pale gray that works on solid white. */
+.section-title {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.row-sub,
+.range-ends,
+.footer-links {
+  color: var(--ink-2);
+}
+
+/* Size-specific tracking: tighter as type grows, open at small sizes. */
+.brand-name {
+  letter-spacing: -0.02em;
+}
+
+.station-title {
+  letter-spacing: -0.03em;
+}
+
+.chip {
+  letter-spacing: 0.005em;
+}
+
+/* Capsule buttons, as on current Apple platforms. */
+.btn {
+  border-radius: 999px;
+}
+
+/* Segmented control: one thumb that slides between segments. */
+.segmented {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.segmented::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  border-radius: calc(var(--radius-control) - 3px);
+  background: var(--raised-bg);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.12),
+    0 3px 1px rgba(0, 0, 0, 0.04);
+  transition: translate 280ms var(--ease-drawer);
+}
+
+.segmented[data-value="dark"]::before {
+  translate: 100% 0;
+}
+
+.segmented button,
+.segmented button[aria-pressed="true"] {
+  position: relative;
+  background: none;
+  box-shadow: none;
+}
+
+.segmented button[aria-pressed="true"] {
+  font-weight: 600;
+}
+
+/* Feedback on press, the instant it happens. */
+.segmented button:active,
+.sheet-collapse:active,
+.btn:active {
+  transform: scale(0.97);
+}
+
+.sheet-collapse {
+  transition: transform 100ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segmented::before {
+    transition: none;
+  }
+}
+
+/* Increased contrast: near-solid surfaces with a defined edge. */
+@media (prefers-contrast: more) {
+  :root {
+    --glass-panel: rgba(250, 250, 252, 0.97);
+    --glass-card: #ffffff;
+    --glass-edge: rgba(0, 0, 0, 0.35);
+  }
+
+  :root[data-theme="dark"] {
+    --glass-panel: rgba(24, 24, 27, 0.97);
+    --glass-card: #2a2a2e;
+    --glass-edge: rgba(255, 255, 255, 0.4);
+  }
+
+  .section-title,
+  .row-sub {
+    color: var(--ink);
+  }
 }
