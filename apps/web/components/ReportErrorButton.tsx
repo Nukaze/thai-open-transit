@@ -3,7 +3,6 @@
 
 import type { Station } from "schema";
 import { t } from "../lib/i18n";
-import { FlagIcon } from "./icons";
 
 // NOTE: points at the personal-account repo because the `opentransit-th`
 // GitHub org does not exist yet (CLAUDE.md lists it as "future"). Update this
@@ -22,13 +21,7 @@ export function ReportErrorButton({ station }: { station: Station }) {
   const url = `${GITHUB_ISSUE_BASE_URL}?title=${title}&body=${body}&labels=data-correction`;
 
   return (
-    <a
-      className="btn btn-secondary"
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <FlagIcon />
+    <a href={url} target="_blank" rel="noopener noreferrer">
       {t("report_error", "en")}
     </a>
   );

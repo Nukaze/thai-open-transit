@@ -1,22 +1,12 @@
 // apps/web/components/HomeClient.tsx
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { StationPanel } from "./StationPanel";
 import { LineFilter } from "./LineFilter";
-import { StationSearchField, StationSearchResults } from "./StationSearch";
-import { ThemeSegmented, ThemeToggle } from "./ThemeToggle";
-import { Sheet, type Detent } from "./Sheet";
-import { LogoIcon } from "./icons";
-import { t } from "../lib/i18n";
+import { StationSearch } from "./StationSearch";
+import { ThemeToggle } from "./ThemeToggle";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
 import { NearestStationChip } from "./NearestStationChip";
@@ -46,13 +36,9 @@ const NetworkMap = dynamic(
   () => import("./Map").then((mod) => ({ default: mod.Map })),
   {
     ssr: false,
-    loading: () => <div className="map-canvas" />,
+    loading: () => <div style={{ width: "100%", height: "100vh" }} />,
   },
 );
-
-// Visible sheet height on phones when collapsed: grabber, search field and
-// the line chip row, so filtering lines never needs the sheet raised.
-const PEEK_HEIGHT = 180;
 
 export function HomeClient({
   stations,
@@ -310,120 +296,6 @@ export function HomeClient({
     return nearestStations(userLocation, boardable, 1)[0] ?? null;
   }, [userLocation, visibleStations]);
 
-  // Sheet state. A selected station opens the sheet halfway, the way Waymo
-  // raises its trip card; focusing search opens it fully for the keyboard.
-  const [detent, setDetent] = useState<Detent>("peek");
-  const [query, setQuery] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  const selectFromSheet = useCallback(
-    (station: StationWithStatus) => {
-      setQuery("");
-      searchRef.current?.blur();
-      handleSelectStation(station);
-      // Drop out of the full-height search state so the map is visible again.
-      setDetent("half");
-    },
-    [handleSelectStation],
-  );
-
-  // Opening a station from the map (or a deep link) raises the sheet so its
-  // details are visible; closing drops it back to the peek.
-  useEffect(() => {
-    if (selectedStation) setDetent((d) => (d === "full" ? d : "half"));
-  }, [selectedStation]);
-
-  const closeStation = useCallback(() => {
-    setSelectedStation(null);
-    setDetent("peek");
-    window.history.replaceState(null, "", window.location.pathname);
-  }, []);
-
-  // The UI chrome follows the map theme so the two never disagree.
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
-  let body: ReactNode;
-  if (query.trim()) {
-    body = (
-      <StationSearchResults
-        stations={stations}
-        lines={lines}
-        query={query.trim()}
-        onSelect={selectFromSheet}
-      />
-    );
-  } else if (selectedStation) {
-    body = (
-      <StationPanel
-        station={selectedStation}
-        lines={lines}
-        onClose={closeStation}
-      />
-    );
-  } else {
-    body = (
-      <>
-        {/* Line chips come first: PEEK_HEIGHT only fits the chip row, and a
-            nearest-station row above it would push the chips out of the
-            collapsed sheet once a location fix (or error) arrives. */}
-        <LineFilter
-          lines={lines}
-          activeLineIds={activeLineIds}
-          onToggle={(id) =>
-            setActiveLineIds((prev) => {
-              const next = new Set(prev);
-              next.has(id) ? next.delete(id) : next.add(id);
-              return next;
-            })
-          }
-          onShowAll={() => setActiveLineIds(new Set(lines.map((l) => l.id)))}
-        />
-        <NearestStationChip
-          nearest={nearest}
-          errorCode={geolocateError}
-          onSelect={selectFromSheet}
-        />
-        {selectedYear !== null && (
-          <YearSelector
-            year={selectedYear}
-            minYear={minYear}
-            maxYear={new Date().getFullYear()}
-            onChange={setSelectedYear}
-          />
-        )}
-        <section className="section">
-          <h2 className="section-title">{t("map_settings", "en")}</h2>
-          <div className="list">
-            <ThemeSegmented theme={theme} onChange={setTheme} />
-            <StationLabelsToggle
-              on={showStationLabels}
-              onChange={setShowStationLabels}
-            />
-            <SelectionRingColorPicker
-              theme={theme}
-              color={selectionRingColors[theme]}
-              onChange={(color) =>
-                setSelectionRingColors((prev) => ({ ...prev, [theme]: color }))
-              }
-            />
-          </div>
-        </section>
-        <nav className="footer-links" aria-label="Project">
-          <a href="/download">{t("download_dataset", "en")}</a>
-          <a
-            href="https://github.com/Nukaze/bangkok-open-transit"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub
-          </a>
-        </nav>
-      </>
-    );
-  }
-
   return (
     <>
       <NetworkMap
@@ -436,33 +308,50 @@ export function HomeClient({
         onUserLocation={handleUserLocation}
         onGeolocateError={setGeolocateError}
       />
-      <div className="fab-stack">
-        <ThemeToggle theme={theme} onChange={setTheme} />
-      </div>
-      <Sheet
-        detent={detent}
-        onDetentChange={setDetent}
-        peekHeight={PEEK_HEIGHT}
-        expandKey={selectedStation?.id ?? null}
-        header={
-          <>
-            <div className="brand">
-              <span className="brand-mark" aria-hidden="true">
-                <LogoIcon size={22} />
-              </span>
-              <span className="brand-name">Bangkok Open Transit</span>
-            </div>
-            <StationSearchField
-              query={query}
-              onQueryChange={setQuery}
-              onFocus={() => setDetent("full")}
-              inputRef={searchRef}
-            />
-          </>
+      <ThemeToggle theme={theme} onChange={setTheme} />
+      <StationLabelsToggle
+        theme={theme}
+        on={showStationLabels}
+        onChange={setShowStationLabels}
+      />
+      <SelectionRingColorPicker
+        theme={theme}
+        color={selectionRingColors[theme]}
+        onChange={(color) =>
+          setSelectionRingColors((prev) => ({ ...prev, [theme]: color }))
         }
-      >
-        {body}
-      </Sheet>
+      />
+      <LineFilter
+        lines={lines}
+        activeLineIds={activeLineIds}
+        onToggle={(id) =>
+          setActiveLineIds((prev) => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+          })
+        }
+      />
+      <StationSearch stations={stations} onSelect={handleSelectStation} />
+      {selectedYear !== null && (
+        <YearSelector
+          year={selectedYear}
+          minYear={minYear}
+          maxYear={new Date().getFullYear()}
+          onChange={setSelectedYear}
+        />
+      )}
+      <NearestStationChip
+        theme={theme}
+        nearest={nearest}
+        errorCode={geolocateError}
+        onSelect={handleSelectStation}
+      />
+      <StationPanel
+        station={selectedStation}
+        lines={lines}
+        onClose={() => setSelectedStation(null)}
+      />
     </>
   );
 }

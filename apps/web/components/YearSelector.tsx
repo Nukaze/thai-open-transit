@@ -1,8 +1,6 @@
 // apps/web/components/YearSelector.tsx
 "use client";
 
-import { t } from "../lib/i18n";
-
 export function YearSelector({
   year,
   minYear,
@@ -14,33 +12,29 @@ export function YearSelector({
   maxYear: number;
   onChange: (year: number) => void;
 }) {
-  const pct =
-    maxYear === minYear ? 100 : ((year - minYear) / (maxYear - minYear)) * 100;
-  const isToday = year === maxYear;
   return (
-    <section className="section">
-      <h2 className="section-title">{t("time_travel", "en")}</h2>
-      <div className="year-card">
-        <div className="year-value" aria-live="polite">
-          {year}
-          <small>{isToday ? t("today", "en") : t("network_as_of", "en")}</small>
-        </div>
-        <input
-          className="range"
-          type="range"
-          aria-label={t("time_travel", "en")}
-          min={minYear}
-          max={maxYear}
-          step={1}
-          value={year}
-          style={{ ["--pct" as string]: `${pct}%` }}
-          onChange={(e) => onChange(Number(e.target.value))}
-        />
-        <div className="range-ends" aria-hidden="true">
-          <span>{minYear}</span>
-          <span>{maxYear}</span>
-        </div>
-      </div>
-    </section>
+    <div
+      style={{
+        position: "absolute",
+        bottom: 16,
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: "white",
+        padding: 8,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+      }}
+    >
+      <input
+        type="range"
+        min={minYear}
+        max={maxYear}
+        step={1}
+        value={year}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+      <span>{year === maxYear ? "Today" : year}</span>
+    </div>
   );
 }
