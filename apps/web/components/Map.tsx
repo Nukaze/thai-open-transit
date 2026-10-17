@@ -868,6 +868,13 @@ export function Map({
     const map = mapRef.current;
     if (!map || themeRef.current === theme) return;
     themeRef.current = theme;
+    // Stop the pulse before the swap: between `setStyle` and `style.load` its
+    // `setPaintProperty` calls hit a half-loaded style and log "Style is not
+    // done loading" every frame. The `style.load` handler restarts it.
+    if (pulseFrameRef.current !== null) {
+      cancelAnimationFrame(pulseFrameRef.current);
+      pulseFrameRef.current = null;
+    }
     map.setStyle(buildStyle(theme), { diff: false });
   }, [theme]);
 

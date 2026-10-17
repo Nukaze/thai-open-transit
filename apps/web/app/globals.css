@@ -400,8 +400,6 @@ button {
   height: 30px;
   display: grid;
   place-items: center;
-  /* Same amethyst as app/favicon.ico, so the tab and the panel match. */
-  color: #9966cc;
 }
 
 .brand-name {
