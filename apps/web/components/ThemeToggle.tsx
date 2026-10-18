@@ -2,6 +2,7 @@
 "use client";
 
 import type { MapTheme } from "./Map";
+import { useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import { MoonIcon, SunIcon } from "./icons";
 
@@ -16,8 +17,9 @@ export function ThemeToggle({
   theme: MapTheme;
   onChange: (theme: MapTheme) => void;
 }) {
+  const lang = useLang();
   const dark = theme === "dark";
-  const label = t(dark ? "theme_to_light" : "theme_to_dark", "en");
+  const label = t(dark ? "theme_to_light" : "theme_to_dark", lang);
   return (
     <button
       type="button"
@@ -39,16 +41,17 @@ export function ThemeSegmented({
   theme: MapTheme;
   onChange: (theme: MapTheme) => void;
 }) {
+  const lang = useLang();
   return (
     <div className="row">
-      <span className="row-main row-title">{t("appearance", "en")}</span>
+      <span className="row-main row-title">{t("appearance", lang)}</span>
       {/* `data-value` drives the sliding thumb (globals.css): one moving
           surface, the way UISegmentedControl reads, instead of two buttons
           swapping fills. */}
       <div
         className="segmented"
         role="group"
-        aria-label={t("appearance", "en")}
+        aria-label={t("appearance", lang)}
         data-value={theme}
       >
         {(["light", "dark"] as const).map((value) => (
@@ -58,7 +61,7 @@ export function ThemeSegmented({
             aria-pressed={theme === value}
             onClick={() => onChange(value)}
           >
-            {t(value === "light" ? "light" : "dark", "en")}
+            {t(value === "light" ? "light" : "dark", lang)}
           </button>
         ))}
       </div>

@@ -2,30 +2,20 @@
 "use client";
 
 import { useState } from "react";
-import type { Line, Status } from "schema";
+import type { Line } from "schema";
 import type { StationWithStatus } from "../lib/types";
-import { t } from "../lib/i18n";
+import { names, useLang } from "../lib/lang";
+import { t, type Lang } from "../lib/i18n";
 import { ReportErrorButton } from "./ReportErrorButton";
 import { LineLogo } from "./LineLogo";
 import { CloseIcon, LinkIcon } from "./icons";
 
-// Same copy as `ui`'s StatusBadge; rendered locally so the badge can carry
-// this app's pill styling via `data-status`.
-const STATUS_LABEL: Record<Status, string> = {
-  operational: "Operational",
-  trial: "Trial service",
-  under_construction: "Under construction",
-  approved: "Approved",
-  planned: "Planned",
-  proposed: "Proposed",
-  suspended: "Suspended",
-  cancelled: "Cancelled",
-};
-
-const STRUCTURE_LABEL: Record<string, string> = {
-  elevated: "Elevated",
-  underground: "Underground",
-  at_grade: "At grade",
+// Status and structure copy lives in the i18n dictionary as
+// `status_<status>` / `structure_<structure>`; the badge carries this app's
+// pill styling via `data-status`. An unknown structure value shows raw.
+const structureLabel = (structure: string, lang: Lang) => {
+  const label = t(`structure_${structure}`, lang);
+  return label === `structure_${structure}` ? structure : label;
 };
 
 export function StationPanel({
@@ -37,7 +27,10 @@ export function StationPanel({
   lines: Line[];
   onClose: () => void;
 }) {
+  const lang = useLang();
   const [copied, setCopied] = useState(false);
+  // Current language's name as the title, the other under it.
+  const stationNames = names(station, lang);
 
   // Lines served come from `validity[]` rather than from the segments graph:
   // validity is the station's own record of which line it belongs to and when,
@@ -61,7 +54,7 @@ export function StationPanel({
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) {
         await navigator.share({
-          title: station.name_en ?? station.name_th,
+          title: stationNames.primary,
           url,
         });
         return;
@@ -75,16 +68,13 @@ export function StationPanel({
   };
 
   const details: [string, string][] = [
+    [t("structure", lang), structureLabel(station.structure, lang)],
+    [t("accessible", lang), t(station.accessible ? "yes" : "no", lang)],
     [
-      t("structure", "en"),
-      STRUCTURE_LABEL[station.structure] ?? station.structure,
+      t("opened", lang),
+      openedMilestone ? openedMilestone.date : t("not_yet_opened", lang),
     ],
-    [t("accessible", "en"), station.accessible ? "Yes" : "No"],
-    [
-      t("opened", "en"),
-      openedMilestone ? openedMilestone.date : t("not_yet_opened", "en"),
-    ],
-    [t("last_verified", "en"), station.last_verified_at],
+    [t("last_verified", lang), station.last_verified_at],
   ];
 
   return (
@@ -95,20 +85,26 @@ export function StationPanel({
     >
       <div className="station-head">
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 id="station-title" className="station-title">
-            {station.name_en ?? station.name_th}
+          <h2
+            id="station-title"
+            className="station-title"
+            lang={stationNames.primaryLang}
+          >
+            {stationNames.primary}
           </h2>
-          <p className="station-th" lang="th">
-            {station.name_th}
-          </p>
+          {stationNames.secondary && (
+            <p className="station-th" lang={stationNames.secondaryLang}>
+              {stationNames.secondary}
+            </p>
+          )}
           <span className="status" data-status={station.status}>
-            {STATUS_LABEL[station.status]}
+            {t(`status_${station.status}`, lang)}
           </span>
         </div>
         <button
           type="button"
           className="icon-btn"
-          aria-label="Close"
+          aria-label={t("close", lang)}
           onClick={onClose}
         >
           <CloseIcon />
@@ -116,41 +112,50 @@ export function StationPanel({
       </div>
 
       <section className="section">
-        <h3 className="section-title">{t("lines", "en")}</h3>
+        <h3 className="section-title">{t("lines", lang)}</h3>
         {servingLines.length === 0 ? (
-          <p className="empty">Unknown</p>
+          <p className="empty">{t("unknown", lang)}</p>
         ) : (
           <ul className="list">
-            {servingLines.map((line) => (
-              <li key={line.id}>
-                <div className="row">
-                  <span
-                    className="line-bar"
-                    aria-hidden="true"
-                    style={{ background: line.color_hex }}
-                  />
-                  <LineLogo line={line} size={28} />
-                  <span className="row-main">
-                    <span className="row-title" style={{ display: "block" }}>
-                      {line.name_en}
-                    </span>
+            {servingLines.map((line) => {
+              const lineNames = names(line, lang);
+              return (
+                <li key={line.id}>
+                  <div className="row">
                     <span
-                      className="row-sub"
-                      lang="th"
-                      style={{ display: "block" }}
-                    >
-                      {line.name_th}
+                      className="line-bar"
+                      aria-hidden="true"
+                      style={{ background: line.color_hex }}
+                    />
+                    <LineLogo line={line} size={28} />
+                    <span className="row-main">
+                      <span
+                        className="row-title"
+                        lang={lineNames.primaryLang}
+                        style={{ display: "block" }}
+                      >
+                        {lineNames.primary}
+                      </span>
+                      {lineNames.secondary && (
+                        <span
+                          className="row-sub"
+                          lang={lineNames.secondaryLang}
+                          style={{ display: "block" }}
+                        >
+                          {lineNames.secondary}
+                        </span>
+                      )}
                     </span>
-                  </span>
-                </div>
-              </li>
-            ))}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
 
       <section className="section">
-        <h3 className="section-title">{t("details", "en")}</h3>
+        <h3 className="section-title">{t("details", lang)}</h3>
         <dl className="list" style={{ margin: 0 }}>
           {details.map(([label, value]) => (
             <div className="row" key={label}>
@@ -168,7 +173,7 @@ export function StationPanel({
       <div className="actions">
         <button type="button" className="btn btn-primary" onClick={copyLink}>
           <LinkIcon />
-          {copied ? t("copied", "en") : t("share", "en")}
+          {copied ? t("copied", lang) : t("share", lang)}
         </button>
         <ReportErrorButton station={station} />
       </div>

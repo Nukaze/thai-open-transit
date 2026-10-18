@@ -2,6 +2,7 @@
 "use client";
 
 import type { Station } from "schema";
+import { useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import { FlagIcon } from "./icons";
 
@@ -13,6 +14,7 @@ const GITHUB_ISSUE_BASE_URL =
   "https://github.com/Nukaze/bangkok-open-transit/issues/new";
 
 export function ReportErrorButton({ station }: { station: Station }) {
+  const lang = useLang();
   const title = encodeURIComponent(
     `Data error: ${station.name_en ?? station.name_th} (${station.id})`,
   );
@@ -29,7 +31,7 @@ export function ReportErrorButton({ station }: { station: Station }) {
       rel="noopener noreferrer"
     >
       <FlagIcon />
-      {t("report_error", "en")}
+      {t("report_error", lang)}
     </a>
   );
 }

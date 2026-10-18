@@ -1,6 +1,38 @@
 // apps/web/lib/i18n.ts
 
-const DICTIONARY: Record<string, { th: string; en: string }> = {
+/** A language the UI is fully translated into. Only these reach `t()`. */
+export type Lang = "en" | "th";
+
+/** Flags drawn by `Flag.tsx`. Optional per language: a language with no
+ *  fitting flag simply goes without. */
+export type FlagId = "us-gb" | "th" | "jp" | "cn";
+
+export type LanguageOption =
+  | { code: Lang; native: string; flag?: FlagId; ready: true }
+  // Listed in the picker but not selectable yet, so visitors can see what
+  // is coming. Typed apart so `t()` can never receive one of these codes.
+  | { code: string; native: string; flag?: FlagId; ready: false };
+
+// Each language in its own script, so a reader finds theirs at a glance
+// whatever the page's current language is.
+export const LANGUAGES: LanguageOption[] = [
+  { code: "en", native: "English", flag: "us-gb", ready: true },
+  { code: "th", native: "ไทย", flag: "th", ready: true },
+  { code: "ja", native: "日本語", flag: "jp", ready: false },
+  // Mainland China. Traditional Chinese (Taiwan) would be its own entry.
+  { code: "zh", native: "中文", flag: "cn", ready: false },
+];
+
+/** First of the browser's preferred languages the UI supports, else English. */
+export function detectLang(preferences: readonly string[]): Lang {
+  for (const pref of preferences) {
+    const base = pref.toLowerCase().split("-")[0];
+    if (base === "th" || base === "en") return base;
+  }
+  return "en";
+}
+
+export const DICTIONARY: Record<string, Record<Lang, string>> = {
   search_placeholder: { th: "ค้นหาสถานี...", en: "Search stations..." },
   report_error: { th: "แจ้งข้อผิดพลาด", en: "Report an error" },
   last_verified: { th: "ตรวจสอบล่าสุด", en: "Last verified" },
@@ -71,8 +103,32 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   reset_view: { th: "กลับสู่มุมมองเริ่มต้น", en: "Reset view" },
   zoom_in: { th: "ซูมเข้า", en: "Zoom in" },
   zoom_out: { th: "ซูมออก", en: "Zoom out" },
+  language: { th: "ภาษา", en: "Language" },
+  coming_soon: { th: "เร็วๆ นี้", en: "Coming soon" },
+  map_controls: { th: "ควบคุมแผนที่", en: "Map controls" },
+  map_panel: { th: "แผงแผนที่", en: "Map panel" },
+  expand_panel: { th: "ขยายแผง", en: "Expand panel" },
+  collapse_panel: { th: "ย่อแผง", en: "Collapse panel" },
+  project: { th: "โครงการ", en: "Project" },
+  close: { th: "ปิด", en: "Close" },
+  clear_search: { th: "ล้างคำค้นหา", en: "Clear search" },
+  search_results: { th: "ผลการค้นหา", en: "Search results" },
+  yes: { th: "ใช่", en: "Yes" },
+  no: { th: "ไม่", en: "No" },
+  unknown: { th: "ไม่ทราบ", en: "Unknown" },
+  status_operational: { th: "เปิดให้บริการ", en: "Operational" },
+  status_trial: { th: "ทดลองเดินรถ", en: "Trial service" },
+  status_under_construction: { th: "กำลังก่อสร้าง", en: "Under construction" },
+  status_approved: { th: "อนุมัติแล้ว", en: "Approved" },
+  status_planned: { th: "อยู่ในแผน", en: "Planned" },
+  status_proposed: { th: "ข้อเสนอ", en: "Proposed" },
+  status_suspended: { th: "หยุดให้บริการชั่วคราว", en: "Suspended" },
+  status_cancelled: { th: "ยกเลิก", en: "Cancelled" },
+  structure_elevated: { th: "ยกระดับ", en: "Elevated" },
+  structure_underground: { th: "ใต้ดิน", en: "Underground" },
+  structure_at_grade: { th: "ระดับดิน", en: "At grade" },
 };
 
-export function t(key: string, lang: "th" | "en"): string {
+export function t(key: string, lang: Lang): string {
   return DICTIONARY[key]?.[lang] ?? key;
 }

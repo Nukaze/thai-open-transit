@@ -11,6 +11,8 @@ import {
   type ReactNode,
 } from "react";
 import { ChevronIcon } from "./icons";
+import { t } from "../lib/i18n";
+import { useLang } from "../lib/lang";
 
 export type Detent = "peek" | "half" | "full";
 
@@ -62,6 +64,7 @@ export function Sheet({
   header: ReactNode;
   children: ReactNode;
 }) {
+  const lang = useLang();
   const sheetRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [desktop, setDesktop] = useState(false);
@@ -292,7 +295,7 @@ export function Sheet({
       data-detent={desktop ? "full" : detent}
       data-collapsed={desktop && collapsed ? "true" : undefined}
       role="region"
-      aria-label="Map panel"
+      aria-label={t("map_panel", lang)}
       // The prerendered HTML has no measurements, so CSS places the sheet at
       // the peek from `--peek-height` until JS takes over with exact pixels.
       style={
@@ -309,13 +312,16 @@ export function Sheet({
       <button
         type="button"
         className="sheet-grabber"
-        aria-label={detent === "peek" ? "Expand panel" : "Collapse panel"}
+        aria-label={t(
+          detent === "peek" ? "expand_panel" : "collapse_panel",
+          lang,
+        )}
         onClick={() => onDetentChange(detent === "peek" ? "half" : "peek")}
       />
       <button
         type="button"
         className="sheet-collapse"
-        aria-label={collapsed ? "Expand panel" : "Collapse panel"}
+        aria-label={t(collapsed ? "expand_panel" : "collapse_panel", lang)}
         aria-expanded={!collapsed}
         onClick={() => setCollapsed((c) => !c)}
       >

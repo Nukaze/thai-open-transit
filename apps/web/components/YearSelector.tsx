@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import { ResetViewIcon } from "./icons";
 
@@ -22,6 +23,7 @@ export function YearSelector({
   maxYear: number;
   onChange: (year: number) => void;
 }) {
+  const lang = useLang();
   const pct =
     maxYear === minYear ? 100 : ((year - minYear) / (maxYear - minYear)) * 100;
   const isToday = year === maxYear;
@@ -44,13 +46,13 @@ export function YearSelector({
 
   return (
     <section className="section time-travel">
-      <h2 className="section-title">{t("time_travel", "en")}</h2>
+      <h2 className="section-title">{t("time_travel", lang)}</h2>
       <div className="year-card">
         <div className="year-head">
           <div className="year-value" aria-live="polite">
             {year}
             <small>
-              {isToday ? t("today", "en") : t("network_as_of", "en")}
+              {isToday ? t("today", lang) : t("network_as_of", lang)}
             </small>
           </div>
           {/* Only away from the present, so the card at its usual state
@@ -59,19 +61,19 @@ export function YearSelector({
             <button
               type="button"
               className="link-btn year-today"
-              aria-label={t("back_to_today", "en")}
-              title={t("back_to_today", "en")}
+              aria-label={t("back_to_today", lang)}
+              title={t("back_to_today", lang)}
               onClick={() => onChange(maxYear)}
             >
               <ResetViewIcon size={14} />
-              {t("today", "en")}
+              {t("today", lang)}
             </button>
           )}
         </div>
         <input
           className="range"
           type="range"
-          aria-label={t("time_travel", "en")}
+          aria-label={t("time_travel", lang)}
           min={minYear}
           max={maxYear}
           step={1}

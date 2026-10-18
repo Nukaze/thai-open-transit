@@ -4,6 +4,7 @@
 import { useMemo, type RefObject } from "react";
 import Fuse from "fuse.js";
 import type { Line, Station } from "schema";
+import { names, useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import { ChevronIcon, CloseIcon, SearchIcon } from "./icons";
 
@@ -21,11 +22,12 @@ export function StationSearchField({
   onFocus: () => void;
   inputRef?: RefObject<HTMLInputElement | null>;
 }) {
+  const lang = useLang();
   return (
     <div className="search" role="search">
       <SearchIcon />
       <label className="visually-hidden" htmlFor="station-search">
-        {t("search_placeholder", "en")}
+        {t("search_placeholder", lang)}
       </label>
       <input
         ref={inputRef}
@@ -36,13 +38,13 @@ export function StationSearchField({
         value={query}
         onFocus={onFocus}
         onChange={(e) => onQueryChange(e.target.value)}
-        placeholder={t("search_where", "en")}
+        placeholder={t("search_where", lang)}
       />
       {query && (
         <button
           type="button"
           className="icon-btn"
-          aria-label="Clear search"
+          aria-label={t("clear_search", lang)}
           onClick={() => onQueryChange("")}
         >
           <CloseIcon size={12} />
@@ -65,6 +67,7 @@ export function StationSearchResults<T extends Station>({
   query: string;
   onSelect: (station: T) => void;
 }) {
+  const lang = useLang();
   const fuse = useMemo(
     () =>
       new Fuse(stations, {
@@ -87,11 +90,11 @@ export function StationSearchResults<T extends Station>({
   const results = fuse.search(query).slice(0, 12);
 
   if (results.length === 0) {
-    return <p className="empty">{t("no_results", "en")}</p>;
+    return <p className="empty">{t("no_results", lang)}</p>;
   }
 
   return (
-    <ul className="list fade-in" aria-label="Search results">
+    <ul className="list fade-in" aria-label={t("search_results", lang)}>
       {results.map(({ item }) => {
         const lineIds = [...new Set(item.validity.map((v) => v.line))];
         return (
@@ -117,11 +120,23 @@ export function StationSearchResults<T extends Station>({
                 </span>
               </span>
               <span className="row-main">
-                <span className="row-title" style={{ display: "block" }}>
-                  {item.name_en ?? item.name_th}
+                <span
+                  className="row-title"
+                  lang={names(item, lang).primaryLang}
+                  style={{ display: "block" }}
+                >
+                  {names(item, lang).primary}
                 </span>
                 <span className="row-sub" style={{ display: "block" }}>
-                  <span lang="th">{item.name_th}</span> · {item.id}
+                  {names(item, lang).secondary && (
+                    <>
+                      <span lang={names(item, lang).secondaryLang}>
+                        {names(item, lang).secondary}
+                      </span>
+                      {" · "}
+                    </>
+                  )}
+                  {item.id}
                 </span>
               </span>
               <ChevronIcon />
