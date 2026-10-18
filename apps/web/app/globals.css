@@ -199,9 +199,9 @@ button {
   max-width: calc(100vw - 76px);
   display: flex;
   align-items: center;
-  /* 8 + 26px icon + 8 + 1px edges = 44: folded, a circle like the theme
-     button. */
-  padding: 0 8px;
+  /* Expanded: 12px before the icon. Folded: 8 + 26px icon + 8 + 1px
+     edges = 44, a circle like the theme button. */
+  padding: 0 8px 0 12px;
   border-radius: 999px;
   /* Glass and edge: the shared control-glass rule further down. */
   box-shadow: var(--shadow-float);
@@ -217,6 +217,10 @@ button {
 
 /* Folding: the S mark turns half a turn (it is point-symmetric, so it
    lands as itself) while the name collapses into it. */
+.mobile-brand[data-folded] {
+  padding-left: 8px;
+}
+
 .mobile-brand[data-folded] img {
   transform: rotate(-180deg);
 }
@@ -1953,11 +1957,18 @@ a.row:active {
 }
 
 /* The theme button keeps its press scale (`.fab` above). */
-.fab,
-.mobile-brand {
+.fab {
   transition:
     transform 120ms ease-out,
     opacity 320ms ease;
+}
+
+/* The brand pill also eases its left padding with the fold. */
+.mobile-brand {
+  transition:
+    transform 120ms ease-out,
+    opacity 320ms ease,
+    padding-left 360ms var(--ease-drawer);
 }
 
 :root[data-scrubbing] .sheet {
