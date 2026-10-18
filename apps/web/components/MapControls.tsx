@@ -24,6 +24,9 @@ const FLAT_PITCH = 5;
 // One press of tilt up/down. Presses snap to multiples of it, so after a
 // free two-finger tilt the steps still land on round angles.
 const PITCH_STEP = 15;
+// One press of zoom in/out, in zoom levels. MapLibre's zoomIn/zoomOut step
+// a full level (2x scale); half a level is finer control on a dense network.
+const ZOOM_STEP = 0.5;
 
 // What the locate button shows. Mirrors GeolocateControl's watch states:
 // "waiting" for the first fix, "active" following the user, "background"
@@ -158,7 +161,7 @@ export function MapControls({
         aria-label={t("zoom_out", lang)}
         title={t("zoom_out", lang)}
         disabled={atMinZoom}
-        onClick={() => map.zoomOut()}
+        onClick={() => map.zoomTo(map.getZoom() - ZOOM_STEP)}
       >
         <MinusIcon />
       </button>
@@ -168,7 +171,7 @@ export function MapControls({
         aria-label={t("zoom_in", lang)}
         title={t("zoom_in", lang)}
         disabled={atMaxZoom}
-        onClick={() => map.zoomIn()}
+        onClick={() => map.zoomTo(map.getZoom() + ZOOM_STEP)}
       >
         <PlusIcon />
       </button>
