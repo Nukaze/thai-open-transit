@@ -1,14 +1,12 @@
-// apps/web/components/VisitCounter.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { t } from "../lib/i18n";
-import { useLang } from "../lib/lang";
+import { startingLang, useLang } from "../lib/lang";
 import {
-  VISIT_DAY_KEY,
-  bangkokDay,
+  deviceClass,
   fetchStats,
-  shouldRecord,
+  isBot,
   statsConfigured,
   type VisitStats,
 } from "../lib/visitCounter";
@@ -20,33 +18,40 @@ import { EyeIcon } from "./icons";
 // or fetch again.
 let pageLoad: Promise<VisitStats | null> | null = null;
 
+// A tab opened in the background (or prerendered) is not a view until
+// someone actually looks at it.
+function whenVisible(): Promise<void> {
+  if (document.visibilityState === "visible") return Promise.resolve();
+  return new Promise((resolve) => {
+    const onChange = () => {
+      if (document.visibilityState !== "visible") return;
+      document.removeEventListener("visibilitychange", onChange);
+      resolve();
+    };
+    document.addEventListener("visibilitychange", onChange);
+  });
+}
+
 function loadStats(): Promise<VisitStats | null> {
   if (pageLoad) return pageLoad;
-  const today = bangkokDay(new Date());
-  let last: string | null = null;
-  try {
-    last = localStorage.getItem(VISIT_DAY_KEY);
-  } catch {
-    // Storage blocked: count this load, the server can't tell anyway.
-  }
-  const record = shouldRecord(last, today);
-  pageLoad = fetchStats(record).then((result) => {
-    if (result && record) {
-      try {
-        localStorage.setItem(VISIT_DAY_KEY, today);
-      } catch {
-        // Not remembered: a reload today may count again. Harmless.
-      }
-    }
-    return result;
-  });
+  pageLoad = whenVisible().then(() =>
+    isBot(navigator.userAgent, navigator.webdriver)
+      ? fetchStats()
+      : // The language the viewer starts in, resolved here rather than taken
+        // from context: this effect runs before HomeClient's detection, while
+        // the context still holds the prerendered "en".
+        fetchStats({
+          lang: startingLang(),
+          device: deviceClass(window.innerWidth),
+        }),
+  );
   return pageLoad;
 }
 
-// "12,345 visits · 87 today" beside the footer links. A visit is a browser's
-// first load of a Bangkok day; later loads that day only read. Renders
-// nothing until the numbers arrive, and nothing at all if the stats project
-// is unconfigured, paused or unreachable - the map never depends on it.
+// "12,345 views · 87 today" beside the footer links. Every page load a person
+// actually sees counts as a view, reloads included. Renders nothing until the
+// numbers arrive, and nothing at all if the stats project is unconfigured,
+// paused or unreachable - the map never depends on it.
 export function VisitCounter() {
   const lang = useLang();
   const [stats, setStats] = useState<VisitStats | null>(null);

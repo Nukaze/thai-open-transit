@@ -15,8 +15,8 @@ import { LineFilter } from "./LineFilter";
 import { StationSearchField, StationSearchResults } from "./StationSearch";
 import { ThemeSegmented, ThemeToggle } from "./ThemeToggle";
 import { Sheet, type Detent } from "./Sheet";
-import { detectLang, t, type Lang } from "../lib/i18n";
-import { LangContext } from "../lib/lang";
+import { t, type Lang } from "../lib/i18n";
+import { LANG_KEY, LangContext, startingLang } from "../lib/lang";
 import { LanguagePicker } from "./LanguagePicker";
 import { VisitCounter } from "./VisitCounter";
 import { YearSelector } from "./YearSelector";
@@ -57,9 +57,6 @@ const NetworkMap = dynamic(
 // the section's Show all / Hide all in reach. The other groups are a swipe
 // up away (half detent).
 const PEEK_HEIGHT = 226;
-
-// localStorage key for the viewer's chosen UI language.
-const LANG_KEY = "bot:lang";
 
 export function HomeClient({
   stations,
@@ -108,17 +105,7 @@ export function HomeClient({
   // Unlike theme it is remembered: a language is a standing preference.
   const [lang, setLang] = useState<Lang>("en");
   useEffect(() => {
-    let saved: string | null = null;
-    try {
-      saved = localStorage.getItem(LANG_KEY);
-    } catch {
-      // Storage blocked (private mode, sandbox): fall through to detection.
-    }
-    setLang(
-      saved === "en" || saved === "th"
-        ? saved
-        : detectLang(navigator.languages ?? [navigator.language]),
-    );
+    setLang(startingLang());
   }, []);
   useEffect(() => {
     document.documentElement.lang = lang;
