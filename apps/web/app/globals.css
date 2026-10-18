@@ -1691,7 +1691,7 @@ a.row:active {
    as legible as on a solid panel. */
 
 :root {
-  --glass-panel: rgba(246, 246, 248, 0.76);
+  --glass-panel: rgba(246, 246, 248, 0.38);
   /* Inner cards are near-solid: light glass stacked on light glass loses
      legibility, so the stacking stops at the panel. Defined here, before
      the solid fallbacks below, so those still win when they apply. */
@@ -1706,7 +1706,7 @@ a.row:active {
 }
 
 :root[data-theme="dark"] {
-  --glass-panel: rgba(28, 28, 31, 0.74);
+  --glass-panel: rgba(28, 28, 31, 0.42);
   --glass-card: rgba(255, 255, 255, 0.07);
   --glass-raised: rgba(255, 255, 255, 0.16);
   --glass-edge: rgba(255, 255, 255, 0.08);
@@ -1714,7 +1714,7 @@ a.row:active {
      for a large panel, whose shape reads anyway, but a 44px button in it
      vanishes and leaves its icon floating. A lighter surface and edge keep
      each control a visible shape. */
-  --glass-control: rgba(52, 52, 56, 0.86);
+  --glass-control: rgba(52, 52, 56, 0.42);
   --glass-control-edge: rgba(255, 255, 255, 0.16);
 }
 
