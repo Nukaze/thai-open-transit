@@ -25,7 +25,7 @@ async function main() {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       "User-Agent":
-        "BangkokOpenTransit/1.0 (+https://github.com/Nukaze/thai-open-transit)",
+        "ThaiOpenTransit/1.0 (+https://github.com/Nukaze/thai-open-transit)",
     },
   });
   if (!response.ok) {

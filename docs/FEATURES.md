@@ -1,6 +1,6 @@
 # FEATURES.md
 
-What BangkokOpenTransit is for, and what it does today. Written for new
+What Thai Open Transit is for, and what it does today. Written for new
 contributors and for the AI coding agents they work with.
 
 | If you want...                         | Read                      |

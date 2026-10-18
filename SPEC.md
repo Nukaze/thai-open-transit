@@ -1,6 +1,6 @@
 # SPEC.md
 
-Feature specification and roadmap for BangkokOpenTransit.
+Feature specification and roadmap for Thai Open Transit.
 
 Read `CLAUDE.md` first for architectural constraints.
 

@@ -1,4 +1,4 @@
-# BangkokOpenTransit
+# Thai Open Transit
 
 An open, structured, versioned dataset of Bangkok's rail transit network,
 covering Bangkok and its metropolitan region (Nonthaburi, Samut Prakan,

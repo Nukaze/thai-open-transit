@@ -4,7 +4,7 @@ import type { Viewport } from "next";
 import "./globals.css";
 
 export const metadata = {
-  title: "BangkokOpenTransit",
+  title: "Thai Open Transit",
   description: "Bangkok's rail transit network as an open, structured dataset.",
 };
 

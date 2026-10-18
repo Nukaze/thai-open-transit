@@ -6,13 +6,13 @@ Context for AI coding agents working in this repository. Read this before writin
 
 ## 1. What this project is
 
-**BangkokOpenTransit** is an open-source dataset and reference web application for
+**ThaiOpenTransit** is an open-source dataset and reference web application for
 Bangkok's rail transit network, covering Bangkok and its metropolitan region
 (Nonthaburi, Samut Prakan, Pathum Thani).
 
 | Field               | Value                                          |
 | ------------------- | ---------------------------------------------- |
-| Product name        | BangkokOpenTransit                             |
+| Product name        | Thai Open Transit (ThaiOpenTransit)            |
 | GitHub repo         | `Nukaze/thai-open-transit`                     |
 | GitHub org (future) | `opentransit-th`                               |
 | Deployment          | Vercel, static export                          |
@@ -28,6 +28,10 @@ The name says "transit", not "transit data", but the positioning is unchanged:
 the dataset is the product. The name was chosen so the first public release
 reads naturally to ordinary users. Do not let the name pull the architecture
 toward a map-first design. Section 2.1 still governs.
+
+"Thai" (renamed from BangkokOpenTransit) names the long-term scope, the whole
+country under one brand; the dataset today still covers Bangkok and its
+metropolitan region. New cities are added as data, not as new brands.
 
 ### The one-sentence positioning
 
