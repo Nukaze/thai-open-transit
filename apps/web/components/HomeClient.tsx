@@ -19,7 +19,6 @@ import { t, type Lang } from "../lib/i18n";
 import { LANG_KEY, LangContext, startingLang } from "../lib/lang";
 import { LanguagePicker } from "./LanguagePicker";
 import { VisitCounter } from "./VisitCounter";
-import { DevFontSwitcher } from "./DevFontSwitcher";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
 import { NearestStationChip } from "./NearestStationChip";
@@ -470,7 +469,6 @@ export function HomeClient({
             />
           </div>
         </section>
-        <DevFontSwitcher />
         {/* Last: dragging the year fades the rest of the sheet away (see
             YearSelector), so from the bottom the whole map above it shows
             the network change - and the bottom is where a thumb lands on

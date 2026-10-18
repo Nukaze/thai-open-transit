@@ -83,8 +83,7 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   /* Fonts: change them here. --font-ui follows <html lang> (HomeClient
-   * sets it); --font-brand is the wordmark. On localhost the dev font
-   * switcher (DevFontSwitcher.tsx) overrides these live. */
+   * sets it); --font-brand is the wordmark. */
   --font-system:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
     "Noto Sans Thai", system-ui, sans-serif;
@@ -1401,47 +1400,6 @@ a.row:active {
   font-weight: 500;
   color: var(--dev);
   background: color-mix(in srgb, var(--dev) 14%, transparent);
-}
-
-/* Dev font switcher (DevFontSwitcher.tsx), localhost only: pink like the
-   dev badge, so it never passes for a real setting. */
-.dev-fonts .section-title {
-  color: var(--dev);
-}
-
-.dev-fonts .list {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dev) 40%, transparent);
-}
-
-.dev-fonts select {
-  max-width: 55%;
-  padding: 4px 6px;
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
-  font: inherit;
-  font-size: 14px;
-  color: var(--ink);
-  background: var(--surface);
-}
-
-.dev-fonts-actions {
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.dev-fonts-actions button {
-  padding: 6px 12px;
-  border: 0;
-  border-radius: 999px;
-  font-size: 14px;
-  color: var(--dev);
-  background: color-mix(in srgb, var(--dev) 14%, transparent);
-  cursor: pointer;
-}
-
-.dev-fonts-actions button:disabled {
-  opacity: 0.45;
-  cursor: default;
 }
 
 /* Station detail swaps in with a short rise; reduced motion gets a fade. */
