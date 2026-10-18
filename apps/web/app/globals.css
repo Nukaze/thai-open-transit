@@ -31,8 +31,11 @@
   --hairline: rgba(0, 0, 0, 0.08);
   --accent: #1f6bff;
   --accent-ink: #ffffff;
-  /* Notices, not errors (dev-only badges). Amber-700: readable on white. */
-  --warn: #b45309;
+  /* Pill colours. Amber for the public BETA label (the usual "early"
+   * colour); pink for the developer-only badge so the two never read as one.
+   * -700 shades: readable on white. */
+  --beta: #b45309;
+  --dev: #be185d;
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-sheet: 0 -1px 0 rgba(0, 0, 0, 0.04), 0 -8px 32px rgba(0, 0, 0, 0.14);
   --radius-sheet: 28px;
@@ -60,7 +63,8 @@
   --ink-3: #7d7e85;
   --hairline: rgba(255, 255, 255, 0.1);
   --accent: #4d8dff;
-  --warn: #f5a524;
+  --beta: #f5a524;
+  --dev: #f472b6;
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-sheet:
     0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 32px rgba(0, 0, 0, 0.6);
@@ -670,8 +674,7 @@ button {
   letter-spacing: -0.01em;
 }
 
-/* Product stage, shown to everyone. Accent tint, not --warn: "early", not
-   "something is wrong". */
+/* Product stage, shown to everyone. */
 .brand-beta {
   padding: 1px 7px;
   border-radius: 999px;
@@ -679,8 +682,8 @@ button {
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--beta);
+  background: color-mix(in srgb, var(--beta) 14%, transparent);
 }
 
 /* ---------- Search ---------- */
@@ -1339,7 +1342,7 @@ a.row:active {
 }
 
 /* Under the counter on the developer's machine only (isLocalDev): views
-   there are read, never counted. Amber, not red: a notice, not an error. */
+   there are read, never counted. Pink, not red: a notice, not an error. */
 .visit-counter-dev {
   flex-basis: 100%;
   display: flex;
@@ -1351,8 +1354,8 @@ a.row:active {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 500;
-  color: var(--warn);
-  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  color: var(--dev);
+  background: color-mix(in srgb, var(--dev) 14%, transparent);
 }
 
 /* Station detail swaps in with a short rise; reduced motion gets a fade. */
