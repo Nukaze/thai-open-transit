@@ -34,9 +34,9 @@ const ZOOM_STEP = 0.5;
 type LocateState = "off" | "waiting" | "active" | "background" | "denied";
 
 /**
- * Glass map controls, bottom-right: locate, 2D/3D tilt, compass, zoom.
- * Reset view sits in the default row; a sliders button opens a second row
- * above with a tilt slider for users who want finer control. Phones also
+ * Glass map controls, bottom-right. Default row, left to right: more
+ * controls, reset view, compass, locate. The sliders button opens a second
+ * row above with the 2D/3D switch and a tilt slider for finer control. Phones also
  * move zoom into that row - people pinch there, as Apple and Google Maps
  * assume - which keeps the default row inside a 360px screen.
  *
@@ -195,6 +195,19 @@ export function MapControls({
         >
           {zoom("narrow")}
 
+          {/* Shows the view it switches to, as in Apple Maps. */}
+          <button
+            type="button"
+            className="map-btn map-btn-text"
+            aria-label={tiltLabel}
+            title={tiltLabel}
+            onClick={() =>
+              map.easeTo({ pitch: tilted ? 0 : PITCH_3D, duration: 500 })
+            }
+          >
+            {tilted ? "2D" : "3D"}
+          </button>
+
           {/* Vertical, top to bottom: tilt up, slider, tilt down. The end
               buttons step 15 degrees; the slider takes any angle. A native
               range input keeps arrow keys and screen readers. */}
@@ -250,33 +263,19 @@ export function MapControls({
           <SlidersIcon />
         </button>
 
+        {/* Back to the first-load camera: N4-centred overview, north up, flat.
+            A deliberate move, so it also leaves follow-my-location
+            (GeolocateControl drops to background on any camera move). */}
         <button
           type="button"
           className="map-btn"
-          data-state={locate}
-          aria-label={locateLabel}
-          title={locateLabel}
-          aria-pressed={following}
-          onClick={onLocate}
-        >
-          {locate === "denied" ? (
-            <LocateOffIcon />
-          ) : (
-            <LocateIcon filled={locate === "active"} />
-          )}
-        </button>
-
-        {/* Shows the view it switches to, as in Apple Maps. */}
-        <button
-          type="button"
-          className="map-btn map-btn-text"
-          aria-label={tiltLabel}
-          title={tiltLabel}
+          aria-label={t("reset_view", lang)}
+          title={t("reset_view", lang)}
           onClick={() =>
-            map.easeTo({ pitch: tilted ? 0 : PITCH_3D, duration: 500 })
+            map.flyTo({ ...home(), bearing: 0, pitch: 0, speed: 1.6 })
           }
         >
-          {tilted ? "2D" : "3D"}
+          <HomeIcon />
         </button>
 
         <button
@@ -294,19 +293,20 @@ export function MapControls({
           </span>
         </button>
 
-        {/* Back to the first-load camera: N4-centred overview, north up, flat.
-            A deliberate move, so it also leaves follow-my-location
-            (GeolocateControl drops to background on any camera move). */}
         <button
           type="button"
           className="map-btn"
-          aria-label={t("reset_view", lang)}
-          title={t("reset_view", lang)}
-          onClick={() =>
-            map.flyTo({ ...home(), bearing: 0, pitch: 0, speed: 1.6 })
-          }
+          data-state={locate}
+          aria-label={locateLabel}
+          title={locateLabel}
+          aria-pressed={following}
+          onClick={onLocate}
         >
-          <HomeIcon />
+          {locate === "denied" ? (
+            <LocateOffIcon />
+          ) : (
+            <LocateIcon filled={locate === "active"} />
+          )}
         </button>
 
         {zoom("wide")}
