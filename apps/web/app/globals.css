@@ -675,14 +675,14 @@ button {
 
 .sheet-head {
   flex: none;
-  padding: 0 20px 10px;
+  padding: 0 24px 10px;
 }
 
 .sheet-body {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 4px 20px calc(var(--safe-bottom) + 24px);
+  padding: 4px 24px calc(var(--safe-bottom) + 24px);
 }
 
 /* Seamless scrollbar: thin, no track, faint until the panel is hovered.
