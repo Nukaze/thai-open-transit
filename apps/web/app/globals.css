@@ -350,8 +350,8 @@ button {
    window edge on desktop - level with the credit there (see below). On
    phones it rides the sheet but stops well below the top-right theme
    button: past that point (the sheet near full height) it slides under the
-   sheet rather than landing on it. 164px = the full sheet's top (TOP_GAP
-   in Sheet.tsx, 108) plus this row (44 + 12), so the row parks exactly
+   sheet rather than landing on it. 142px = the full sheet's top (TOP_GAP
+   in Sheet.tsx, 86) plus this row (44 + 12), so the row parks exactly
    where a full-height sheet covers it. The advanced group stacks above it,
    right-aligned; while it is open the cap grows by the vertical tilt capsule (48 + 112 + 48, plus
    an 8px gap) for the same reason. */
@@ -359,7 +359,7 @@ button {
   position: fixed;
   right: 12px;
   bottom: calc(
-    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 164px)) + 12px
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 142px)) + 12px
   );
   z-index: 5;
   display: flex;
@@ -375,7 +375,7 @@ button {
 
 .map-controls[data-advanced] {
   bottom: calc(
-    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 380px)) + 12px
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 358px)) + 12px
   );
 }
 
@@ -566,7 +566,7 @@ button {
 .maplibregl-ctrl-bottom-right {
   bottom: min(
     var(--sheet-offset),
-    calc(100dvh - var(--safe-top) - 164px)
+    calc(100dvh - var(--safe-top) - 142px)
   ) !important;
 }
 
@@ -656,11 +656,11 @@ button {
   will-change: transform;
   /* Pre-hydration placement at the peek detent, so the prerendered page
      doesn't show the sheet covering the map until JS measures the screen.
-     108px mirrors TOP_GAP in Sheet.tsx; JS then writes exact inline values. */
-  height: calc(100dvh - var(--safe-top) - 108px);
+     86px mirrors TOP_GAP in Sheet.tsx; JS then writes exact inline values. */
+  height: calc(100dvh - var(--safe-top) - 86px);
   transform: translate3d(
     0,
-    calc(100dvh - var(--safe-top) - 108px - var(--peek-height)),
+    calc(100dvh - var(--safe-top) - 86px - var(--peek-height)),
     0
   );
 }
