@@ -1971,7 +1971,7 @@ a.row:active {
 }
 
 /* Phones: one line, so the collapsed sheet's fixed height (PEEK_HEIGHT in
-   HomeClient.tsx) always fits the chip row below it. */
+   HomeClient.tsx) always lines up with the first group below it. */
 @media (max-width: 767px) {
   .section-hint span {
     min-width: 0;
