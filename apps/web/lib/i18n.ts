@@ -140,6 +140,15 @@ export const DICTIONARY: Record<string, Record<Lang, string>> = {
     en: "Development mode: views not counted",
   },
   beta: { th: "เบต้า", en: "Beta" },
+  // Developer-only font switcher (DevFontSwitcher.tsx, localhost only).
+  dev_fonts: { th: "นักพัฒนา: ฟอนต์", en: "Dev: fonts" },
+  dev_font_th: { th: "UI ภาษาไทย", en: "Thai UI" },
+  dev_font_en: { th: "UI ภาษาอังกฤษ", en: "English UI" },
+  dev_font_brand: { th: "ชื่อแบรนด์", en: "Brand" },
+  dev_font_default: { th: "ค่าเริ่มต้น (CSS)", en: "Default (CSS)" },
+  dev_font_reset: { th: "รีเซ็ต", en: "Reset" },
+  dev_font_copy: { th: "คัดลอก CSS", en: "Copy CSS" },
+  dev_font_copied: { th: "คัดลอกแล้ว", en: "Copied" },
 };
 
 export function t(key: string, lang: Lang): string {

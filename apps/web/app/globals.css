@@ -16,6 +16,38 @@
   font-display: swap;
 }
 
+/* Chakra Petch (OFL, public/fonts/OFL.txt), same subset as above. Two
+ * weights: the browser maps the UI's 500 to 400 and 560/650 to 600. */
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("/fonts/ChakraPetch-Regular-subset.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("/fonts/ChakraPetch-SemiBold-subset.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+/* Sao Chingcha, the BMA identity font: local() only, NEVER url(). Its
+ * license is "all rights reserved" (BMA), so the file must not be in this
+ * repo or served by the site. Visitors who installed it themselves see it;
+ * everyone else falls through to Chakra Petch. */
+@font-face {
+  font-family: "Sao Chingcha";
+  src: local("Sao Chingcha Regular"), local("SaoChingcha-Regular");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Sao Chingcha";
+  src: local("Sao Chingcha Bold"), local("SaoChingcha-Bold");
+  font-weight: 700;
+}
+
 /*
  * Design tokens. The UI follows the map theme (HomeClient writes
  * `data-theme` on <html>), so chrome and basemap never disagree.
@@ -50,7 +82,19 @@
   --radius-control: 10px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Fonts: change them here. --font-ui follows <html lang> (HomeClient
+   * sets it); --font-brand is the wordmark. On localhost the dev font
+   * switcher (DevFontSwitcher.tsx) overrides these live. */
+  --font-system:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+    "Noto Sans Thai", system-ui, sans-serif;
+  --font-ui: var(--font-system);
+  --font-brand: "Sao Chingcha", "Chakra Petch", var(--font-system);
   color-scheme: light;
+}
+
+:root:lang(th) {
+  --font-ui: "Sao Chingcha", "Chakra Petch", var(--font-system);
 }
 
 :root[data-theme="dark"] {
@@ -87,11 +131,7 @@ body {
 }
 
 body {
-  /* System font first for Latin (SF on Apple, Segoe/Roboto elsewhere); the
-   * Thai subset covers Thai glyphs the system font lacks. */
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
-    "Noto Sans Thai", system-ui, sans-serif;
+  font-family: var(--font-ui);
   font-size: 16px;
   line-height: 1.45;
   color: var(--ink);
@@ -669,6 +709,7 @@ button {
 }
 
 .brand-name {
+  font-family: var(--font-brand);
   font-weight: 650;
   font-size: 17px;
   letter-spacing: -0.01em;
@@ -1356,6 +1397,47 @@ a.row:active {
   font-weight: 500;
   color: var(--dev);
   background: color-mix(in srgb, var(--dev) 14%, transparent);
+}
+
+/* Dev font switcher (DevFontSwitcher.tsx), localhost only: pink like the
+   dev badge, so it never passes for a real setting. */
+.dev-fonts .section-title {
+  color: var(--dev);
+}
+
+.dev-fonts .list {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dev) 40%, transparent);
+}
+
+.dev-fonts select {
+  max-width: 55%;
+  padding: 4px 6px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.dev-fonts-actions {
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dev-fonts-actions button {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--dev);
+  background: color-mix(in srgb, var(--dev) 14%, transparent);
+  cursor: pointer;
+}
+
+.dev-fonts-actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 /* Station detail swaps in with a short rise; reduced motion gets a fade. */

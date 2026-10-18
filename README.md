@@ -51,12 +51,19 @@ for entity shapes, `scripts/build` generates the published artifacts, and
 
 ## Licensing
 
-| Asset         | Licence      | File                           |
-| ------------- | ------------ | ------------------------------ |
-| Code          | AGPL-3.0     | [LICENSE-CODE](./LICENSE-CODE) |
-| Data          | ODbL-1.0     | [LICENSE-DATA](./LICENSE-DATA) |
-| Documentation | CC BY-SA 4.0 | -                              |
+| Asset         | Licence      | File                                       |
+| ------------- | ------------ | ------------------------------------------ |
+| Code          | AGPL-3.0     | [LICENSE-CODE](./LICENSE-CODE)             |
+| Data          | ODbL-1.0     | [LICENSE-DATA](./LICENSE-DATA)             |
+| Documentation | CC BY-SA 4.0 | -                                          |
+| Fonts         | SIL OFL 1.1  | [OFL.txt](./apps/web/public/fonts/OFL.txt) |
 
 ODbL matches OpenStreetMap, a primary upstream source, which requires
 share-alike anyway. Geometry is derived from OpenStreetMap and from published
 MRTA/DRT/SRT documents - never traced or adapted from copyrighted transit maps.
+
+Fonts: Chakra Petch and Noto Sans Thai (UI), Noto Sans (map labels), all OFL.
+The brand and Thai UI also list Sao Chingcha, the Bangkok Metropolitan
+Administration's identity font, but only as a font installed on the
+visitor's own device: its licence does not allow redistribution, so the
+file is never in this repo or served by the site.
