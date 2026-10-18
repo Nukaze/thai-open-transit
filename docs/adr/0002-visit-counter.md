@@ -74,6 +74,12 @@ Two layers, deliberately loose:
 Crawling, SEO and AI indexing are unaffected: the filter only skips the counter
 call.
 
+The developer's own machine never counts either: under `next dev`
+(`NODE_ENV=development`) or on `localhost` / `127.0.0.1` / `[::1]`, the browser
+only reads `get_stats`. No `.env` needed. The developer's visits to the
+deployed site still count; a per-browser opt-out was judged not worth the
+setup.
+
 Principle: stop simple and average bots, never risk dropping a real person. A
 bot faking a browser UA still counts. That is accepted: the number is
 decorative and the site is low-value to attackers.

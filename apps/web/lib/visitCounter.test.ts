@@ -1,6 +1,6 @@
 // apps/web/lib/visitCounter.test.ts
 import { describe, it, expect } from "vitest";
-import { deviceClass, isBot, parseStats } from "./visitCounter";
+import { deviceClass, isBot, isLocalDev, parseStats } from "./visitCounter";
 
 const CHROME =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
@@ -55,6 +55,24 @@ describe("isBot", () => {
     );
     expect(isBot(`${CHROME} Chrome-Lighthouse`, false)).toBe(true);
     expect(isBot(CHROME, true)).toBe(true); // navigator.webdriver
+  });
+});
+
+describe("isLocalDev", () => {
+  it("never counts `next dev`, whatever the host", () => {
+    expect(isLocalDev("development", "192.168.1.20")).toBe(true);
+  });
+
+  it("never counts a production build served locally", () => {
+    for (const host of ["localhost", "127.0.0.1", "[::1]"]) {
+      expect(isLocalDev("production", host)).toBe(true);
+    }
+  });
+
+  it("counts deployed production builds", () => {
+    expect(isLocalDev("production", "bangkokopentransit.vercel.app")).toBe(
+      false,
+    );
   });
 });
 

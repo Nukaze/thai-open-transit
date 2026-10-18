@@ -7,6 +7,7 @@ import {
   deviceClass,
   fetchStats,
   isBot,
+  isLocalDev,
   statsConfigured,
   type VisitStats,
 } from "../lib/visitCounter";
@@ -35,7 +36,8 @@ function whenVisible(): Promise<void> {
 function loadStats(): Promise<VisitStats | null> {
   if (pageLoad) return pageLoad;
   pageLoad = whenVisible().then(() =>
-    isBot(navigator.userAgent, navigator.webdriver)
+    isBot(navigator.userAgent, navigator.webdriver) ||
+    isLocalDev(process.env.NODE_ENV, location.hostname)
       ? fetchStats()
       : // The language the viewer starts in, resolved here rather than taken
         // from context: this effect runs before HomeClient's detection, while
