@@ -54,6 +54,9 @@
   --dev: #be185d;
   /* Close buttons: a dim red, so "close" reads without shouting. */
   --close: #c2413f;
+  /* Wordmark: the logo's purple (#9966cc) shaded 35% toward black, so it
+   * keeps the icon's hue; dark mode keeps ink. */
+  --brand-ink: #634285;
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-sheet: 0 -1px 0 rgba(0, 0, 0, 0.04), 0 -8px 32px rgba(0, 0, 0, 0.14);
   --radius-sheet: 28px;
@@ -96,6 +99,7 @@
   --beta: #f5a524;
   --dev: #f472b6;
   --close: #f2787a;
+  --brand-ink: var(--ink);
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-sheet:
     0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 32px rgba(0, 0, 0, 0.6);
@@ -278,6 +282,7 @@ button {
 
 .mobile-brand-name {
   font-family: var(--font-brand);
+  color: var(--brand-ink);
   font-size: 17px;
   font-weight: 650;
   letter-spacing: -0.01em;
@@ -874,6 +879,7 @@ button {
 
 .brand-name {
   font-family: var(--font-brand);
+  color: var(--brand-ink);
   font-weight: 650;
   font-size: 26px;
   letter-spacing: -0.01em;
