@@ -195,8 +195,146 @@ button {
 }
 
 .fab:active,
+.mobile-brand:active,
 .press:active {
   transform: scale(0.94);
+}
+
+/* Brand on phones (MobileBrand.tsx), top-left across from the theme
+   button and the same height and glass. Tapping folds it to the icon. */
+.mobile-brand {
+  position: fixed;
+  top: calc(var(--safe-top) + 12px);
+  left: 12px;
+  z-index: 5;
+  height: 44px;
+  /* Never under the theme button: 12px insets, 44px button, 8px gap. */
+  max-width: calc(100vw - 76px);
+  display: flex;
+  align-items: center;
+  /* 8 + 26px icon + 8 + 1px edges = 44: folded, a circle like the theme
+     button. */
+  padding: 0 8px;
+  border-radius: 999px;
+  /* Glass and edge: the shared control-glass rule further down. */
+  box-shadow: var(--shadow-float);
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mobile-brand img {
+  flex: none;
+  display: block;
+}
+
+/* Folding: the S mark turns half a turn (it is point-symmetric, so it
+   lands as itself) while the name collapses into it. */
+.mobile-brand[data-folded] img {
+  transform: rotate(-180deg);
+}
+
+/* Width animates as a grid track (1fr <-> 0fr): exactly the text's own
+   width, so there is no dead time as with a max-width guess. */
+.mobile-brand-text {
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+}
+
+.mobile-brand[data-folded] .mobile-brand-text {
+  grid-template-columns: 0fr;
+}
+
+/* min-width 0 + overflow hidden let the 0fr track reach 0; the spacing
+   lives on the children, since the inner box's own padding would not
+   collapse. */
+.mobile-brand-inner {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.mobile-brand-inner > :first-child {
+  margin-left: 8px;
+}
+
+.mobile-brand-inner > :last-child {
+  margin-right: 3px;
+}
+
+.mobile-brand[data-folded] .mobile-brand-inner {
+  opacity: 0;
+  transform: translateX(-6px);
+}
+
+.mobile-brand img {
+  transition: transform 360ms var(--ease-drawer);
+}
+
+.mobile-brand-text {
+  transition: grid-template-columns 360ms var(--ease-drawer);
+}
+
+.mobile-brand-inner {
+  transition:
+    opacity 240ms ease,
+    transform 360ms var(--ease-drawer);
+}
+
+.mobile-brand-name {
+  font-family: var(--font-brand);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.mobile-brand-beta {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--beta);
+  background: color-mix(in srgb, var(--beta) 14%, transparent);
+}
+
+/* Narrow phones: the BETA pill shrinks to an amber dot, and below 300px
+   only the icon is left. */
+@media (max-width: 339px) {
+  .mobile-brand-beta {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    font-size: 0;
+    background: var(--beta);
+  }
+}
+
+@media (max-width: 299px) {
+  .mobile-brand-text {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  /* The panel's brand row takes over. */
+  .mobile-brand {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-brand img,
+  .mobile-brand-text,
+  .mobile-brand-inner {
+    transition: none;
+  }
 }
 
 /* MapLibre's geolocate control stays mounted for its tracking and user dot,
@@ -439,9 +577,9 @@ button {
    panel's max-height leaves room for it). !important because
    maplibre-gl.css loads after this file and sets `bottom/left: 0`. */
 .maplibregl-ctrl-bottom-left {
-  /* Centered on the 44px theme button (top 12px) across from it: the
-     pill is 26px tall, so 12 + (44 - 26) / 2. */
-  top: calc(var(--safe-top) + 21px) !important;
+  /* One row under the brand pill (MobileBrand, 44px at top 12px), left
+     aligned with it: 12 + 44 + 8. */
+  top: calc(var(--safe-top) + 64px) !important;
   bottom: auto !important;
   left: 12px !important;
 }
@@ -1594,7 +1732,7 @@ a.row:active {
    as legible as on a solid panel. */
 
 :root {
-  --glass-panel: rgba(246, 246, 248, 0.76);
+  --glass-panel: rgba(246, 246, 248, 0.38);
   /* Inner cards are near-solid: light glass stacked on light glass loses
      legibility, so the stacking stops at the panel. Defined here, before
      the solid fallbacks below, so those still win when they apply. */
@@ -1609,7 +1747,7 @@ a.row:active {
 }
 
 :root[data-theme="dark"] {
-  --glass-panel: rgba(28, 28, 31, 0.74);
+  --glass-panel: rgba(28, 28, 31, 0.42);
   --glass-card: rgba(255, 255, 255, 0.07);
   --glass-raised: rgba(255, 255, 255, 0.16);
   --glass-edge: rgba(255, 255, 255, 0.08);
@@ -1617,7 +1755,7 @@ a.row:active {
      for a large panel, whose shape reads anyway, but a 44px button in it
      vanishes and leaves its icon floating. A lighter surface and edge keep
      each control a visible shape. */
-  --glass-control: rgba(52, 52, 56, 0.86);
+  --glass-control: rgba(52, 52, 56, 0.42);
   --glass-control-edge: rgba(255, 255, 255, 0.16);
 }
 
@@ -1665,8 +1803,10 @@ a.row:active {
   box-shadow: var(--raised-shadow);
 }
 
-/* Floating map buttons and the credits share one control glass. */
+/* Floating map buttons, the brand pill and the credits share one control
+   glass. */
 .fab,
+.mobile-brand,
 .map-controls-row > .map-btn,
 .map-zoom,
 .maplibregl-ctrl.maplibregl-ctrl-attrib {
@@ -1780,7 +1920,8 @@ a.row:active {
 }
 
 /* The theme button keeps its press scale (`.fab` above). */
-.fab {
+.fab,
+.mobile-brand {
   transition:
     transform 120ms ease-out,
     opacity 320ms ease;
@@ -1804,6 +1945,7 @@ a.row:active {
     .time-travel .section-title,
     .map-controls,
     .fab,
+    .mobile-brand,
     .maplibregl-ctrl-bottom-left
   ) {
   opacity: 0;
