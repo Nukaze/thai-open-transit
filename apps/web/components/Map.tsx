@@ -937,16 +937,14 @@ export function Map({
       attributionControl: false,
     });
     // Credits bottom-left, apart from the glass controls bottom-right, as
-    // Apple and Google Maps do. Compact at every width (by default MapLibre
-    // only folds on maps under 640px): it starts expanded, so the
-    // OpenStreetMap credit is seen before any interaction, then folds to an
-    // (i) on the first pan or after 5 seconds, whichever comes first - both
+    // Apple and Google Maps do. MapLibre's default control (compact, with
+    // its own MapLibre credit - passing any options replaces that default
+    // object and drops the credit) starts expanded, so the OpenStreetMap
+    // credit is seen before any interaction, but only folds to an (i) on
+    // the first pan. The timer below also folds it after 5 seconds: both
     // collapse triggers the OSMF attribution guidelines allow. Folded from
     // the first frame would not be: the credit must not need a tap to see.
-    map.addControl(
-      new maplibregl.AttributionControl({ compact: true }),
-      "bottom-left",
-    );
+    map.addControl(new maplibregl.AttributionControl(), "bottom-left");
     // MapLibre has no public fold call; this mirrors its own on-pan fold
     // (`_updateCompactMinimize`), which only drops this class.
     const foldCredits = window.setTimeout(() => {
