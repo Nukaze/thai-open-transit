@@ -10,25 +10,30 @@ import {
   type LineGroupId,
 } from "../lib/lineGroups";
 import { LineLogo } from "./LineLogo";
-import { InfoIcon } from "./icons";
+import { EyeIcon, EyeOffIcon, InfoIcon } from "./icons";
 
 // Desktop: chips grouped by system (BTS / MRT / SRT) with short names under
 // a small group label. Phones: the groups dissolve (`display: contents`)
 // into one horizontal chip row with full names, which is what the collapsed
 // sheet's fixed height is sized for. Each chip is a toggle; `aria-pressed`
 // carries the state and the full line name is always its accessible name.
+// Each desktop group label also carries a Show / Hide link for the whole
+// group, flipping by the same rule as the section's Show all / Hide all, so
+// "Hide all, then show MRT" is two clicks and groups add up.
 export function LineFilter({
   lines,
   activeLineIds,
   onToggle,
   onShowAll,
   onHideAll,
+  onSetLines,
 }: {
   lines: Line[];
   activeLineIds: Set<string>;
   onToggle: (id: string) => void;
   onShowAll: () => void;
   onHideAll: () => void;
+  onSetLines: (ids: string[], visible: boolean) => void;
 }) {
   const shownCount = lines.filter((l) => activeLineIds.has(l.id)).length;
   const allOn = shownCount === lines.length;
@@ -63,6 +68,7 @@ export function LineFilter({
             className="link-btn"
             onClick={allOn ? onHideAll : onShowAll}
           >
+            {allOn ? <EyeOffIcon /> : <EyeIcon />}
             {t(allOn ? "hide_all" : "show_all", "en")}
           </button>
         </span>
@@ -81,9 +87,16 @@ export function LineFilter({
               aria-label={groupId ? t(`group_${groupId}`, "en") : undefined}
             >
               {groupId && (
-                <span className="line-group-label" aria-hidden="true">
-                  {t(`group_${groupId}`, "en")}
-                </span>
+                <GroupHead
+                  name={t(`group_${groupId}`, "en")}
+                  allOn={groupLines.every((l) => activeLineIds.has(l.id))}
+                  onSet={(visible) =>
+                    onSetLines(
+                      groupLines.map((l) => l.id),
+                      visible,
+                    )
+                  }
+                />
               )}
               <div className="chips">
                 {groupLines.map((line) => (
@@ -109,5 +122,41 @@ export function LineFilter({
         )}
       </div>
     </section>
+  );
+}
+
+// Desktop only: on phones the groups dissolve into one chip row with no
+// labels (CSS hides the head), so there is nowhere to put the link.
+function GroupHead({
+  name,
+  allOn,
+  onSet,
+}: {
+  name: string;
+  allOn: boolean;
+  onSet: (visible: boolean) => void;
+}) {
+  const label = t(allOn ? "hide_group" : "show_group", "en").replace(
+    "{group}",
+    name,
+  );
+  return (
+    <div className="line-group-head">
+      <span className="line-group-label" aria-hidden="true">
+        {name}
+      </span>
+      {/* Visible text is one word; the accessible name says which group,
+          since a screen reader hears three of these in a row. */}
+      <button
+        type="button"
+        className="link-btn line-group-toggle"
+        aria-label={label}
+        title={label}
+        onClick={() => onSet(!allOn)}
+      >
+        {allOn ? <EyeOffIcon size={13} /> : <EyeIcon size={13} />}
+        {t(allOn ? "hide" : "show", "en")}
+      </button>
+    </div>
   );
 }

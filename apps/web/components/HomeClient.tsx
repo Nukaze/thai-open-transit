@@ -415,6 +415,13 @@ export function HomeClient({
           }
           onShowAll={() => setActiveLineIds(new Set(lines.map((l) => l.id)))}
           onHideAll={() => setActiveLineIds(new Set())}
+          onSetLines={(ids, visible) =>
+            setActiveLineIds((prev) => {
+              const next = new Set(prev);
+              for (const id of ids) visible ? next.add(id) : next.delete(id);
+              return next;
+            })
+          }
         />
         <NearestStationChip
           nearest={nearest}

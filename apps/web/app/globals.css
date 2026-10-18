@@ -876,6 +876,10 @@ a.row:active {
   /* Rounds the focus ring (outlines follow border-radius) so it hugs the
      text instead of drawing a square box around it. */
   border-radius: 6px;
+  /* An icon (eye / eye-off) may lead the text. */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .section-head {
@@ -1724,7 +1728,7 @@ a.row:active {
   display: contents;
 }
 
-.line-group-label,
+.line-group-head,
 .chip-name-short {
   display: none;
 }
@@ -1752,12 +1756,32 @@ a.row:active {
     overflow: visible;
   }
 
-  .line-group-label {
-    display: block;
+  /* Group name left, its Show / Hide link right. */
+  .line-group-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
     margin: 0 0 6px;
+  }
+
+  .line-group-label {
     font-size: 12px;
     font-weight: 600;
     color: var(--ink-2);
+  }
+
+  /* Muted, not accent: three of these sit under the section's blue
+     Show all / Hide all and should not compete with it. Accent on hover
+     and focus says it is clickable. */
+  .line-group-toggle {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-3);
+  }
+
+  .line-group-toggle:hover,
+  .line-group-toggle:focus-visible {
+    color: var(--accent);
   }
 
   .chip-name-full {
