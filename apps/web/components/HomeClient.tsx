@@ -429,14 +429,6 @@ export function HomeClient({
           errorCode={geolocateError}
           onSelect={selectFromSheet}
         />
-        {selectedYear !== null && (
-          <YearSelector
-            year={selectedYear}
-            minYear={minYear}
-            maxYear={new Date().getFullYear()}
-            onChange={setSelectedYear}
-          />
-        )}
         <section className="section">
           <h2 className="section-title">{t("map_settings", "en")}</h2>
           <div className="list">
@@ -454,6 +446,18 @@ export function HomeClient({
             />
           </div>
         </section>
+        {/* Last: dragging the year fades the rest of the sheet away (see
+            YearSelector), so from the bottom the whole map above it shows
+            the network change - and the bottom is where a thumb lands on
+            a raised sheet. */}
+        {selectedYear !== null && (
+          <YearSelector
+            year={selectedYear}
+            minYear={minYear}
+            maxYear={new Date().getFullYear()}
+            onChange={setSelectedYear}
+          />
+        )}
         <nav className="footer-links" aria-label="Project">
           <a href="/download">{t("download_dataset", "en")}</a>
           <a
