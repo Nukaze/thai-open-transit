@@ -161,7 +161,9 @@ button {
 
 /* One row bottom-right, clear of the attribution "i" below it
    (which reaches 34px up from the bottom; 44px leaves a 10px gap). Rides the sheet on
-   phones with the same cap as MapLibre's controls (see below). */
+   phones with the same cap as MapLibre's controls (see below). The
+   advanced row stacks above it, right-aligned; while it is open the cap
+   grows by that row (44 + 8px gap) so it never reaches the theme button. */
 .map-controls {
   position: fixed;
   right: 12px;
@@ -169,6 +171,19 @@ button {
     min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 180px)) + 44px
   );
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.map-controls[data-advanced] {
+  bottom: calc(
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 232px)) + 44px
+  );
+}
+
+.map-controls-row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -203,7 +218,9 @@ button {
   letter-spacing: -0.01em;
 }
 
-/* Following the user: systemBlue, as in Apple Maps. */
+/* Following the user: systemBlue, as in Apple Maps. The advanced toggle
+   uses the same tint while its row is open. */
+.map-btn[aria-expanded="true"],
 .map-btn[data-state="active"],
 .map-btn[data-state="background"],
 .map-btn[data-state="waiting"] {
@@ -689,6 +706,11 @@ a.row:active {
   font-weight: 560;
 }
 
+.link-btn:disabled {
+  color: var(--ink-3);
+  cursor: default;
+}
+
 .section-head {
   display: flex;
   align-items: baseline;
@@ -1011,7 +1033,7 @@ a.row:active {
 
 @media (prefers-reduced-transparency: reduce) {
   .fab,
-  .map-controls > .map-btn,
+  .map-controls-row > .map-btn,
   .map-zoom {
     background: var(--surface);
     -webkit-backdrop-filter: none;
@@ -1245,7 +1267,7 @@ a.row:active {
 
 /* Floating map buttons share the panel's glass and edge. */
 .fab,
-.map-controls > .map-btn,
+.map-controls-row > .map-btn,
 .map-zoom {
   background: var(--glass-panel) !important;
   -webkit-backdrop-filter: var(--glass-blur);
@@ -1328,7 +1350,7 @@ a.row:active {
 }
 
 .fab,
-.map-controls > .map-btn,
+.map-controls-row > .map-btn,
 .map-zoom {
   box-shadow:
     var(--glass-highlight),
@@ -1486,7 +1508,7 @@ a.row:active {
 
 /* ---------- Line groups (LineFilter.tsx) ---------- */
 
-/* Count + "Show all", right of the section title. */
+/* Count + "Show all" / "Hide all", right of the section title. */
 .section-head-aside {
   display: inline-flex;
   align-items: baseline;

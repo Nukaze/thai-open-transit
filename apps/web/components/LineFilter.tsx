@@ -22,11 +22,13 @@ export function LineFilter({
   activeLineIds,
   onToggle,
   onShowAll,
+  onHideAll,
 }: {
   lines: Line[];
   activeLineIds: Set<string>;
   onToggle: (id: string) => void;
   onShowAll: () => void;
+  onHideAll: () => void;
 }) {
   const shownCount = lines.filter((l) => activeLineIds.has(l.id)).length;
   const allOn = shownCount === lines.length;
@@ -52,11 +54,24 @@ export function LineFilter({
           {t("lines_shown", "en")
             .replace("{shown}", String(shownCount))
             .replace("{total}", String(lines.length))}
-          {!allOn && (
-            <button type="button" className="link-btn" onClick={onShowAll}>
-              {t("show_all", "en")}
-            </button>
-          )}
+          {/* Both always present and disabled when there is nothing to do,
+              so neither jumps sideways as lines are toggled. */}
+          <button
+            type="button"
+            className="link-btn"
+            disabled={allOn}
+            onClick={onShowAll}
+          >
+            {t("show_all", "en")}
+          </button>
+          <button
+            type="button"
+            className="link-btn"
+            disabled={shownCount === 0}
+            onClick={onHideAll}
+          >
+            {t("hide_all", "en")}
+          </button>
         </span>
       </div>
       <p className="section-hint">
