@@ -297,7 +297,7 @@ function splitFeatures(collection: FeatureCollection<Point | LineString>): {
 // `PUBLIC_BASE_URL` if one is ever configured. Safe to touch `window` here:
 // `Map` is only ever mounted through `next/dynamic` with `ssr: false`.
 // Must resolve to an ORIGIN, not a path prefix: a bare path here (say
-// "/bangkok-open-transit" for a subpath deployment) would make the sprite URL
+// "/thai-open-transit" for a subpath deployment) would make the sprite URL
 // relative again, which is exactly what MapLibre rejects.
 function assetOrigin(): string {
   return PUBLIC_BASE_URL || window.location.origin;

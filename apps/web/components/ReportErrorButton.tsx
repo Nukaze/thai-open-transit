@@ -6,12 +6,10 @@ import { useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import { FlagIcon } from "./icons";
 
-// NOTE: points at the personal-account repo because the `opentransit-th`
-// GitHub org does not exist yet (CLAUDE.md lists it as "future"). Update this
-// to `https://github.com/opentransit-th/bangkok-open-transit/issues/new` once
-// the org is created and this repo is transferred/moved there.
+// The repo lives on the personal account (renamed from bangkok-open-transit;
+// GitHub redirects the old URL). Update this if it ever moves to an org.
 const GITHUB_ISSUE_BASE_URL =
-  "https://github.com/Nukaze/bangkok-open-transit/issues/new";
+  "https://github.com/Nukaze/thai-open-transit/issues/new";
 
 export function ReportErrorButton({ station }: { station: Station }) {
   const lang = useLang();
