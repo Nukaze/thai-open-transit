@@ -26,6 +26,10 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   lines: { th: "สายรถไฟ", en: "Lines" },
   show_all: { th: "แสดงทั้งหมด", en: "Show all" },
   hide_all: { th: "ซ่อนทั้งหมด", en: "Hide all" },
+  show: { th: "แสดง", en: "Show" },
+  hide: { th: "ซ่อน", en: "Hide" },
+  show_group: { th: "แสดงสาย{group}ทั้งหมด", en: "Show all {group} lines" },
+  hide_group: { th: "ซ่อนสาย{group}ทั้งหมด", en: "Hide all {group} lines" },
   lines_hint: {
     th: "แตะสายเพื่อแสดงหรือซ่อนบนแผนที่",
     en: "Tap a line to show or hide it on the map.",

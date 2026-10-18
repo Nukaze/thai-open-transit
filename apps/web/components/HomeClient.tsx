@@ -50,9 +50,10 @@ const NetworkMap = dynamic(
 );
 
 // Visible sheet height on phones when collapsed: grabber, search field, the
-// one-line lines hint (+28px) and the line chip row, so filtering lines never
-// needs the sheet raised.
-const PEEK_HEIGHT = 208;
+// one-line lines hint and the first line group (its label + chip row), with
+// the section's Show all / Hide all in reach. The other groups are a swipe
+// up away (half detent).
+const PEEK_HEIGHT = 226;
 
 export function HomeClient({
   stations,
@@ -400,7 +401,7 @@ export function HomeClient({
   } else {
     body = (
       <>
-        {/* Line chips come first: PEEK_HEIGHT only fits the chip row, and a
+        {/* Line chips come first: PEEK_HEIGHT only fits the first group, and a
             nearest-station row above it would push the chips out of the
             collapsed sheet once a location fix (or error) arrives. */}
         <LineFilter
@@ -415,6 +416,13 @@ export function HomeClient({
           }
           onShowAll={() => setActiveLineIds(new Set(lines.map((l) => l.id)))}
           onHideAll={() => setActiveLineIds(new Set())}
+          onSetLines={(ids, visible) =>
+            setActiveLineIds((prev) => {
+              const next = new Set(prev);
+              for (const id of ids) visible ? next.add(id) : next.delete(id);
+              return next;
+            })
+          }
         />
         <NearestStationChip
           nearest={nearest}
