@@ -19,9 +19,11 @@ export type Detent = "peek" | "half" | "full";
 // Breakpoint where the sheet becomes a floating side panel (matches
 // globals.css). Below it the sheet is a draggable bottom sheet.
 const DESKTOP_QUERY = "(min-width: 768px)";
-// Gap kept between the fully expanded sheet and the top of the screen, so
-// the map stays visible as context and the sheet reads as a layer on it.
-const TOP_GAP = 56;
+// Gap kept between the fully expanded sheet and the safe-area top, so the
+// map stays visible as context and the sheet reads as a layer on it. Clears
+// the top-corner buttons: 12px inset + 44px button + 11px breathing room.
+// Mirrored in globals.css (.sheet pre-hydration placement).
+const TOP_GAP = 67;
 // Movement before a press becomes a drag, so taps on rows and chips inside
 // the sheet still register as taps.
 const DRAG_SLOP = 8;
@@ -32,6 +34,18 @@ const DRAG_SLOP = 8;
 // short flick travel a long way.
 function project(velocity: number, decelerationRate = 0.998): number {
   return ((velocity / 1000) * decelerationRate) / (1 - decelerationRate);
+}
+
+// The top buttons sit below env(safe-area-inset-top) (the notch), which JS
+// cannot read directly; a probe element resolves it to pixels.
+function readSafeTop(): number {
+  const probe = document.createElement("div");
+  probe.style.cssText =
+    "position:fixed;visibility:hidden;padding-top:var(--safe-top)";
+  document.body.appendChild(probe);
+  const px = parseFloat(getComputedStyle(probe).paddingTop) || 0;
+  probe.remove();
+  return px;
 }
 
 // Progressive resistance past an edge instead of a hard stop.
@@ -69,6 +83,7 @@ export function Sheet({
   const bodyRef = useRef<HTMLDivElement>(null);
   const [desktop, setDesktop] = useState(false);
   const [viewport, setViewport] = useState(0);
+  const [safeTop, setSafeTop] = useState(0);
   // Desktop only: the floating panel folds down to its header so the map
   // gets the whole screen. Phones already collapse via the peek detent.
   const [collapsed, setCollapsed] = useState(false);
@@ -86,7 +101,7 @@ export function Sheet({
     history: { y: number; t: number }[];
   } | null>(null);
 
-  const sheetHeight = Math.max(0, viewport - TOP_GAP);
+  const sheetHeight = Math.max(0, viewport - safeTop - TOP_GAP);
   const detentY = useCallback(
     (d: Detent) => {
       if (d === "full") return 0;
@@ -158,6 +173,8 @@ export function Sheet({
     const sync = () => {
       setDesktop(mq.matches);
       setViewport(window.innerHeight);
+      // Rotation changes the inset (the notch moves to a side).
+      setSafeTop(readSafeTop());
     };
     sync();
     mq.addEventListener("change", sync);
