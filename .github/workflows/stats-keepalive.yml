@@ -1,0 +1,39 @@
+# Keeps the visit counter's free Supabase "stats" project from pausing
+# (free projects pause after about a week without activity). Calls the
+# read-only get_stats(), so a ping never adds a visit. Mon, Wed and Fri at
+# 10:00 Bangkok: the longest gap is 3 days, 5 if one run is missed.
+# See docs/adr/0002-visit-counter.md.
+name: stats-keepalive
+
+on:
+  schedule:
+    - cron: "0 3 * * 1,3,5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/web/lib/stats-config.json
+          sparse-checkout-cone-mode: false
+
+      # URL and publishable key are public by design and live in one file
+      # shared with the web app; unconfigured means nothing to keep alive.
+      - name: Ping get_stats
+        run: |
+          url=$(jq -r .url apps/web/lib/stats-config.json)
+          key=$(jq -r .publishableKey apps/web/lib/stats-config.json)
+          if [ -z "$url" ] || [ -z "$key" ]; then
+            echo "Stats project not configured; skipping."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 20 \
+            -X POST "$url/rest/v1/rpc/get_stats" \
+            -H "apikey: $key" \
+            -H "Content-Type: application/json" \
+            -d '{}'
