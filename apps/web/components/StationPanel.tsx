@@ -97,19 +97,21 @@ export function StationPanel({
               {stationNames.secondary}
             </p>
           )}
-          <span className="status" data-status={station.status}>
-            {t(`status_${station.status}`, lang)}
-          </span>
         </div>
         <button
           type="button"
-          className="icon-btn"
+          className="icon-btn station-close"
           aria-label={t("close", lang)}
           onClick={onClose}
         >
-          <CloseIcon />
+          <CloseIcon size={18} />
         </button>
       </div>
+      {/* Under the head, so the close button centres on the two name lines
+          only. */}
+      <span className="status" data-status={station.status}>
+        {t(`status_${station.status}`, lang)}
+      </span>
 
       <section className="section">
         <h3 className="section-title">{t("lines", lang)}</h3>

@@ -52,6 +52,8 @@
    * -700 shades: readable on white. */
   --beta: #b45309;
   --dev: #be185d;
+  /* Close buttons: a dim red, so "close" reads without shouting. */
+  --close: #c2413f;
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-sheet: 0 -1px 0 rgba(0, 0, 0, 0.04), 0 -8px 32px rgba(0, 0, 0, 0.14);
   --radius-sheet: 28px;
@@ -93,6 +95,7 @@
   --accent: #4d8dff;
   --beta: #f5a524;
   --dev: #f472b6;
+  --close: #f2787a;
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-sheet:
     0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 32px rgba(0, 0, 0, 0.6);
@@ -1368,8 +1371,21 @@ a.row:active {
 
 .station-head {
   display: flex;
-  align-items: flex-start;
+  /* The close button sits centred on the name lines (status is below). */
+  align-items: center;
   gap: 12px;
+}
+
+.station-close {
+  width: 40px;
+  height: 40px;
+  margin-right: 4px;
+  color: var(--close);
+  background: color-mix(in srgb, var(--close) 14%, transparent);
+}
+
+.station-close:active {
+  background: color-mix(in srgb, var(--close) 24%, transparent);
 }
 
 .station-title {
