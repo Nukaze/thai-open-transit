@@ -129,10 +129,17 @@ export const DICTIONARY: Record<string, Record<Lang, string>> = {
   structure_at_grade: { th: "ระดับดิน", en: "At grade" },
   visits_total: { th: "เข้าชมทั้งหมด {n} ครั้ง", en: "{n} views" },
   visits_today: { th: "วันนี้ {n}", en: "{n} today" },
+  // Static: the day the stats project started counting. Edit by hand if the
+  // table is ever reset. Thai uses the Buddhist year, as Thai readers expect.
+  visits_since: {
+    th: "เริ่มนับตั้งแต่ 18 ต.ค. 2569",
+    en: "Counting since 18 Oct 2026",
+  },
   visits_dev: {
     th: "โหมดพัฒนา: ไม่นับยอดเข้าชม",
     en: "Development mode: views not counted",
   },
+  beta: { th: "เบต้า", en: "Beta" },
 };
 
 export function t(key: string, lang: Lang): string {

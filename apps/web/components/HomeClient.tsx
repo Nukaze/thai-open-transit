@@ -526,6 +526,7 @@ export function HomeClient({
                 <img src="/favicon.ico" alt="" width={22} height={22} />
               </span>
               <span className="brand-name">Bangkok Open Transit</span>
+              <span className="brand-beta">{t("beta", lang)}</span>
             </div>
             <StationSearchField
               query={query}

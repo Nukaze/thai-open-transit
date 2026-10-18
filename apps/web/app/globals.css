@@ -670,6 +670,19 @@ button {
   letter-spacing: -0.01em;
 }
 
+/* Product stage, shown to everyone. Accent tint, not --warn: "early", not
+   "something is wrong". */
+.brand-beta {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
 /* ---------- Search ---------- */
 
 .search {
@@ -1313,6 +1326,16 @@ a.row:active {
   color: var(--ink-3);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* What the total covers. Smaller and pulled close to the counter so the two
+   read as one group (the parent's row gap is 8px). */
+.visit-counter-since {
+  flex-basis: 100%;
+  margin-top: -6px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-3);
 }
 
 /* Under the counter on the developer's machine only (isLocalDev): views
