@@ -110,3 +110,32 @@ export const InfoIcon = ({ size = 14 }: P) => (
     <circle cx="12" cy="7.75" r=".6" fill="currentColor" />
   </svg>
 );
+
+// A ground plane in perspective with an arrow: up tilts it further back,
+// down lays it flatter.
+export const TiltIcon = ({
+  size = 20,
+  direction,
+}: P & { direction: "up" | "down" }) => (
+  <svg {...base(size)}>
+    <path d="M8 13h8l3.5 7h-15L8 13Z" />
+    <path
+      d={direction === "up" ? "M12 9V3M9 6l3-3 3 3" : "M12 3v6M9 6l3 3 3-3"}
+    />
+  </svg>
+);
+
+export const ResetViewIcon = ({ size = 20 }: P) => (
+  <svg {...base(size)}>
+    <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5" />
+    <path d="M3.5 3.5v5h5" />
+  </svg>
+);
+
+export const SlidersIcon = ({ size = 20 }: P) => (
+  <svg {...base(size)}>
+    <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+    <circle cx="15" cy="7" r="2" />
+    <circle cx="9" cy="17" r="2" />
+  </svg>
+);

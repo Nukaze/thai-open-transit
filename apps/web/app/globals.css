@@ -159,19 +159,43 @@ button {
 
 /* ---------- Map controls (MapControls.tsx) ---------- */
 
-/* One row bottom-right, clear of the attribution "i" below it
-   (which reaches 34px up from the bottom; 44px leaves a 10px gap). Rides the sheet on
-   phones with the same cap as MapLibre's controls (see below). */
+/* One row bottom-right, 12px above the sheet on phones and 16px above the
+   window edge on desktop - level with the credit there (see below). On
+   phones it rides the sheet but stops well below the top-right theme
+   button: past that point (the sheet near full height) it slides under the
+   sheet rather than landing on it. 148px = theme button (12 + 44), this row
+   (44 + 12) and a gap, which also keeps it fully under a full-height sheet
+   (top 56px). The advanced group stacks above it, right-aligned; while it
+   is open the cap grows by the vertical tilt capsule (48 + 112 + 48, plus
+   an 8px gap) for the same reason. */
 .map-controls {
   position: fixed;
   right: 12px;
   bottom: calc(
-    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 180px)) + 44px
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 148px)) + 12px
   );
   z-index: 5;
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.map-controls[data-advanced] {
+  bottom: calc(
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 364px)) + 12px
+  );
+}
+
+.map-controls-row {
+  display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Phone zoom sits at the foot of the tall tilt capsule, level with it. */
+#map-controls-advanced {
+  align-items: flex-end;
 }
 
 .map-btn {
@@ -203,7 +227,9 @@ button {
   letter-spacing: -0.01em;
 }
 
-/* Following the user: systemBlue, as in Apple Maps. */
+/* Following the user: systemBlue, as in Apple Maps. The advanced toggle
+   uses the same tint while its row is open. */
+.map-btn[aria-expanded="true"],
 .map-btn[data-state="active"],
 .map-btn[data-state="background"],
 .map-btn[data-state="waiting"] {
@@ -236,24 +262,183 @@ button {
   width: 48px;
 }
 
+/* Zoom lives in the default row on desktop and in the advanced row on
+   phones (MapControls renders one copy for each). */
+.map-zoom.map-zoom-wide {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .map-zoom.map-zoom-wide {
+    display: flex;
+  }
+
+  .map-zoom.map-zoom-narrow {
+    display: none;
+  }
+}
+
+/* Tilt: one vertical capsule, step buttons at each end and the slider
+   between. Vertical so the thumb moves the way the camera does - up tilts
+   toward the horizon (spatial compatibility). The slider is a normal
+   horizontal range rotated -90deg in a fixed box: rotating keeps min at the
+   bottom and arrow keys working in every browser, without depending on
+   `writing-mode` support for form controls. */
+.map-tilt {
+  flex-direction: column;
+  align-items: center;
+}
+
+.map-tilt .map-btn {
+  width: 44px;
+  height: 48px;
+}
+
+.tilt-track {
+  position: relative;
+  width: 44px;
+  height: 112px;
+}
+
+.tilt-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 112px;
+  height: 44px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.tilt-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ink-3);
+}
+
+.tilt-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ink-3);
+}
+
+.tilt-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--hairline),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.tilt-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--hairline),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.tilt-slider:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -6px;
+  border-radius: 22px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .map-btn[data-state="waiting"] svg {
     animation: none;
   }
 }
 
-/* Attribution (and .map-controls above it) ride on top of the sheet instead
-   of hiding under it, but stop well below the top-right theme button: past
-   that point (the sheet near full height) they slide under the sheet
-   rather than landing on it. 180px = theme button (12 + 44), the
-   attribution plus the controls row (44 + 44) and a gap, which also keeps
-   both fully under a full-height sheet (top 56px). */
-.maplibregl-ctrl-bottom-right,
-.maplibregl-ctrl-bottom-left {
+/* MapLibre's bottom-right corner only holds the hidden geolocate control
+   now; it rides the sheet like .map-controls so the user dot logic sees
+   the same visible map. */
+.maplibregl-ctrl-bottom-right {
   bottom: min(
     var(--sheet-offset),
-    calc(100dvh - var(--safe-top) - 180px)
+    calc(100dvh - var(--safe-top) - 148px)
   ) !important;
+}
+
+/* Credits. Phones: top-left, level with the theme button top-right - the
+   bottom edge belongs to the sheet and the control row, and an expanded
+   credit line beside that row would not fit a 360px screen. Desktop:
+   bottom-left under the panel's left edge, level with the controls (the
+   panel's max-height leaves room for it). !important because
+   maplibre-gl.css loads after this file and sets `bottom/left: 0`. */
+.maplibregl-ctrl-bottom-left {
+  /* Centered on the 44px theme button (top 12px) across from it: the
+     pill is 26px tall, so 12 + (44 - 26) / 2. */
+  top: calc(var(--safe-top) + 21px) !important;
+  bottom: auto !important;
+  left: 12px !important;
+}
+
+.maplibregl-ctrl-bottom-left .maplibregl-ctrl {
+  margin: 0 !important;
+}
+
+@media (min-width: 768px) {
+  .maplibregl-ctrl-bottom-left {
+    top: auto !important;
+    bottom: 16px !important;
+    left: 16px !important;
+  }
+
+  /* No sheet on desktop: the controls share the credit's 16px baseline. */
+  .map-controls,
+  .map-controls[data-advanced] {
+    bottom: 16px;
+  }
+}
+
+/* Credits wear the controls' glass instead of MapLibre's white pill, and
+   the (i) icon (a black SVG background) is inverted on the dark map. */
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  color: var(--ink-2);
+  font-size: 11px;
+}
+
+.maplibregl-ctrl-bottom-left > .maplibregl-ctrl-attrib.maplibregl-compact-show {
+  padding: 2px 10px 2px 30px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: inherit;
+}
+
+/* maplibre-gl.css (loaded after this file) pins the compact credit to
+   #000 and its links to rgba(0,0,0,.75), unreadable on the dark glass.
+   Light mode keeps those, which read fine there. */
+:root[data-theme="dark"] .maplibregl-ctrl.maplibregl-ctrl-attrib,
+:root[data-theme="dark"] .maplibregl-ctrl.maplibregl-ctrl-attrib a {
+  color: var(--ink) !important;
+}
+
+.maplibregl-ctrl-attrib-button,
+.maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-button {
+  background-color: transparent;
+}
+
+:root[data-theme="dark"] .maplibregl-ctrl-attrib-button {
+  filter: invert(1);
 }
 
 /* ---------- Sheet ---------- */
@@ -367,7 +552,9 @@ button {
     bottom: auto;
     width: 320px;
     height: auto;
-    max-height: calc(100dvh - 32px);
+    /* 16px top inset, then the credit's row at the bottom: 16px inset +
+       24px credit + 8px gap. */
+    max-height: calc(100dvh - 64px);
     border-radius: 20px;
     box-shadow: var(--shadow-float);
     transform: none !important;
@@ -449,8 +636,7 @@ button {
     transform: rotate(90deg);
   }
 
-  .maplibregl-ctrl-bottom-right,
-  .maplibregl-ctrl-bottom-left {
+  .maplibregl-ctrl-bottom-right {
     bottom: 0 !important;
   }
 }
@@ -687,6 +873,9 @@ a.row:active {
   color: var(--accent);
   font-size: 14px;
   font-weight: 560;
+  /* Rounds the focus ring (outlines follow border-radius) so it hugs the
+     text instead of drawing a square box around it. */
+  border-radius: 6px;
 }
 
 .section-head {
@@ -736,7 +925,7 @@ a.row:active {
   border-radius: 3px;
   background: linear-gradient(
     to right,
-    var(--ink) var(--pct),
+    var(--accent) var(--pct),
     color-mix(in srgb, var(--ink) 14%, transparent) var(--pct)
   );
 }
@@ -750,7 +939,7 @@ a.row:active {
 .range::-moz-range-progress {
   height: 6px;
   border-radius: 3px;
-  background: var(--ink);
+  background: var(--accent);
 }
 
 .range::-webkit-slider-thumb {
@@ -810,8 +999,10 @@ a.row:active {
   transition: transform 260ms cubic-bezier(0.3, 1.3, 0.5, 1);
 }
 
+/* The UI's one accent, not iOS's switch green: on a transit map green
+   means "running" (the Operational badge), so a control must not use it. */
 [aria-pressed="true"] > .switch {
-  background: #34c759;
+  background: var(--accent);
 }
 
 [aria-pressed="true"] > .switch::after {
@@ -1011,9 +1202,10 @@ a.row:active {
 
 @media (prefers-reduced-transparency: reduce) {
   .fab,
-  .map-controls > .map-btn,
-  .map-zoom {
-    background: var(--surface);
+  .map-controls-row > .map-btn,
+  .map-zoom,
+  .maplibregl-ctrl.maplibregl-ctrl-attrib {
+    background: var(--surface) !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -1190,6 +1382,10 @@ a.row:active {
   --glass-raised: rgba(255, 255, 255, 0.92);
   --glass-edge: rgba(255, 255, 255, 0.55);
   --glass-blur: blur(24px) saturate(180%);
+  /* Small floating controls over the map. Same as the panel in light mode;
+     see the dark override for why they differ there. */
+  --glass-control: var(--glass-panel);
+  --glass-control-edge: var(--glass-edge);
 }
 
 :root[data-theme="dark"] {
@@ -1197,6 +1393,12 @@ a.row:active {
   --glass-card: rgba(255, 255, 255, 0.07);
   --glass-raised: rgba(255, 255, 255, 0.16);
   --glass-edge: rgba(255, 255, 255, 0.08);
+  /* The panel's dark glass is nearly the dark basemap's own color: fine
+     for a large panel, whose shape reads anyway, but a 44px button in it
+     vanishes and leaves its icon floating. A lighter surface and edge keep
+     each control a visible shape. */
+  --glass-control: rgba(52, 52, 56, 0.86);
+  --glass-control-edge: rgba(255, 255, 255, 0.16);
 }
 
 .sheet {
@@ -1243,14 +1445,15 @@ a.row:active {
   box-shadow: var(--raised-shadow);
 }
 
-/* Floating map buttons share the panel's glass and edge. */
+/* Floating map buttons and the credits share one control glass. */
 .fab,
-.map-controls > .map-btn,
-.map-zoom {
-  background: var(--glass-panel) !important;
+.map-controls-row > .map-btn,
+.map-zoom,
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background: var(--glass-control) !important;
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--glass-control-edge);
 }
 
 /* No blur support, or the viewer asked for less transparency: solid
@@ -1268,6 +1471,7 @@ a.row:active {
     --glass-panel: #1c1c1f;
     --glass-card: #26262a;
     --glass-raised: #3a3a3e;
+    --glass-control: #2c2c30;
   }
 }
 
@@ -1282,6 +1486,7 @@ a.row:active {
     --glass-panel: #1c1c1f;
     --glass-card: #26262a;
     --glass-raised: #3a3a3e;
+    --glass-control: #2c2c30;
   }
 }
 
@@ -1328,7 +1533,7 @@ a.row:active {
 }
 
 .fab,
-.map-controls > .map-btn,
+.map-controls-row > .map-btn,
 .map-zoom {
   box-shadow:
     var(--glass-highlight),
@@ -1486,7 +1691,7 @@ a.row:active {
 
 /* ---------- Line groups (LineFilter.tsx) ---------- */
 
-/* Count + "Show all", right of the section title. */
+/* Count + "Show all" / "Hide all", right of the section title. */
 .section-head-aside {
   display: inline-flex;
   align-items: baseline;

@@ -25,6 +25,7 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   no_results: { th: "ไม่พบสถานี", en: "No stations found" },
   lines: { th: "สายรถไฟ", en: "Lines" },
   show_all: { th: "แสดงทั้งหมด", en: "Show all" },
+  hide_all: { th: "ซ่อนทั้งหมด", en: "Hide all" },
   lines_hint: {
     th: "แตะสายเพื่อแสดงหรือซ่อนบนแผนที่",
     en: "Tap a line to show or hide it on the map.",
@@ -58,6 +59,11 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   view_3d: { th: "มุมมอง 3 มิติ", en: "Tilt to 3D view" },
   view_2d: { th: "มุมมอง 2 มิติ", en: "Flatten to 2D view" },
   reset_north: { th: "หันทิศเหนือขึ้น", en: "Point north up" },
+  more_controls: { th: "ควบคุมกล้องเพิ่มเติม", en: "More camera controls" },
+  tilt: { th: "มุมเอียงแผนที่", en: "Map tilt" },
+  tilt_up: { th: "เอียงแผนที่เพิ่ม", en: "Tilt up" },
+  tilt_down: { th: "เอียงแผนที่ลด", en: "Tilt down" },
+  reset_view: { th: "กลับสู่มุมมองเริ่มต้น", en: "Reset view" },
   zoom_in: { th: "ซูมเข้า", en: "Zoom in" },
   zoom_out: { th: "ซูมออก", en: "Zoom out" },
 };

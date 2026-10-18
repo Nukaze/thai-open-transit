@@ -22,11 +22,13 @@ export function LineFilter({
   activeLineIds,
   onToggle,
   onShowAll,
+  onHideAll,
 }: {
   lines: Line[];
   activeLineIds: Set<string>;
   onToggle: (id: string) => void;
   onShowAll: () => void;
+  onHideAll: () => void;
 }) {
   const shownCount = lines.filter((l) => activeLineIds.has(l.id)).length;
   const allOn = shownCount === lines.length;
@@ -52,11 +54,17 @@ export function LineFilter({
           {t("lines_shown", "en")
             .replace("{shown}", String(shownCount))
             .replace("{total}", String(lines.length))}
-          {!allOn && (
-            <button type="button" className="link-btn" onClick={onShowAll}>
-              {t("show_all", "en")}
-            </button>
-          )}
+          {/* One button whose label is its action, as a "select all" does:
+              Hide all only when every line is on; from any partial state it
+              offers the way back to the full map. Both labels are about the
+              same width, so nothing shifts when it flips. */}
+          <button
+            type="button"
+            className="link-btn"
+            onClick={allOn ? onHideAll : onShowAll}
+          >
+            {t(allOn ? "hide_all" : "show_all", "en")}
+          </button>
         </span>
       </div>
       <p className="section-hint">

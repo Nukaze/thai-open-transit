@@ -16,7 +16,8 @@ import { PUBLIC_BASE_URL } from "../lib/constants";
 import type { Feature, FeatureCollection, Point, LineString } from "geojson";
 import { MapControls } from "./MapControls";
 
-const BANGKOK_CENTER: [number, number] = [100.5018, 13.7563];
+// The first-load camera, which the controls' reset button flies back to.
+const HOME_VIEW = { center: [100.5018, 13.7563] as [number, number], zoom: 11 };
 
 export type MapTheme = "light" | "dark";
 
@@ -634,7 +635,7 @@ export function Map({
   // lifecycle" (Protomaps docs), and re-running it on every line-filter
   // toggle (which produces a new `networkGeoJson` object each time) would
   // tear down and rebuild the whole MapLibre instance - destroying the
-  // protocol, resetting zoom/center to `BANGKOK_CENTER`, and re-registering
+  // protocol, resetting zoom/center to `HOME_VIEW`, and re-registering
   // the protocol on top of itself.
   const onStationClickRef = useRef(onStationClick);
   const networkGeoJsonRef = useRef(networkGeoJson);
@@ -927,10 +928,17 @@ export function Map({
     const initialTheme = themeRef.current;
     const map = new maplibregl.Map({
       container: containerRef.current!,
-      center: BANGKOK_CENTER,
-      zoom: 11,
+      center: HOME_VIEW.center,
+      zoom: HOME_VIEW.zoom,
       style: buildStyle(initialTheme),
+      attributionControl: false,
     });
+    // Credits bottom-left, apart from the glass controls bottom-right, as
+    // Apple and Google Maps do. Same default control otherwise: it starts
+    // expanded and collapses to an (i) on narrow maps after the first pan,
+    // so the OpenStreetMap credit is visible before any interaction (ODbL,
+    // OSMF attribution guidelines).
+    map.addControl(new maplibregl.AttributionControl(), "bottom-left");
 
     // Code-badge images, built the first time the style asks for one. The
     // `station-badges` layer requests `badge|<fill>|<ring>` by expression, so
@@ -1087,7 +1095,11 @@ export function Map({
         style={{ "--haze": basemapFlavor(theme).earth } as CSSProperties}
       />
       {controls && (
-        <MapControls map={controls.map} geolocate={controls.geolocate} />
+        <MapControls
+          map={controls.map}
+          geolocate={controls.geolocate}
+          home={HOME_VIEW}
+        />
       )}
     </>
   );
