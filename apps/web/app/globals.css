@@ -88,11 +88,12 @@
   --font-system:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
     "Noto Sans Thai", system-ui, sans-serif;
-  --font-ui: var(--font-system);
+  --font-ui: "Sao Chingcha", "Chakra Petch", var(--font-system);
   --font-brand: "Sao Chingcha", "Chakra Petch", var(--font-system);
   color-scheme: light;
 }
 
+/* Same as English for now; kept so one language can change on its own. */
 :root:lang(th) {
   --font-ui: "Sao Chingcha", "Chakra Petch", var(--font-system);
 }
@@ -610,7 +611,9 @@ button {
     left: 16px;
     right: auto;
     bottom: auto;
-    width: 320px;
+    /* Wide enough for the 26px brand on one line (Sao Chingcha needs
+       ~408px with the BETA pill and collapse button). */
+    width: 420px;
     height: auto;
     /* 16px top inset, then the credit's row at the bottom: 16px inset +
        24px credit + 8px gap. */
@@ -711,7 +714,7 @@ button {
 .brand-name {
   font-family: var(--font-brand);
   font-weight: 650;
-  font-size: 17px;
+  font-size: 26px;
   letter-spacing: -0.01em;
 }
 
@@ -1506,10 +1509,6 @@ a.row:active {
     width: 26px;
     height: 26px;
     border-radius: 8px;
-  }
-
-  .brand-name {
-    font-size: 15px;
   }
 
   .search {

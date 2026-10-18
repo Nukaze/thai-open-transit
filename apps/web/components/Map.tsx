@@ -26,9 +26,9 @@ export type MapFocus = { lon: number; lat: number; n: number };
 // Close enough to read the station's badge and its neighbours; never zooms
 // out if the user is already closer.
 const FOCUS_MIN_ZOOM = 14;
-// Half the desktop panel's footprint (320px wide + 16px inset each side),
+// Half the desktop panel's footprint (420px wide + 16px inset each side),
 // so the station lands in the middle of the map area right of it.
-const FOCUS_PANEL_OFFSET_X = 176;
+const FOCUS_PANEL_OFFSET_X = 226;
 // The OSMF attribution guidelines allow collapsing credits "automatically
 // after five seconds".
 const CREDITS_FOLD_MS = 5000;
