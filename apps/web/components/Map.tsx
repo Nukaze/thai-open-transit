@@ -931,7 +931,14 @@ export function Map({
       center: HOME_VIEW.center,
       zoom: HOME_VIEW.zoom,
       style: buildStyle(initialTheme),
+      attributionControl: false,
     });
+    // Credits bottom-left, apart from the glass controls bottom-right, as
+    // Apple and Google Maps do. Same default control otherwise: it starts
+    // expanded and collapses to an (i) on narrow maps after the first pan,
+    // so the OpenStreetMap credit is visible before any interaction (ODbL,
+    // OSMF attribution guidelines).
+    map.addControl(new maplibregl.AttributionControl(), "bottom-left");
 
     // Code-badge images, built the first time the style asks for one. The
     // `station-badges` layer requests `badge|<fill>|<ring>` by expression, so

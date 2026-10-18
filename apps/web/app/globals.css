@@ -359,7 +359,8 @@ button {
   }
 }
 
-/* Attribution (and .map-controls above it) ride on top of the sheet instead
+/* Attribution (bottom-left) and .map-controls (bottom-right, held 44px up
+   so an expanded credit line never runs under them on a phone) ride on top of the sheet instead
    of hiding under it, but stop well below the top-right theme button: past
    that point (the sheet near full height) they slide under the sheet
    rather than landing on it. 180px = theme button (12 + 44), the
@@ -501,6 +502,13 @@ button {
       opacity: 0;
       translate: -16px 0;
     }
+  }
+
+  /* The floating panel covers the map's left edge (16 + 320 + 16px).
+     !important for the same reason as `bottom` above: maplibre-gl.css
+     loads after this file and sets `left: 0`. */
+  .maplibregl-ctrl-bottom-left {
+    left: 352px !important;
   }
 
   .sheet-grabber {
