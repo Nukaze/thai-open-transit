@@ -81,6 +81,7 @@ export function VisitCounter() {
         {" · "}
         {t("visits_today", lang).replace("{n}", n.format(stats.today))}
       </span>
+      <span className="visit-counter-since">{t("visits_since", lang)}</span>
       {localDev && (
         <span className="visit-counter-dev">
           <span>{t("visits_dev", lang)}</span>

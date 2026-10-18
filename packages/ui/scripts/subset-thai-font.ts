@@ -13,21 +13,33 @@ const GLYPH_SUBSET =
   "แโใไๅๆ็่้๊๋์ํ๎๏" +
   "๐๑๒๓๔๕๖๗๘๙";
 
+// Every self-hosted UI font, subset to the same glyphs. Licenses: fonts/OFL.txt
+// (copied next to the output). Chakra Petch is the UI font (Thai) and brand
+// fallback; two weights only, the CSS maps 500 to 400 and 650 to 600.
+export const FONTS = [
+  { source: "NotoSansThai-Regular.ttf", output: "NotoSansThai-subset.woff2" },
+  {
+    source: "ChakraPetch-Regular.ttf",
+    output: "ChakraPetch-Regular-subset.woff2",
+  },
+  {
+    source: "ChakraPetch-SemiBold.ttf",
+    output: "ChakraPetch-SemiBold-subset.woff2",
+  },
+] as const;
+
 export async function subsetThaiFont(): Promise<void> {
-  const inputPath = new URL(
-    "../fonts/NotoSansThai-Regular.ttf",
-    import.meta.url,
-  );
   const outputDir = new URL("../../../apps/web/public/fonts/", import.meta.url);
-  const outputPath = new URL("NotoSansThai-subset.woff2", outputDir);
-
-  const original = readFileSync(inputPath);
-  const subset = await subsetFont(original, GLYPH_SUBSET, {
-    targetFormat: "woff2",
-  });
-
   mkdirSync(outputDir, { recursive: true });
-  writeFileSync(outputPath, subset);
+  for (const font of FONTS) {
+    const original = readFileSync(
+      new URL(`../fonts/${font.source}`, import.meta.url),
+    );
+    const subset = await subsetFont(original, GLYPH_SUBSET, {
+      targetFormat: "woff2",
+    });
+    writeFileSync(new URL(font.output, outputDir), subset);
+  }
 }
 
 if (import.meta.main) {

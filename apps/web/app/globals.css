@@ -16,6 +16,38 @@
   font-display: swap;
 }
 
+/* Chakra Petch (OFL, public/fonts/OFL.txt), same subset as above. Two
+ * weights: the browser maps the UI's 500 to 400 and 560/650 to 600. */
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("/fonts/ChakraPetch-Regular-subset.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("/fonts/ChakraPetch-SemiBold-subset.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+/* Sao Chingcha, the BMA identity font: local() only, NEVER url(). Its
+ * license is "all rights reserved" (BMA), so the file must not be in this
+ * repo or served by the site. Visitors who installed it themselves see it;
+ * everyone else falls through to Chakra Petch. */
+@font-face {
+  font-family: "Sao Chingcha";
+  src: local("Sao Chingcha Regular"), local("SaoChingcha-Regular");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Sao Chingcha";
+  src: local("Sao Chingcha Bold"), local("SaoChingcha-Bold");
+  font-weight: 700;
+}
+
 /*
  * Design tokens. The UI follows the map theme (HomeClient writes
  * `data-theme` on <html>), so chrome and basemap never disagree.
@@ -31,8 +63,11 @@
   --hairline: rgba(0, 0, 0, 0.08);
   --accent: #1f6bff;
   --accent-ink: #ffffff;
-  /* Notices, not errors (dev-only badges). Amber-700: readable on white. */
-  --warn: #b45309;
+  /* Pill colours. Amber for the public BETA label (the usual "early"
+   * colour); pink for the developer-only badge so the two never read as one.
+   * -700 shades: readable on white. */
+  --beta: #b45309;
+  --dev: #be185d;
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-sheet: 0 -1px 0 rgba(0, 0, 0, 0.04), 0 -8px 32px rgba(0, 0, 0, 0.14);
   --radius-sheet: 28px;
@@ -47,7 +82,19 @@
   --radius-control: 10px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Fonts: change them here. --font-ui follows <html lang> (HomeClient
+   * sets it); --font-brand is the wordmark. */
+  --font-system:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+    "Noto Sans Thai", system-ui, sans-serif;
+  --font-ui: "Sao Chingcha", "Chakra Petch", var(--font-system);
+  --font-brand: "Sao Chingcha", "Chakra Petch", var(--font-system);
   color-scheme: light;
+}
+
+/* Same as English for now; kept so one language can change on its own. */
+:root:lang(th) {
+  --font-ui: "Sao Chingcha", "Chakra Petch", var(--font-system);
 }
 
 :root[data-theme="dark"] {
@@ -60,7 +107,8 @@
   --ink-3: #7d7e85;
   --hairline: rgba(255, 255, 255, 0.1);
   --accent: #4d8dff;
-  --warn: #f5a524;
+  --beta: #f5a524;
+  --dev: #f472b6;
   --shadow-float: 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-sheet:
     0 -1px 0 rgba(255, 255, 255, 0.06), 0 -8px 32px rgba(0, 0, 0, 0.6);
@@ -83,11 +131,7 @@ body {
 }
 
 body {
-  /* System font first for Latin (SF on Apple, Segoe/Roboto elsewhere); the
-   * Thai subset covers Thai glyphs the system font lacks. */
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
-    "Noto Sans Thai", system-ui, sans-serif;
+  font-family: var(--font-ui);
   font-size: 16px;
   line-height: 1.45;
   color: var(--ink);
@@ -566,7 +610,9 @@ button {
     left: 16px;
     right: auto;
     bottom: auto;
-    width: 320px;
+    /* Wide enough for the 36px mark + 26px brand on one line (Sao Chingcha
+       needs ~418px with the BETA pill and collapse button). */
+    width: 432px;
     height: auto;
     /* 16px top inset, then the credit's row at the bottom: 16px inset +
        24px credit + 8px gap. */
@@ -658,16 +704,30 @@ button {
 }
 
 .brand-mark {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
 }
 
 .brand-name {
+  font-family: var(--font-brand);
   font-weight: 650;
-  font-size: 17px;
+  font-size: 26px;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* Product stage, shown to everyone. */
+.brand-beta {
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--beta);
+  background: color-mix(in srgb, var(--beta) 14%, transparent);
 }
 
 /* ---------- Search ---------- */
@@ -1315,8 +1375,18 @@ a.row:active {
   white-space: nowrap;
 }
 
+/* What the total covers. Smaller and pulled close to the counter so the two
+   read as one group (the parent's row gap is 8px). */
+.visit-counter-since {
+  flex-basis: 100%;
+  margin-top: -6px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
 /* Under the counter on the developer's machine only (isLocalDev): views
-   there are read, never counted. Amber, not red: a notice, not an error. */
+   there are read, never counted. Pink, not red: a notice, not an error. */
 .visit-counter-dev {
   flex-basis: 100%;
   display: flex;
@@ -1328,8 +1398,8 @@ a.row:active {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 500;
-  color: var(--warn);
-  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  color: var(--dev);
+  background: color-mix(in srgb, var(--dev) 14%, transparent);
 }
 
 /* Station detail swaps in with a short rise; reduced motion gets a fade. */
@@ -1394,16 +1464,6 @@ a.row:active {
    equal specificity. Phones keep the larger tap targets. */
 
 @media (min-width: 768px) {
-  .brand-mark {
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-  }
-
-  .brand-name {
-    font-size: 15px;
-  }
-
   .search {
     height: 40px;
     padding: 0 12px;
