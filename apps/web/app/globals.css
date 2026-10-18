@@ -350,16 +350,16 @@ button {
    window edge on desktop - level with the credit there (see below). On
    phones it rides the sheet but stops well below the top-right theme
    button: past that point (the sheet near full height) it slides under the
-   sheet rather than landing on it. 148px = theme button (12 + 44), this row
-   (44 + 12) and a gap, which also keeps it fully under a full-height sheet
-   (top 56px). The advanced group stacks above it, right-aligned; while it
-   is open the cap grows by the vertical tilt capsule (48 + 112 + 48, plus
+   sheet rather than landing on it. 142px = the full sheet's top (TOP_GAP
+   in Sheet.tsx, 86) plus this row (44 + 12), so the row parks exactly
+   where a full-height sheet covers it. The advanced group stacks above it,
+   right-aligned; while it is open the cap grows by the vertical tilt capsule (48 + 112 + 48, plus
    an 8px gap) for the same reason. */
 .map-controls {
   position: fixed;
   right: 12px;
   bottom: calc(
-    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 148px)) + 12px
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 142px)) + 12px
   );
   z-index: 5;
   display: flex;
@@ -375,7 +375,7 @@ button {
 
 .map-controls[data-advanced] {
   bottom: calc(
-    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 364px)) + 12px
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 358px)) + 12px
   );
 }
 
@@ -566,7 +566,7 @@ button {
 .maplibregl-ctrl-bottom-right {
   bottom: min(
     var(--sheet-offset),
-    calc(100dvh - var(--safe-top) - 148px)
+    calc(100dvh - var(--safe-top) - 142px)
   ) !important;
 }
 
@@ -656,9 +656,13 @@ button {
   will-change: transform;
   /* Pre-hydration placement at the peek detent, so the prerendered page
      doesn't show the sheet covering the map until JS measures the screen.
-     56px mirrors TOP_GAP in Sheet.tsx; JS then writes exact inline values. */
-  height: calc(100dvh - 56px);
-  transform: translate3d(0, calc(100dvh - 56px - var(--peek-height)), 0);
+     86px mirrors TOP_GAP in Sheet.tsx; JS then writes exact inline values. */
+  height: calc(100dvh - var(--safe-top) - 86px);
+  transform: translate3d(
+    0,
+    calc(100dvh - var(--safe-top) - 86px - var(--peek-height)),
+    0
+  );
 }
 
 .sheet-grabber {
@@ -2113,7 +2117,7 @@ a.row:active {
 }
 
 /* Phones: one line, so the collapsed sheet's fixed height (PEEK_HEIGHT in
-   HomeClient.tsx) always fits the chip row below it. */
+   HomeClient.tsx) always lines up with the first group below it. */
 @media (max-width: 767px) {
   .section-hint span {
     min-width: 0;
