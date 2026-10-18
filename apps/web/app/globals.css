@@ -908,10 +908,31 @@ a.row:active {
 }
 
 .year-value small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 15px;
   font-weight: 560;
   letter-spacing: 0;
   color: var(--ink-3);
+}
+
+/* Year left, the back-to-today link right on the same line, so the card
+   does not grow when the link appears. The caption gives way first. */
+.year-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.year-head .year-value {
+  min-width: 0;
+}
+
+.year-today {
+  flex: none;
 }
 
 .range {
@@ -1549,6 +1570,78 @@ a.row:active {
 .sheet {
   transition-property: opacity, translate, background-color, border-color;
   transition-duration: 320ms;
+}
+
+/* Time-travel focus (YearSelector): while the year slider is held, the
+   panel's glass and everything on it except the time-travel card fade
+   out, as do the map's own controls, so the network shows through. Fades
+   out fast (150ms) and back in at the panel's usual 320ms. */
+.sheet-grabber,
+.sheet-head,
+.sheet-body > *,
+.map-controls,
+.maplibregl-ctrl-bottom-left {
+  transition: opacity 320ms ease;
+}
+
+/* The theme button keeps its press scale (`.fab` above). */
+.fab {
+  transition:
+    transform 120ms ease-out,
+    opacity 320ms ease;
+}
+
+:root[data-scrubbing] .sheet {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition-duration: 150ms;
+}
+
+:root[data-scrubbing]
+  :is(
+    .sheet-grabber,
+    .sheet-collapse,
+    .sheet-head,
+    .sheet-body > :not(.time-travel),
+    .time-travel .section-title,
+    .map-controls,
+    .fab,
+    .maplibregl-ctrl-bottom-left
+  ) {
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: 150ms;
+}
+
+/* The card stays, lifted onto the controls' glass so it reads over the
+   bare map. */
+:root[data-scrubbing] .time-travel .year-card {
+  background: var(--glass-control);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-float);
+}
+
+/* The sheet-body's top-edge fade mask would fade the card too if the
+   body is scrolled; nothing else is visible while scrubbing anyway. */
+:root[data-scrubbing] .sheet-body {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-grabber,
+  .sheet-head,
+  .sheet-body > *,
+  .map-controls,
+  .fab,
+  .maplibregl-ctrl-bottom-left,
+  :root[data-scrubbing] .sheet {
+    transition: none;
+  }
 }
 
 /* Vibrancy: on glass, secondary text gets more contrast and a touch more

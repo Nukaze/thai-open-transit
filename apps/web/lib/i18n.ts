@@ -43,6 +43,7 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   group_srt: { th: "รถไฟชานเมือง (SRT)", en: "SRT & Airport Rail Link" },
   time_travel: { th: "ย้อนเวลา", en: "Time travel" },
   today: { th: "วันนี้", en: "Today" },
+  back_to_today: { th: "กลับมาปัจจุบัน", en: "Back to today" },
   network_as_of: { th: "สิ้นปี", en: "Network at year end" },
   map_settings: { th: "แผนที่", en: "Map" },
   appearance: { th: "ธีม", en: "Appearance" },
