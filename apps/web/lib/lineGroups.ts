@@ -1,5 +1,6 @@
 // apps/web/lib/lineGroups.ts
 import type { Line } from "schema";
+import type { Lang } from "./i18n";
 
 // How the line filter groups its chips: by the system riders know a line
 // by (the brand on the logo), not by operator company - MRT Blue, Pink,
@@ -23,8 +24,14 @@ export function lineGroup(line: Line): LineGroupId | null {
 
 // "BTS Sukhumvit Line" -> "Sukhumvit": inside a group labelled BTS, the
 // brand and the word "Line" repeat on every chip. Names that don't follow
-// the pattern ("Airport Rail Link") are kept whole.
-export function lineShortName(line: Line): string {
+// the pattern ("Airport Rail Link") are kept whole. Thai names put the
+// brand first and the line after a space ("รถไฟฟ้าบีทีเอส สายสีทอง" ->
+// "สายสีทอง"); one with no space is kept whole.
+export function lineShortName(line: Line, lang: Lang = "en"): string {
+  if (lang === "th") {
+    const parts = line.name_th.trim().split(/\s+/);
+    return parts[parts.length - 1] || line.name_th;
+  }
   const short = line.name_en
     .replace(/^(BTS|MRT|SRT)\s+/, "")
     .replace(/\s+Line$/, "");

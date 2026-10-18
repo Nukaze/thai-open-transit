@@ -2,6 +2,7 @@
 "use client";
 
 import type { Line } from "schema";
+import { names, useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import {
   LINE_GROUP_ORDER,
@@ -34,6 +35,7 @@ export function LineFilter({
   onHideAll: () => void;
   onSetLines: (ids: string[], visible: boolean) => void;
 }) {
+  const lang = useLang();
   const shownCount = lines.filter((l) => activeLineIds.has(l.id)).length;
   const allOn = shownCount === lines.length;
 
@@ -53,9 +55,9 @@ export function LineFilter({
   return (
     <section className="section">
       <div className="section-head">
-        <h2 className="section-title">{t("lines", "en")}</h2>
+        <h2 className="section-title">{t("lines", lang)}</h2>
         <span className="section-head-aside" aria-live="polite">
-          {t("lines_shown", "en")
+          {t("lines_shown", lang)
             .replace("{shown}", String(shownCount))
             .replace("{total}", String(lines.length))}
           {/* One button whose label is its action, as a "select all" does:
@@ -68,13 +70,13 @@ export function LineFilter({
             onClick={allOn ? onHideAll : onShowAll}
           >
             {allOn ? <EyeOffIcon /> : <EyeIcon />}
-            {t(allOn ? "hide_all" : "show_all", "en")}
+            {t(allOn ? "hide_all" : "show_all", lang)}
           </button>
         </span>
       </div>
       <p className="section-hint">
         <InfoIcon />
-        <span>{t("lines_hint", "en")}</span>
+        <span>{t("lines_hint", lang)}</span>
       </p>
       <div className="line-groups">
         {[...groups].map(([groupId, groupLines]) =>
@@ -83,11 +85,11 @@ export function LineFilter({
               key={groupId ?? "other"}
               className="line-group"
               role="group"
-              aria-label={groupId ? t(`group_${groupId}`, "en") : undefined}
+              aria-label={groupId ? t(`group_${groupId}`, lang) : undefined}
             >
               {groupId && (
                 <GroupHead
-                  name={t(`group_${groupId}`, "en")}
+                  name={t(`group_${groupId}`, lang)}
                   allOn={groupLines.every((l) => activeLineIds.has(l.id))}
                   onSet={(visible) =>
                     onSetLines(
@@ -104,14 +106,16 @@ export function LineFilter({
                     type="button"
                     className="chip"
                     aria-pressed={activeLineIds.has(line.id)}
-                    aria-label={line.name_en}
-                    title={line.name_en}
+                    aria-label={names(line, lang).primary}
+                    title={names(line, lang).primary}
                     onClick={() => onToggle(line.id)}
                   >
                     <LineLogo line={line} />
-                    <span className="chip-name-full">{line.name_en}</span>
+                    <span className="chip-name-full">
+                      {names(line, lang).primary}
+                    </span>
                     <span className="chip-name-short">
-                      {lineShortName(line)}
+                      {lineShortName(line, lang)}
                     </span>
                   </button>
                 ))}
@@ -134,7 +138,8 @@ function GroupHead({
   allOn: boolean;
   onSet: (visible: boolean) => void;
 }) {
-  const label = t(allOn ? "hide_group" : "show_group", "en").replace(
+  const lang = useLang();
+  const label = t(allOn ? "hide_group" : "show_group", lang).replace(
     "{group}",
     name,
   );
@@ -153,7 +158,7 @@ function GroupHead({
         onClick={() => onSet(!allOn)}
       >
         {allOn ? <EyeOffIcon size={13} /> : <EyeIcon size={13} />}
-        {t(allOn ? "hide" : "show", "en")}
+        {t(allOn ? "hide" : "show", lang)}
       </button>
     </div>
   );

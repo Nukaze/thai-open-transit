@@ -15,7 +15,9 @@ import { LineFilter } from "./LineFilter";
 import { StationSearchField, StationSearchResults } from "./StationSearch";
 import { ThemeSegmented, ThemeToggle } from "./ThemeToggle";
 import { Sheet, type Detent } from "./Sheet";
-import { t } from "../lib/i18n";
+import { detectLang, t, type Lang } from "../lib/i18n";
+import { LangContext } from "../lib/lang";
+import { LanguagePicker } from "./LanguagePicker";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
 import { NearestStationChip } from "./NearestStationChip";
@@ -54,6 +56,9 @@ const NetworkMap = dynamic(
 // the section's Show all / Hide all in reach. The other groups are a swipe
 // up away (half detent).
 const PEEK_HEIGHT = 226;
+
+// localStorage key for the viewer's chosen UI language.
+const LANG_KEY = "bot:lang";
 
 export function HomeClient({
   stations,
@@ -96,6 +101,35 @@ export function HomeClient({
     const query = window.matchMedia("(prefers-color-scheme: light)");
     if (query.matches) setTheme("light");
   }, []);
+
+  // UI language: prerendered in English like `theme` above, then after
+  // mount the viewer's saved pick, else the browser's preferred languages.
+  // Unlike theme it is remembered: a language is a standing preference.
+  const [lang, setLang] = useState<Lang>("en");
+  useEffect(() => {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(LANG_KEY);
+    } catch {
+      // Storage blocked (private mode, sandbox): fall through to detection.
+    }
+    setLang(
+      saved === "en" || saved === "th"
+        ? saved
+        : detectLang(navigator.languages ?? [navigator.language]),
+    );
+  }, []);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+  const chooseLang = (next: Lang) => {
+    setLang(next);
+    try {
+      localStorage.setItem(LANG_KEY, next);
+    } catch {
+      // Not persisted; the pick still holds for this visit.
+    }
+  };
 
   // Same prerendered-at-build-time problem as `theme` above: `output:'export'`
   // bakes whatever `new Date()` returns into the static HTML once, at build
@@ -430,9 +464,10 @@ export function HomeClient({
           onSelect={selectFromSheet}
         />
         <section className="section">
-          <h2 className="section-title">{t("map_settings", "en")}</h2>
+          <h2 className="section-title">{t("map_settings", lang)}</h2>
           <div className="list">
             <ThemeSegmented theme={theme} onChange={setTheme} />
+            <LanguagePicker onChange={chooseLang} />
             <StationLabelsToggle
               on={showStationLabels}
               onChange={setShowStationLabels}
@@ -458,8 +493,8 @@ export function HomeClient({
             onChange={setSelectedYear}
           />
         )}
-        <nav className="footer-links" aria-label="Project">
-          <a href="/download">{t("download_dataset", "en")}</a>
+        <nav className="footer-links" aria-label={t("project", lang)}>
+          <a href="/download">{t("download_dataset", lang)}</a>
           <a
             href="https://github.com/Nukaze/bangkok-open-transit"
             target="_blank"
@@ -473,7 +508,7 @@ export function HomeClient({
   }
 
   return (
-    <>
+    <LangContext.Provider value={lang}>
       <NetworkMap
         networkGeoJson={filteredGeoJson}
         onStationClick={selectFromMap}
@@ -514,6 +549,6 @@ export function HomeClient({
       >
         {body}
       </Sheet>
-    </>
+    </LangContext.Provider>
   );
 }

@@ -755,7 +755,10 @@ button {
 }
 
 .list > li + li .row::before,
-.list > .row + .row::before {
+.list > .row + .row::before,
+.list > .row + .lang-picker > .row::before,
+.list > .lang-picker + .row::before,
+.lang-options > .row::before {
   content: "";
   position: absolute;
   top: 0;
@@ -772,6 +775,90 @@ a.row:active {
 .row-main {
   flex: 1;
   min-width: 0;
+}
+
+/* ---------- Language picker (LanguagePicker.tsx) ---------- */
+
+.flag {
+  flex: none;
+  display: block;
+}
+
+.lang-picker > .row > svg:first-child {
+  flex: none;
+  color: var(--ink-2);
+}
+
+.lang-current {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+.lang-chevron {
+  display: inline-flex;
+  color: var(--ink-3);
+  transition: transform 200ms var(--ease-out);
+}
+
+.lang-picker > .row[aria-expanded="true"] .lang-chevron {
+  transform: rotate(90deg);
+}
+
+.lang-options {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.lang-option {
+  cursor: pointer;
+  padding-left: 44px;
+}
+
+.lang-option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+
+/* Visible but not selectable yet. */
+.lang-option[data-disabled] {
+  cursor: default;
+  color: var(--ink-3);
+}
+
+.lang-option[data-disabled] .flag {
+  opacity: 0.45;
+}
+
+.lang-flag-slot {
+  display: inline-flex;
+  width: 21px;
+}
+
+.lang-soon {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--ink-3);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lang-check {
+  display: inline-flex;
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lang-chevron {
+    transition: none;
+  }
 }
 
 .row-title {

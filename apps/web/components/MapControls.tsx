@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type * as maplibregl from "maplibre-gl";
+import { useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import {
   LocateIcon,
@@ -49,6 +50,7 @@ export function MapControls({
   geolocate: maplibregl.GeolocateControl;
   home: { center: [number, number]; zoom: number };
 }) {
+  const lang = useLang();
   const [locate, setLocate] = useState<LocateState>("off");
   const [tilted, setTilted] = useState(() => map.getPitch() > FLAT_PITCH);
   const [atMinZoom, setAtMinZoom] = useState(false);
@@ -133,9 +135,9 @@ export function MapControls({
   const following = locate === "active" || locate === "waiting";
   const locateLabel = t(
     locate === "active" ? "locate_stop" : "locate_me",
-    "en",
+    lang,
   );
-  const tiltLabel = t(tilted ? "view_2d" : "view_3d", "en");
+  const tiltLabel = t(tilted ? "view_2d" : "view_3d", lang);
 
   const tiltBy = (steps: number) => {
     const snapped = Math.round(map.getPitch() / PITCH_STEP) * PITCH_STEP;
@@ -153,8 +155,8 @@ export function MapControls({
       <button
         type="button"
         className="map-btn"
-        aria-label={t("zoom_out", "en")}
-        title={t("zoom_out", "en")}
+        aria-label={t("zoom_out", lang)}
+        title={t("zoom_out", lang)}
         disabled={atMinZoom}
         onClick={() => map.zoomOut()}
       >
@@ -163,8 +165,8 @@ export function MapControls({
       <button
         type="button"
         className="map-btn"
-        aria-label={t("zoom_in", "en")}
-        title={t("zoom_in", "en")}
+        aria-label={t("zoom_in", lang)}
+        title={t("zoom_in", lang)}
         disabled={atMaxZoom}
         onClick={() => map.zoomIn()}
       >
@@ -178,14 +180,14 @@ export function MapControls({
       className="map-controls"
       data-advanced={advanced || undefined}
       role="group"
-      aria-label="Map controls"
+      aria-label={t("map_controls", lang)}
     >
       {advanced && (
         <div
           id="map-controls-advanced"
           className="map-controls-row"
           role="group"
-          aria-label={t("more_controls", "en")}
+          aria-label={t("more_controls", lang)}
         >
           {zoom("narrow")}
 
@@ -196,8 +198,8 @@ export function MapControls({
             <button
               type="button"
               className="map-btn"
-              aria-label={t("tilt_up", "en")}
-              title={t("tilt_up", "en")}
+              aria-label={t("tilt_up", lang)}
+              title={t("tilt_up", lang)}
               disabled={atMaxPitch}
               onClick={() => tiltBy(1)}
             >
@@ -209,7 +211,7 @@ export function MapControls({
                 ref={tiltSliderRef}
                 type="range"
                 className="tilt-slider"
-                aria-label={t("tilt", "en")}
+                aria-label={t("tilt", lang)}
                 min={map.getMinPitch()}
                 max={map.getMaxPitch()}
                 step={1}
@@ -220,8 +222,8 @@ export function MapControls({
             <button
               type="button"
               className="map-btn"
-              aria-label={t("tilt_down", "en")}
-              title={t("tilt_down", "en")}
+              aria-label={t("tilt_down", lang)}
+              title={t("tilt_down", lang)}
               disabled={atMinPitch}
               onClick={() => tiltBy(-1)}
             >
@@ -235,8 +237,8 @@ export function MapControls({
         <button
           type="button"
           className="map-btn"
-          aria-label={t("more_controls", "en")}
-          title={t("more_controls", "en")}
+          aria-label={t("more_controls", lang)}
+          title={t("more_controls", lang)}
           aria-expanded={advanced}
           aria-controls={advanced ? "map-controls-advanced" : undefined}
           onClick={() => setAdvanced((a) => !a)}
@@ -276,8 +278,8 @@ export function MapControls({
         <button
           type="button"
           className="map-btn"
-          aria-label={t("reset_north", "en")}
-          title={t("reset_north", "en")}
+          aria-label={t("reset_north", lang)}
+          title={t("reset_north", lang)}
           onClick={() => map.easeTo({ bearing: 0, duration: 400 })}
         >
           <span ref={needleRef} className="compass" aria-hidden="true">
@@ -294,8 +296,8 @@ export function MapControls({
         <button
           type="button"
           className="map-btn"
-          aria-label={t("reset_view", "en")}
-          title={t("reset_view", "en")}
+          aria-label={t("reset_view", lang)}
+          title={t("reset_view", lang)}
           onClick={() =>
             map.flyTo({ ...home, bearing: 0, pitch: 0, speed: 1.6 })
           }

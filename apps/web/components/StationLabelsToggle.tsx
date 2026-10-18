@@ -1,6 +1,7 @@
 // apps/web/components/StationLabelsToggle.tsx
 "use client";
 
+import { useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 
 export function StationLabelsToggle({
@@ -10,6 +11,7 @@ export function StationLabelsToggle({
   on: boolean;
   onChange: (on: boolean) => void;
 }) {
+  const lang = useLang();
   return (
     <button
       type="button"
@@ -19,7 +21,7 @@ export function StationLabelsToggle({
       // `aria-pressed` carries the state, so the two never contradict.
       aria-pressed={on}
     >
-      <span className="row-main row-title">{t("station_labels", "en")}</span>
+      <span className="row-main row-title">{t("station_labels", lang)}</span>
       <span className="switch" aria-hidden="true" />
     </button>
   );

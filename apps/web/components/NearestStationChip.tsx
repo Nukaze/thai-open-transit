@@ -2,6 +2,7 @@
 "use client";
 
 import type { StationWithStatus } from "../lib/types";
+import { names, useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import { ChevronIcon, PinIcon } from "./icons";
 
@@ -31,6 +32,7 @@ export function NearestStationChip({
   errorCode: number | null;
   onSelect: (station: StationWithStatus) => void;
 }) {
+  const lang = useLang();
   if (!nearest && errorCode === null) return null;
 
   // An error replaces the row rather than stacking a second notice: both are
@@ -44,7 +46,7 @@ export function NearestStationChip({
               <PinIcon />
             </span>
             <span className="row-main row-sub">
-              {t(ERROR_KEYS[errorCode] ?? "geolocate_unavailable", "en")}
+              {t(ERROR_KEYS[errorCode] ?? "geolocate_unavailable", lang)}
             </span>
           </div>
         </div>
@@ -65,10 +67,10 @@ export function NearestStationChip({
           </span>
           <span className="row-main">
             <span className="row-sub" style={{ display: "block" }}>
-              {t("nearest_station", "en")} · {formatDistance(distanceMeters)}
+              {t("nearest_station", lang)} · {formatDistance(distanceMeters)}
             </span>
             <span className="row-title" style={{ display: "block" }}>
-              {station.name_en ?? station.name_th}
+              {names(station, lang).primary}
             </span>
           </span>
           <ChevronIcon />
