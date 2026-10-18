@@ -54,10 +54,11 @@ const NetworkMap = dynamic(
 );
 
 // Visible sheet height on phones when collapsed: grabber, search field, the
-// one-line lines hint and the first line group (its label + chip row), with
-// the section's Show all / Hide all in reach. The other groups are a swipe
-// up away (half detent).
-const PEEK_HEIGHT = 226;
+// one-line lines hint and the first line group's label, with the section's
+// Show all / Hide all in reach. The top of its chip row peeks in below as a
+// cue that the sheet holds more; the full row and the other groups are a
+// swipe up away (half detent).
+const PEEK_HEIGHT = 196;
 
 export function HomeClient({
   stations,
@@ -424,7 +425,7 @@ export function HomeClient({
   } else {
     body = (
       <>
-        {/* Line chips come first: PEEK_HEIGHT only fits the first group, and a
+        {/* Line chips come first: PEEK_HEIGHT only reaches the first group, and a
             nearest-station row above it would push the chips out of the
             collapsed sheet once a location fix (or error) arrives. */}
         <LineFilter
