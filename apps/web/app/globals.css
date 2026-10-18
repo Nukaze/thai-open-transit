@@ -312,6 +312,12 @@ button {
   background: none;
   cursor: pointer;
   transform: translate(-50%, -50%) rotate(-90deg);
+  /* Browsers pick touch gestures in screen space, and a horizontal range
+     leaves vertical swipes to the page. Rotated, a vertical swipe is the
+     drag itself, so the phone also panned the viewport (rubber-band,
+     address bar) while the thumb moved. Nothing behind the controls
+     scrolls, so the slider claims every touch gesture. */
+  touch-action: none;
 }
 
 .tilt-slider::-webkit-slider-runnable-track {
