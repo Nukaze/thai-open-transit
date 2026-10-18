@@ -19,7 +19,7 @@ export function MobileBrand() {
       className="mobile-brand"
       data-folded={folded || undefined}
       aria-expanded={!folded}
-      aria-label={`Bangkok Open Transit - ${label}`}
+      aria-label={`Thai Open Transit - ${label}`}
       title={label}
       onClick={() => setFolded(!folded)}
     >
@@ -29,7 +29,7 @@ export function MobileBrand() {
           slide and fade. */}
       <span className="mobile-brand-text" aria-hidden="true">
         <span className="mobile-brand-inner">
-          <span className="mobile-brand-name">Bangkok Open Transit</span>
+          <span className="mobile-brand-name">Thai Open Transit</span>
           <span className="mobile-brand-beta">{t("beta", lang)}</span>
         </span>
       </span>

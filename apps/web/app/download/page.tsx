@@ -1,12 +1,12 @@
 // apps/web/app/download/page.tsx
-export const metadata = { title: "Download dataset - BangkokOpenTransit" };
+export const metadata = { title: "Download dataset - Thai Open Transit" };
 
 export default function DownloadPage() {
   return (
     <main style={{ padding: 32 }}>
       <h1>Download the dataset</h1>
       <p>
-        BangkokOpenTransit's dataset is the product - the map is a demonstration
+        Thai Open Transit's dataset is the product - the map is a demonstration
         of it. Licensed under ODbL-1.0.
       </p>
       <ul>

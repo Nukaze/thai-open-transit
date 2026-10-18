@@ -529,7 +529,7 @@ export function HomeClient({
                     CLAUDE.md 3 (no hardcoded domain). */}
                 <img src="/route_amethyst.png" alt="" width={32} height={32} />
               </span>
-              <span className="brand-name">Bangkok Open Transit</span>
+              <span className="brand-name">Thai Open Transit</span>
               <span className="brand-beta">{t("beta", lang)}</span>
             </div>
             <StationSearchField
