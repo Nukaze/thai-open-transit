@@ -159,17 +159,20 @@ button {
 
 /* ---------- Map controls (MapControls.tsx) ---------- */
 
-/* One row bottom-right, clear of the attribution "i" below it
-   (which reaches 34px up from the bottom; 44px leaves a 10px gap). Rides the sheet on
-   phones with the same cap as MapLibre's controls (see below). The
-   advanced group stacks above it, right-aligned; while it is open the cap
-   grows by the vertical tilt capsule (48 + 112 + 48, plus an 8px gap) so it
-   never reaches the theme button. */
+/* One row bottom-right, 12px above the sheet on phones and 16px above the
+   window edge on desktop - level with the credit there (see below). On
+   phones it rides the sheet but stops well below the top-right theme
+   button: past that point (the sheet near full height) it slides under the
+   sheet rather than landing on it. 148px = theme button (12 + 44), this row
+   (44 + 12) and a gap, which also keeps it fully under a full-height sheet
+   (top 56px). The advanced group stacks above it, right-aligned; while it
+   is open the cap grows by the vertical tilt capsule (48 + 112 + 48, plus
+   an 8px gap) for the same reason. */
 .map-controls {
   position: fixed;
   right: 12px;
   bottom: calc(
-    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 180px)) + 44px
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 148px)) + 12px
   );
   z-index: 5;
   display: flex;
@@ -180,7 +183,7 @@ button {
 
 .map-controls[data-advanced] {
   bottom: calc(
-    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 396px)) + 44px
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 364px)) + 12px
   );
 }
 
@@ -359,19 +362,75 @@ button {
   }
 }
 
-/* Attribution (bottom-left) and .map-controls (bottom-right, held 44px up
-   so an expanded credit line never runs under them on a phone) ride on top of the sheet instead
-   of hiding under it, but stop well below the top-right theme button: past
-   that point (the sheet near full height) they slide under the sheet
-   rather than landing on it. 180px = theme button (12 + 44), the
-   attribution plus the controls row (44 + 44) and a gap, which also keeps
-   both fully under a full-height sheet (top 56px). */
-.maplibregl-ctrl-bottom-right,
-.maplibregl-ctrl-bottom-left {
+/* MapLibre's bottom-right corner only holds the hidden geolocate control
+   now; it rides the sheet like .map-controls so the user dot logic sees
+   the same visible map. */
+.maplibregl-ctrl-bottom-right {
   bottom: min(
     var(--sheet-offset),
-    calc(100dvh - var(--safe-top) - 180px)
+    calc(100dvh - var(--safe-top) - 148px)
   ) !important;
+}
+
+/* Credits. Phones: top-left, level with the theme button top-right - the
+   bottom edge belongs to the sheet and the control row, and an expanded
+   credit line beside that row would not fit a 360px screen. Desktop:
+   bottom-left under the panel's left edge, level with the controls (the
+   panel's max-height leaves room for it). !important because
+   maplibre-gl.css loads after this file and sets `bottom/left: 0`. */
+.maplibregl-ctrl-bottom-left {
+  /* Centered on the 44px theme button (top 12px) across from it: the
+     pill is 26px tall, so 12 + (44 - 26) / 2. */
+  top: calc(var(--safe-top) + 21px) !important;
+  bottom: auto !important;
+  left: 12px !important;
+}
+
+.maplibregl-ctrl-bottom-left .maplibregl-ctrl {
+  margin: 0 !important;
+}
+
+@media (min-width: 768px) {
+  .maplibregl-ctrl-bottom-left {
+    top: auto !important;
+    bottom: 16px !important;
+    left: 16px !important;
+  }
+
+  /* No sheet on desktop: the controls share the credit's 16px baseline. */
+  .map-controls,
+  .map-controls[data-advanced] {
+    bottom: 16px;
+  }
+}
+
+/* Credits wear the controls' glass instead of MapLibre's white pill, and
+   the (i) icon (a black SVG background) is inverted on the dark map. */
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  color: var(--ink-2);
+  font-size: 11px;
+}
+
+.maplibregl-ctrl-bottom-left > .maplibregl-ctrl-attrib.maplibregl-compact-show {
+  padding: 2px 10px 2px 30px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: inherit;
+}
+
+.maplibregl-ctrl-attrib-button,
+.maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-button {
+  background-color: transparent;
+}
+
+:root[data-theme="dark"] .maplibregl-ctrl-attrib-button {
+  filter: invert(1);
 }
 
 /* ---------- Sheet ---------- */
@@ -485,7 +544,9 @@ button {
     bottom: auto;
     width: 320px;
     height: auto;
-    max-height: calc(100dvh - 32px);
+    /* 16px top inset, then the credit's row at the bottom: 16px inset +
+       24px credit + 8px gap. */
+    max-height: calc(100dvh - 64px);
     border-radius: 20px;
     box-shadow: var(--shadow-float);
     transform: none !important;
@@ -502,13 +563,6 @@ button {
       opacity: 0;
       translate: -16px 0;
     }
-  }
-
-  /* The floating panel covers the map's left edge (16 + 320 + 16px).
-     !important for the same reason as `bottom` above: maplibre-gl.css
-     loads after this file and sets `left: 0`. */
-  .maplibregl-ctrl-bottom-left {
-    left: 352px !important;
   }
 
   .sheet-grabber {
@@ -574,8 +628,7 @@ button {
     transform: rotate(90deg);
   }
 
-  .maplibregl-ctrl-bottom-right,
-  .maplibregl-ctrl-bottom-left {
+  .maplibregl-ctrl-bottom-right {
     bottom: 0 !important;
   }
 }
@@ -1142,8 +1195,9 @@ a.row:active {
 @media (prefers-reduced-transparency: reduce) {
   .fab,
   .map-controls-row > .map-btn,
-  .map-zoom {
-    background: var(--surface);
+  .map-zoom,
+  .maplibregl-ctrl.maplibregl-ctrl-attrib {
+    background: var(--surface) !important;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -1320,6 +1374,10 @@ a.row:active {
   --glass-raised: rgba(255, 255, 255, 0.92);
   --glass-edge: rgba(255, 255, 255, 0.55);
   --glass-blur: blur(24px) saturate(180%);
+  /* Small floating controls over the map. Same as the panel in light mode;
+     see the dark override for why they differ there. */
+  --glass-control: var(--glass-panel);
+  --glass-control-edge: var(--glass-edge);
 }
 
 :root[data-theme="dark"] {
@@ -1327,6 +1385,12 @@ a.row:active {
   --glass-card: rgba(255, 255, 255, 0.07);
   --glass-raised: rgba(255, 255, 255, 0.16);
   --glass-edge: rgba(255, 255, 255, 0.08);
+  /* The panel's dark glass is nearly the dark basemap's own color: fine
+     for a large panel, whose shape reads anyway, but a 44px button in it
+     vanishes and leaves its icon floating. A lighter surface and edge keep
+     each control a visible shape. */
+  --glass-control: rgba(52, 52, 56, 0.86);
+  --glass-control-edge: rgba(255, 255, 255, 0.16);
 }
 
 .sheet {
@@ -1373,14 +1437,15 @@ a.row:active {
   box-shadow: var(--raised-shadow);
 }
 
-/* Floating map buttons share the panel's glass and edge. */
+/* Floating map buttons and the credits share one control glass. */
 .fab,
 .map-controls-row > .map-btn,
-.map-zoom {
-  background: var(--glass-panel) !important;
+.map-zoom,
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background: var(--glass-control) !important;
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--glass-control-edge);
 }
 
 /* No blur support, or the viewer asked for less transparency: solid
@@ -1398,6 +1463,7 @@ a.row:active {
     --glass-panel: #1c1c1f;
     --glass-card: #26262a;
     --glass-raised: #3a3a3e;
+    --glass-control: #2c2c30;
   }
 }
 
@@ -1412,6 +1478,7 @@ a.row:active {
     --glass-panel: #1c1c1f;
     --glass-card: #26262a;
     --glass-raised: #3a3a3e;
+    --glass-control: #2c2c30;
   }
 }
 
