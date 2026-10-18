@@ -125,6 +125,16 @@ export const TiltIcon = ({
   </svg>
 );
 
+// Map "home" (back to the first-load camera): a house, the convention from
+// GIS home buttons. A circular arrow there reads as reload.
+export const HomeIcon = ({ size = 20 }: P) => (
+  <svg {...base(size)}>
+    <path d="M3.5 10.5 12 3.5l8.5 7" />
+    <path d="M5.5 9v11h13V9" />
+    <path d="M10 20v-5.5h4V20" />
+  </svg>
+);
+
 export const ResetViewIcon = ({ size = 20 }: P) => (
   <svg {...base(size)}>
     <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5" />

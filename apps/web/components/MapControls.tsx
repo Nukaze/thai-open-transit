@@ -6,11 +6,11 @@ import type * as maplibregl from "maplibre-gl";
 import { useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import {
+  HomeIcon,
   LocateIcon,
   LocateOffIcon,
   MinusIcon,
   PlusIcon,
-  ResetViewIcon,
   SlidersIcon,
   TiltIcon,
 } from "./icons";
@@ -290,7 +290,7 @@ export function MapControls({
           </span>
         </button>
 
-        {/* Back to the first-load camera: Bangkok overview, north up, flat.
+        {/* Back to the first-load camera: N4-centred overview, north up, flat.
             A deliberate move, so it also leaves follow-my-location
             (GeolocateControl drops to background on any camera move). */}
         <button
@@ -302,7 +302,7 @@ export function MapControls({
             map.flyTo({ ...home, bearing: 0, pitch: 0, speed: 1.6 })
           }
         >
-          <ResetViewIcon />
+          <HomeIcon />
         </button>
 
         {zoom("wide")}
