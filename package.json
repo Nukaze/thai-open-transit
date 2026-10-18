@@ -1,5 +1,5 @@
 {
-  "name": "bangkok-open-transit",
+  "name": "thai-open-transit",
   "private": true,
   "workspaces": [
     "packages/*",

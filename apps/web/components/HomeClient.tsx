@@ -486,7 +486,7 @@ export function HomeClient({
         <nav className="footer-links" aria-label={t("project", lang)}>
           <a href="/download">{t("download_dataset", lang)}</a>
           <a
-            href="https://github.com/Nukaze/bangkok-open-transit"
+            href="https://github.com/Nukaze/thai-open-transit"
             target="_blank"
             rel="noopener noreferrer"
           >

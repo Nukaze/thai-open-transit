@@ -13,7 +13,7 @@ Bangkok's rail transit network, covering Bangkok and its metropolitan region
 | Field               | Value                                          |
 | ------------------- | ---------------------------------------------- |
 | Product name        | BangkokOpenTransit                             |
-| GitHub repo         | `bangkok-open-transit`                         |
+| GitHub repo         | `Nukaze/thai-open-transit`                     |
 | GitHub org (future) | `opentransit-th`                               |
 | Deployment          | Vercel, static export                          |
 | URL                 | `bangkokopentransit.vercel.app`                |
@@ -146,7 +146,7 @@ absolute URLs are the most common thing that breaks in that migration.
 ## 4. Repository layout
 
 ```
-bangkok-open-transit/
+thai-open-transit/
 ├── CLAUDE.md                    # this file
 ├── README.md
 ├── LICENSE-CODE                 # AGPL-3.0
