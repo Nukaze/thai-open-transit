@@ -523,9 +523,10 @@ export function HomeClient({
           <>
             <div className="brand">
               <span className="brand-mark" aria-hidden="true">
-                {/* The favicon itself, so the panel and the tab can't drift
-                    apart. Root-relative per CLAUDE.md 3 (no hardcoded domain). */}
-                <img src="/favicon.ico" alt="" width={22} height={22} />
+                {/* The favicon's mark at 512px: the .ico tops out at 32px,
+                    blurry at this size on high-DPI screens. Root-relative per
+                    CLAUDE.md 3 (no hardcoded domain). */}
+                <img src="/route_amethyst.png" alt="" width={32} height={32} />
               </span>
               <span className="brand-name">Bangkok Open Transit</span>
               <span className="brand-beta">{t("beta", lang)}</span>

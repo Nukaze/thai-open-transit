@@ -611,9 +611,9 @@ button {
     left: 16px;
     right: auto;
     bottom: auto;
-    /* Wide enough for the 26px brand on one line (Sao Chingcha needs
-       ~408px with the BETA pill and collapse button). */
-    width: 420px;
+    /* Wide enough for the 36px mark + 26px brand on one line (Sao Chingcha
+       needs ~418px with the BETA pill and collapse button). */
+    width: 432px;
     height: auto;
     /* 16px top inset, then the credit's row at the bottom: 16px inset +
        24px credit + 8px gap. */
@@ -705,8 +705,8 @@ button {
 }
 
 .brand-mark {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
 }
@@ -716,6 +716,7 @@ button {
   font-weight: 650;
   font-size: 26px;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 /* Product stage, shown to everyone. */
@@ -1505,12 +1506,6 @@ a.row:active {
    equal specificity. Phones keep the larger tap targets. */
 
 @media (min-width: 768px) {
-  .brand-mark {
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-  }
-
   .search {
     height: 40px;
     padding: 0 12px;
