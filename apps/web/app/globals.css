@@ -1288,6 +1288,7 @@ a.row:active {
 .footer-links {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px 16px;
   margin-top: 24px;
   font-size: 13px;
@@ -1298,13 +1299,14 @@ a.row:active {
   color: inherit;
 }
 
-/* Visit counter (VisitCounter.tsx): quieter than the links beside it,
-   pushed to the row's end. */
+/* View counter (VisitCounter.tsx): quieter than the links, on its own
+   centred line under them. */
 .visit-counter {
-  display: inline-flex;
+  display: flex;
+  flex-basis: 100%;
+  justify-content: center;
   align-items: center;
   gap: 4px;
-  margin-left: auto;
   color: var(--ink-3);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
