@@ -32,22 +32,6 @@
   font-display: swap;
 }
 
-/* Sao Chingcha, the BMA identity font: local() only, NEVER url(). Its
- * license is "all rights reserved" (BMA), so the file must not be in this
- * repo or served by the site. Visitors who installed it themselves see it;
- * everyone else falls through to Chakra Petch. */
-@font-face {
-  font-family: "Sao Chingcha";
-  src: local("Sao Chingcha Regular"), local("SaoChingcha-Regular");
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: "Sao Chingcha";
-  src: local("Sao Chingcha Bold"), local("SaoChingcha-Bold");
-  font-weight: 700;
-}
-
 /*
  * Design tokens. The UI follows the map theme (HomeClient writes
  * `data-theme` on <html>), so chrome and basemap never disagree.
@@ -87,14 +71,14 @@
   --font-system:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
     "Noto Sans Thai", system-ui, sans-serif;
-  --font-ui: "Sao Chingcha", "Chakra Petch", var(--font-system);
-  --font-brand: "Sao Chingcha", "Chakra Petch", var(--font-system);
+  --font-ui: "Chakra Petch", var(--font-system);
+  --font-brand: "Chakra Petch", var(--font-system);
   color-scheme: light;
 }
 
 /* Same as English for now; kept so one language can change on its own. */
 :root:lang(th) {
-  --font-ui: "Sao Chingcha", "Chakra Petch", var(--font-system);
+  --font-ui: "Chakra Petch", var(--font-system);
 }
 
 :root[data-theme="dark"] {
@@ -752,8 +736,8 @@ button {
     left: 16px;
     right: auto;
     bottom: auto;
-    /* Wide enough for the 36px mark + 26px brand on one line (Sao Chingcha
-       needs ~418px with the BETA pill and collapse button). */
+    /* Wide enough for the 36px mark + 26px brand on one line, with the
+       BETA pill and collapse button. */
     width: 432px;
     height: auto;
     /* 16px top inset, then the credit's row at the bottom: 16px inset +

@@ -63,7 +63,3 @@ share-alike anyway. Geometry is derived from OpenStreetMap and from published
 MRTA/DRT/SRT documents - never traced or adapted from copyrighted transit maps.
 
 Fonts: Chakra Petch and Noto Sans Thai (UI), Noto Sans (map labels), all OFL.
-The brand and UI also list Sao Chingcha, the Bangkok Metropolitan
-Administration's identity font, but only as a font installed on the
-visitor's own device: its licence does not allow redistribution, so the
-file is never in this repo or served by the site.
