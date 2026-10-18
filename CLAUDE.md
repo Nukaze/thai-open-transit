@@ -16,7 +16,7 @@ Bangkok's rail transit network, covering Bangkok and its metropolitan region
 | GitHub repo         | `Nukaze/thai-open-transit`                     |
 | GitHub org (future) | `opentransit-th`                               |
 | Deployment          | Vercel, static export                          |
-| URL                 | `bangkokopentransit.vercel.app`                |
+| URL                 | `thaiopentransit.vercel.app`                   |
 | Custom domain       | Not yet purchased. Do not hardcode any domain  |
 | Primary artifact    | **The dataset**, not the map                   |
 | Map role            | Reference implementation / demo of the dataset |
@@ -136,7 +136,7 @@ Phase 1 deploys `apps/web` to Vercel on the free tier.
 | No Vercel-specific APIs in app code                    | Must stay portable to Cloudflare Pages or GitHub Pages    |
 | No environment variables required to build             | Anyone can clone and build locally                        |
 | `vercel.json` sets long cache headers on hashed assets | See performance budget                                    |
-| Never hardcode `bangkokopentransit.vercel.app`         | Use relative URLs, or a single `PUBLIC_BASE_URL` constant |
+| Never hardcode `thaiopentransit.vercel.app`            | Use relative URLs, or a single `PUBLIC_BASE_URL` constant |
 
 The last rule matters: a custom domain will be added later, and hardcoded
 absolute URLs are the most common thing that breaks in that migration.
