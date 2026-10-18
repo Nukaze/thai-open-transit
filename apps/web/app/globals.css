@@ -162,8 +162,9 @@ button {
 /* One row bottom-right, clear of the attribution "i" below it
    (which reaches 34px up from the bottom; 44px leaves a 10px gap). Rides the sheet on
    phones with the same cap as MapLibre's controls (see below). The
-   advanced row stacks above it, right-aligned; while it is open the cap
-   grows by that row (44 + 8px gap) so it never reaches the theme button. */
+   advanced group stacks above it, right-aligned; while it is open the cap
+   grows by the vertical tilt capsule (48 + 112 + 48, plus an 8px gap) so it
+   never reaches the theme button. */
 .map-controls {
   position: fixed;
   right: 12px;
@@ -179,7 +180,7 @@ button {
 
 .map-controls[data-advanced] {
   bottom: calc(
-    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 232px)) + 44px
+    min(var(--sheet-offset), calc(100dvh - var(--safe-top) - 396px)) + 44px
   );
 }
 
@@ -187,6 +188,11 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Phone zoom sits at the foot of the tall tilt capsule, level with it. */
+#map-controls-advanced {
+  align-items: flex-end;
 }
 
 .map-btn {
@@ -269,19 +275,40 @@ button {
   }
 }
 
-/* Tilt: step buttons at each end of one capsule, the slider between. */
+/* Tilt: one vertical capsule, step buttons at each end and the slider
+   between. Vertical so the thumb moves the way the camera does - up tilts
+   toward the horizon (spatial compatibility). The slider is a normal
+   horizontal range rotated -90deg in a fixed box: rotating keeps min at the
+   bottom and arrow keys working in every browser, without depending on
+   `writing-mode` support for form controls. */
 .map-tilt {
+  flex-direction: column;
   align-items: center;
+}
+
+.map-tilt .map-btn {
+  width: 44px;
+  height: 48px;
+}
+
+.tilt-track {
+  position: relative;
+  width: 44px;
+  height: 112px;
 }
 
 .tilt-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 104px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 112px;
   height: 44px;
-  margin: 0 4px;
+  margin: 0;
   background: none;
   cursor: pointer;
+  transform: translate(-50%, -50%) rotate(-90deg);
 }
 
 .tilt-slider::-webkit-slider-runnable-track {
@@ -322,7 +349,7 @@ button {
 
 .tilt-slider:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: -8px;
+  outline-offset: -6px;
   border-radius: 22px;
 }
 

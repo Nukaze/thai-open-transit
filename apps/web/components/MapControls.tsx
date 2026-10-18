@@ -189,30 +189,10 @@ export function MapControls({
         >
           {zoom("narrow")}
 
-          {/* The end buttons step 15 degrees; the slider takes any angle.
-              A native range input keeps arrow keys and screen readers. */}
+          {/* Vertical, top to bottom: tilt up, slider, tilt down. The end
+              buttons step 15 degrees; the slider takes any angle. A native
+              range input keeps arrow keys and screen readers. */}
           <div className="map-zoom map-tilt">
-            <button
-              type="button"
-              className="map-btn"
-              aria-label={t("tilt_down", "en")}
-              title={t("tilt_down", "en")}
-              disabled={atMinPitch}
-              onClick={() => tiltBy(-1)}
-            >
-              <TiltIcon direction="down" />
-            </button>
-            <input
-              ref={tiltSliderRef}
-              type="range"
-              className="tilt-slider"
-              aria-label={t("tilt", "en")}
-              min={map.getMinPitch()}
-              max={map.getMaxPitch()}
-              step={1}
-              defaultValue={map.getPitch()}
-              onChange={(e) => map.setPitch(Number(e.currentTarget.value))}
-            />
             <button
               type="button"
               className="map-btn"
@@ -222,6 +202,30 @@ export function MapControls({
               onClick={() => tiltBy(1)}
             >
               <TiltIcon direction="up" />
+            </button>
+            <div className="tilt-track">
+              <input
+                aria-orientation="vertical"
+                ref={tiltSliderRef}
+                type="range"
+                className="tilt-slider"
+                aria-label={t("tilt", "en")}
+                min={map.getMinPitch()}
+                max={map.getMaxPitch()}
+                step={1}
+                defaultValue={map.getPitch()}
+                onChange={(e) => map.setPitch(Number(e.currentTarget.value))}
+              />
+            </div>
+            <button
+              type="button"
+              className="map-btn"
+              aria-label={t("tilt_down", "en")}
+              title={t("tilt_down", "en")}
+              disabled={atMinPitch}
+              onClick={() => tiltBy(-1)}
+            >
+              <TiltIcon direction="down" />
             </button>
           </div>
         </div>
