@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Two commits so the PR merge commit's base parent (HEAD^1) is
+          # available to the last_verified_at check below.
+          fetch-depth: 2
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -46,6 +50,13 @@ jobs:
       # regression the guard exists to catch.
       - name: Validate dataset (schema, graph integrity, provenance, perf budget)
         run: bun run data:validate
+
+      # Warns (never fails) when a station/line/segment/override file changes
+      # but its last_verified_at does not, so the footer's "Data verified"
+      # date doesn't silently go stale. A typo fix needn't re-verify a record.
+      - name: Check last_verified_at was bumped for changed data (warning)
+        if: github.event_name == 'pull_request'
+        run: bun run scripts/validate/check-verification-bumped.ts HEAD^1
 
       - name: Build web app
         run: cd apps/web && bun run build

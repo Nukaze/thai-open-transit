@@ -6,6 +6,7 @@ import type { Line } from "schema";
 import type { StationWithStatus } from "../lib/types";
 import { names, useLang } from "../lib/lang";
 import { t, type Lang } from "../lib/i18n";
+import { formatDataDate } from "../lib/buildInfo";
 import { ReportErrorButton } from "./ReportErrorButton";
 import { LineLogo } from "./LineLogo";
 import { CloseIcon, LinkIcon } from "./icons";
@@ -67,14 +68,20 @@ export function StationPanel({
     }
   };
 
-  const details: [string, string][] = [
+  // [label, value, ISO date shown as a tooltip when the value is a date]
+  const details: [string, string, string?][] = [
     [t("structure", lang), structureLabel(station.structure, lang)],
     [t("accessible", lang), t(station.accessible ? "yes" : "no", lang)],
     [
       t("opened", lang),
       openedMilestone ? openedMilestone.date : t("not_yet_opened", lang),
     ],
-    [t("last_verified", lang), station.last_verified_at],
+    [
+      t("last_verified", lang),
+      formatDataDate(station.last_verified_at, lang) ??
+        station.last_verified_at,
+      station.last_verified_at,
+    ],
   ];
 
   return (
@@ -159,13 +166,19 @@ export function StationPanel({
       <section className="section">
         <h3 className="section-title">{t("details", lang)}</h3>
         <dl className="list" style={{ margin: 0 }}>
-          {details.map(([label, value]) => (
+          {details.map(([label, value, iso]) => (
             <div className="row" key={label}>
               <dt className="row-main" style={{ color: "var(--ink-2)" }}>
                 {label}
               </dt>
               <dd className="row-value" style={{ margin: 0 }}>
-                {value}
+                {iso ? (
+                  <time dateTime={iso} title={iso}>
+                    {value}
+                  </time>
+                ) : (
+                  value
+                )}
               </dd>
             </div>
           ))}

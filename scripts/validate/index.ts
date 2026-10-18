@@ -7,6 +7,7 @@ import {
   findDanglingSegments,
 } from "network-graph";
 import { checkSourceRefs } from "./check-source-refs";
+import { checkVerifiedDates } from "./check-verified-dates";
 
 const NETWORK_JSON_BROTLI_BUDGET_BYTES = 120 * 1024;
 
@@ -49,11 +50,16 @@ function main() {
   const orphans = findOrphanStations(graph);
   const dangling = findDanglingSegments(graph);
   const sourceRefViolations = checkSourceRefs({ stations, lines, segments });
+  const verifiedDateViolations = checkVerifiedDates(
+    { stations, lines, segments },
+    new Date().toISOString().slice(0, 10),
+  );
 
   const errors = [
     ...orphans.map((id) => `Orphan station: ${id}`),
     ...dangling.map((id) => `Dangling segment: ${id}`),
     ...sourceRefViolations,
+    ...verifiedDateViolations,
   ];
 
   // An empty network passes every other check here vacuously - no orphans, no
