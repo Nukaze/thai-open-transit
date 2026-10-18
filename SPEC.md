@@ -291,7 +291,8 @@ nobody updates the data six months later, and a stale map is worse than no map.
 
 To resolve before or during Phase 1.
 
-1. Domain: deferred. Running on `bangkokopentransit.vercel.app` until there is
+1. Domain: deferred. Running on `thaiopentransit.vercel.app` (the old
+   `bangkokopentransit.vercel.app` 308-redirects to it) until there is
    reason to buy one. Free options if needed sooner: `owns.it.com`, `is-an.app`.
    When purchased, `.org` fits a civic project; `.in.th` requires business
    registration documents.

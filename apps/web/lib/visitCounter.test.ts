@@ -70,9 +70,7 @@ describe("isLocalDev", () => {
   });
 
   it("counts deployed production builds", () => {
-    expect(isLocalDev("production", "bangkokopentransit.vercel.app")).toBe(
-      false,
-    );
+    expect(isLocalDev("production", "thaiopentransit.vercel.app")).toBe(false);
   });
 });
 
