@@ -23,7 +23,7 @@ import { MapControls } from "./MapControls";
 // the window has now, not the one it loaded with.
 function homeView(): { center: [number, number]; zoom: number } {
   const desktop = window.matchMedia("(min-width: 768px)").matches;
-  return { center: [100.5421, 13.7726], zoom: desktop ? 11.5 : 10.5 };
+  return { center: [100.5421, 13.7726], zoom: desktop ? 11 : 10.5 };
 }
 
 export type MapTheme = "light" | "dark";
