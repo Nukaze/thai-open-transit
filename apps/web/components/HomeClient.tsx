@@ -18,6 +18,7 @@ import { Sheet, type Detent } from "./Sheet";
 import { detectLang, t, type Lang } from "../lib/i18n";
 import { LangContext } from "../lib/lang";
 import { LanguagePicker } from "./LanguagePicker";
+import { VisitCounter } from "./VisitCounter";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
 import { NearestStationChip } from "./NearestStationChip";
@@ -502,6 +503,7 @@ export function HomeClient({
           >
             GitHub
           </a>
+          <VisitCounter />
         </nav>
       </>
     );
