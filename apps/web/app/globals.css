@@ -893,7 +893,7 @@ button {
   outline: 0;
   background: none;
   font-size: 18px;
-  font-weight: 560;
+  font-weight: 400;
   letter-spacing: -0.01em;
 }
 
@@ -938,7 +938,7 @@ button {
 .section-title {
   margin: 0 0 10px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.01em;
   color: var(--ink-3);
   text-transform: uppercase;
@@ -1059,7 +1059,7 @@ a.row:active {
   background: color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--ink-3);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .lang-check {
@@ -1074,7 +1074,7 @@ a.row:active {
 }
 
 .row-title {
-  font-weight: 560;
+  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1143,7 +1143,7 @@ a.row:active {
   border: 1px solid var(--hairline);
   background: var(--surface);
   font-size: 14px;
-  font-weight: 560;
+  font-weight: 400;
   white-space: nowrap;
   transition:
     opacity 160ms ease,
@@ -1177,7 +1177,7 @@ a.row:active {
   padding: 0;
   color: var(--accent);
   font-size: 14px;
-  font-weight: 560;
+  font-weight: 400;
   /* Rounds the focus ring (outlines follow border-radius) so it hugs the
      text instead of drawing a square box around it. */
   border-radius: 6px;
@@ -1218,7 +1218,7 @@ a.row:active {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 15px;
-  font-weight: 560;
+  font-weight: 400;
   letter-spacing: 0;
   color: var(--ink-3);
 }
@@ -1353,7 +1353,7 @@ a.row:active {
   height: 30px;
   border-radius: 7px;
   font-size: 14px;
-  font-weight: 560;
+  font-weight: 400;
   transition: background 160ms ease;
 }
 
@@ -1411,7 +1411,7 @@ a.row:active {
   padding: 0 10px;
   border-radius: 13px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   background: color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--ink-2);
 }
@@ -1469,7 +1469,7 @@ a.row:active {
   padding: 0 16px;
   border: 0;
   border-radius: 14px;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
   transition: transform 120ms ease-out;
@@ -1990,7 +1990,7 @@ a.row:active {
 .section-title {
   color: var(--ink-2);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.04em;
 }
 
@@ -2052,7 +2052,7 @@ a.row:active {
 }
 
 .segmented button[aria-pressed="true"] {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Feedback on press, the instant it happens. */
@@ -2135,7 +2135,7 @@ a.row:active {
   align-items: baseline;
   gap: 10px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--ink-2);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -2164,7 +2164,7 @@ a.row:active {
 
 .line-group-label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink-2);
 }
 
@@ -2173,7 +2173,7 @@ a.row:active {
    and focus says it is clickable. */
 .line-group-toggle {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--ink-3);
 }
 
