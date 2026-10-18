@@ -21,9 +21,10 @@ export type Detent = "peek" | "half" | "full";
 const DESKTOP_QUERY = "(min-width: 768px)";
 // Gap kept between the fully expanded sheet and the safe-area top, so the
 // map stays visible as context and the sheet reads as a layer on it. Clears
-// the top-corner buttons: 12px inset + 44px button + 20px breathing room.
-// Mirrored in globals.css (.sheet pre-hydration placement).
-const TOP_GAP = 76;
+// the top-corner buttons: 12px inset + 44px button + 52px of map below them.
+// Mirrored in globals.css (.sheet pre-hydration placement, and the 164px
+// .map-controls cap derived from it).
+const TOP_GAP = 108;
 // Movement before a press becomes a drag, so taps on rows and chips inside
 // the sheet still register as taps.
 const DRAG_SLOP = 8;
