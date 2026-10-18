@@ -212,7 +212,9 @@ button {
   max-width: calc(100vw - 76px);
   display: flex;
   align-items: center;
-  padding: 0 9px;
+  /* 8 + 26px icon + 8 + 1px edges = 44: folded, a circle like the theme
+     button. */
+  padding: 0 8px;
   border-radius: 999px;
   /* Glass and edge: the shared control-glass rule further down. */
   box-shadow: var(--shadow-float);
@@ -226,24 +228,61 @@ button {
   display: block;
 }
 
+/* Folding: the S mark turns half a turn (it is point-symmetric, so it
+   lands as itself) while the name collapses into it. */
+.mobile-brand[data-folded] img {
+  transform: rotate(-180deg);
+}
+
+/* Width animates as a grid track (1fr <-> 0fr): exactly the text's own
+   width, so there is no dead time as with a max-width guess. */
 .mobile-brand-text {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  max-width: 300px;
-  padding: 0 3px 0 7px;
+  display: grid;
+  grid-template-columns: 1fr;
   overflow: hidden;
-  white-space: nowrap;
-  transition:
-    max-width 280ms var(--ease-out),
-    opacity 200ms ease,
-    padding 280ms var(--ease-out);
 }
 
 .mobile-brand[data-folded] .mobile-brand-text {
-  max-width: 0;
-  padding: 0;
+  grid-template-columns: 0fr;
+}
+
+/* min-width 0 + overflow hidden let the 0fr track reach 0; the spacing
+   lives on the children, since the inner box's own padding would not
+   collapse. */
+.mobile-brand-inner {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.mobile-brand-inner > :first-child {
+  margin-left: 8px;
+}
+
+.mobile-brand-inner > :last-child {
+  margin-right: 3px;
+}
+
+.mobile-brand[data-folded] .mobile-brand-inner {
   opacity: 0;
+  transform: translateX(-6px);
+}
+
+.mobile-brand img {
+  transition: transform 360ms var(--ease-drawer);
+}
+
+.mobile-brand-text {
+  transition: grid-template-columns 360ms var(--ease-drawer);
+}
+
+.mobile-brand-inner {
+  transition:
+    opacity 240ms ease,
+    transform 360ms var(--ease-drawer);
 }
 
 .mobile-brand-name {
@@ -291,7 +330,9 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mobile-brand-text {
+  .mobile-brand img,
+  .mobile-brand-text,
+  .mobile-brand-inner {
     transition: none;
   }
 }
