@@ -31,9 +31,10 @@ type LocateState = "off" | "waiting" | "active" | "background" | "denied";
 
 /**
  * Glass map controls, bottom-right: locate, 2D/3D tilt, compass, zoom.
- * A sliders button opens a second row above with finer camera controls -
- * stepped tilt and a reset to the first-load view - for users who want
- * them, keeping the default row narrow enough for a 360px phone.
+ * Reset view sits in the default row; a sliders button opens a second row
+ * above with a tilt slider for users who want finer control. Phones also
+ * move zoom into that row - people pinch there, as Apple and Google Maps
+ * assume - which keeps the default row inside a 360px screen.
  *
  * Locate drives MapLibre's own GeolocateControl (its button is hidden in
  * globals.css): the control owns the user dot, accuracy circle and
@@ -56,12 +57,17 @@ export function MapControls({
   const [atMaxPitch, setAtMaxPitch] = useState(false);
   const [advanced, setAdvanced] = useState(false);
   const needleRef = useRef<HTMLSpanElement>(null);
+  const tiltSliderRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // The compass turns every frame of a rotation, so it is written straight
     // to the DOM rather than through React state. Tilting it with the pitch
     // (like MapLibre's own compass) shows the 3D view at a glance.
+    // The tilt slider follows the same way, so it tracks two-finger tilts
+    // and eased steps frame by frame without re-rendering.
     const syncCompass = () => {
+      const slider = tiltSliderRef.current;
+      if (slider) slider.value = String(map.getPitch());
       const needle = needleRef.current;
       if (!needle) return;
       needle.style.transform = `rotateX(${map.getPitch()}deg) rotate(${-map.getBearing()}deg)`;
@@ -140,6 +146,33 @@ export function MapControls({
     map.easeTo({ pitch, duration: 300 });
   };
 
+  // Rendered twice, each copy hidden by CSS at the other breakpoint: in the
+  // default row on desktop, in the advanced row on phones.
+  const zoom = (where: "wide" | "narrow") => (
+    <div className={`map-zoom map-zoom-${where}`}>
+      <button
+        type="button"
+        className="map-btn"
+        aria-label={t("zoom_out", "en")}
+        title={t("zoom_out", "en")}
+        disabled={atMinZoom}
+        onClick={() => map.zoomOut()}
+      >
+        <MinusIcon />
+      </button>
+      <button
+        type="button"
+        className="map-btn"
+        aria-label={t("zoom_in", "en")}
+        title={t("zoom_in", "en")}
+        disabled={atMaxZoom}
+        onClick={() => map.zoomIn()}
+      >
+        <PlusIcon />
+      </button>
+    </div>
+  );
+
   return (
     <div
       className="map-controls"
@@ -154,22 +187,11 @@ export function MapControls({
           role="group"
           aria-label={t("more_controls", "en")}
         >
-          {/* Back to the first-load camera: Bangkok overview, north up,
-              flat. A deliberate move, so it also leaves follow-my-location
-              (GeolocateControl drops to background on any camera move). */}
-          <button
-            type="button"
-            className="map-btn"
-            aria-label={t("reset_view", "en")}
-            title={t("reset_view", "en")}
-            onClick={() =>
-              map.flyTo({ ...home, bearing: 0, pitch: 0, speed: 1.6 })
-            }
-          >
-            <ResetViewIcon />
-          </button>
+          {zoom("narrow")}
 
-          <div className="map-zoom">
+          {/* The end buttons step 15 degrees; the slider takes any angle.
+              A native range input keeps arrow keys and screen readers. */}
+          <div className="map-zoom map-tilt">
             <button
               type="button"
               className="map-btn"
@@ -180,6 +202,17 @@ export function MapControls({
             >
               <TiltIcon direction="down" />
             </button>
+            <input
+              ref={tiltSliderRef}
+              type="range"
+              className="tilt-slider"
+              aria-label={t("tilt", "en")}
+              min={map.getMinPitch()}
+              max={map.getMaxPitch()}
+              step={1}
+              defaultValue={map.getPitch()}
+              onChange={(e) => map.setPitch(Number(e.currentTarget.value))}
+            />
             <button
               type="button"
               className="map-btn"
@@ -251,28 +284,22 @@ export function MapControls({
           </span>
         </button>
 
-        <div className="map-zoom">
-          <button
-            type="button"
-            className="map-btn"
-            aria-label={t("zoom_out", "en")}
-            title={t("zoom_out", "en")}
-            disabled={atMinZoom}
-            onClick={() => map.zoomOut()}
-          >
-            <MinusIcon />
-          </button>
-          <button
-            type="button"
-            className="map-btn"
-            aria-label={t("zoom_in", "en")}
-            title={t("zoom_in", "en")}
-            disabled={atMaxZoom}
-            onClick={() => map.zoomIn()}
-          >
-            <PlusIcon />
-          </button>
-        </div>
+        {/* Back to the first-load camera: Bangkok overview, north up, flat.
+            A deliberate move, so it also leaves follow-my-location
+            (GeolocateControl drops to background on any camera move). */}
+        <button
+          type="button"
+          className="map-btn"
+          aria-label={t("reset_view", "en")}
+          title={t("reset_view", "en")}
+          onClick={() =>
+            map.flyTo({ ...home, bearing: 0, pitch: 0, speed: 1.6 })
+          }
+        >
+          <ResetViewIcon />
+        </button>
+
+        {zoom("wide")}
       </div>
     </div>
   );

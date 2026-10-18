@@ -60,6 +60,7 @@ const DICTIONARY: Record<string, { th: string; en: string }> = {
   view_2d: { th: "มุมมอง 2 มิติ", en: "Flatten to 2D view" },
   reset_north: { th: "หันทิศเหนือขึ้น", en: "Point north up" },
   more_controls: { th: "ควบคุมกล้องเพิ่มเติม", en: "More camera controls" },
+  tilt: { th: "มุมเอียงแผนที่", en: "Map tilt" },
   tilt_up: { th: "เอียงแผนที่เพิ่ม", en: "Tilt up" },
   tilt_down: { th: "เอียงแผนที่ลด", en: "Tilt down" },
   reset_view: { th: "กลับสู่มุมมองเริ่มต้น", en: "Reset view" },

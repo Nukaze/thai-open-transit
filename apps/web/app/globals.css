@@ -253,6 +253,79 @@ button {
   width: 48px;
 }
 
+/* Zoom lives in the default row on desktop and in the advanced row on
+   phones (MapControls renders one copy for each). */
+.map-zoom.map-zoom-wide {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .map-zoom.map-zoom-wide {
+    display: flex;
+  }
+
+  .map-zoom.map-zoom-narrow {
+    display: none;
+  }
+}
+
+/* Tilt: step buttons at each end of one capsule, the slider between. */
+.map-tilt {
+  align-items: center;
+}
+
+.tilt-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 104px;
+  height: 44px;
+  margin: 0 4px;
+  background: none;
+  cursor: pointer;
+}
+
+.tilt-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ink-3);
+}
+
+.tilt-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ink-3);
+}
+
+.tilt-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--hairline),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.tilt-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--hairline),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.tilt-slider:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -8px;
+  border-radius: 22px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .map-btn[data-state="waiting"] svg {
     animation: none;
