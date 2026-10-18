@@ -424,6 +424,14 @@ button {
   color: inherit;
 }
 
+/* maplibre-gl.css (loaded after this file) pins the compact credit to
+   #000 and its links to rgba(0,0,0,.75), unreadable on the dark glass.
+   Light mode keeps those, which read fine there. */
+:root[data-theme="dark"] .maplibregl-ctrl.maplibregl-ctrl-attrib,
+:root[data-theme="dark"] .maplibregl-ctrl.maplibregl-ctrl-attrib a {
+  color: var(--ink) !important;
+}
+
 .maplibregl-ctrl-attrib-button,
 .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-button {
   background-color: transparent;
