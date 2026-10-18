@@ -128,6 +128,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* Same as .map-controls: a swipe here must not pan the page. */
+  touch-action: none;
 }
 
 .fab {
@@ -179,6 +181,11 @@ button {
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
+  /* A swipe that starts on the controls but off a button (the capsule
+     padding, the tilt track beside the slider) fell to the page, so the
+     phone panned the viewport. Nothing here scrolls, and touch-action
+     applies to every descendant, so taps still click. */
+  touch-action: none;
 }
 
 .map-controls[data-advanced] {
