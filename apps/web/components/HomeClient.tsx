@@ -20,6 +20,8 @@ import { LANG_KEY, LangContext, startingLang } from "../lib/lang";
 import { LanguagePicker } from "./LanguagePicker";
 import { VisitCounter } from "./VisitCounter";
 import { MobileBrand } from "./MobileBrand";
+import { BuildInfo } from "./BuildInfo";
+import { GITHUB_REPO_URL } from "../lib/buildInfo";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
 import { NearestStationChip } from "./NearestStationChip";
@@ -485,13 +487,13 @@ export function HomeClient({
         )}
         <nav className="footer-links" aria-label={t("project", lang)}>
           <a href="/download">{t("download_dataset", lang)}</a>
-          <a
-            href="https://github.com/Nukaze/thai-open-transit"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
+          {/* Right under the links it explains: data date for Download,
+              build commit for GitHub. The view counter follows as its own
+              group. */}
+          <BuildInfo />
           <VisitCounter />
         </nav>
       </>

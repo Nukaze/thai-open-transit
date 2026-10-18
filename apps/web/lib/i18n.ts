@@ -140,6 +140,11 @@ export const DICTIONARY: Record<string, Record<Lang, string>> = {
     en: "Development mode: views not counted",
   },
   beta: { th: "เบต้า", en: "Beta" },
+  data_verified: {
+    th: "ข้อมูลตรวจสอบล่าสุด {date}",
+    en: "Data verified {date}",
+  },
+  build_commit: { th: "บิลด์ {commit}", en: "Build {commit}" },
   brand_fold: { th: "ย่อเหลือไอคอน", en: "Show icon only" },
   brand_unfold: { th: "แสดงชื่อ", en: "Show name" },
 };
