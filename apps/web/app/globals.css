@@ -352,7 +352,7 @@ button {
    button: past that point (the sheet near full height) it slides under the
    sheet rather than landing on it. 148px = theme button (12 + 44), this row
    (44 + 12) and a gap, which also keeps it fully under a full-height sheet
-   (top safe-top + 67px). The advanced group stacks above it, right-aligned; while it
+   (top safe-top + 76px). The advanced group stacks above it, right-aligned; while it
    is open the cap grows by the vertical tilt capsule (48 + 112 + 48, plus
    an 8px gap) for the same reason. */
 .map-controls {
@@ -656,11 +656,11 @@ button {
   will-change: transform;
   /* Pre-hydration placement at the peek detent, so the prerendered page
      doesn't show the sheet covering the map until JS measures the screen.
-     67px mirrors TOP_GAP in Sheet.tsx; JS then writes exact inline values. */
-  height: calc(100dvh - var(--safe-top) - 67px);
+     76px mirrors TOP_GAP in Sheet.tsx; JS then writes exact inline values. */
+  height: calc(100dvh - var(--safe-top) - 76px);
   transform: translate3d(
     0,
-    calc(100dvh - var(--safe-top) - 67px - var(--peek-height)),
+    calc(100dvh - var(--safe-top) - 76px - var(--peek-height)),
     0
   );
 }
