@@ -7,6 +7,7 @@ import {
   deviceClass,
   fetchStats,
   isBot,
+  isLocalDev,
   statsConfigured,
   type VisitStats,
 } from "../lib/visitCounter";
@@ -35,7 +36,8 @@ function whenVisible(): Promise<void> {
 function loadStats(): Promise<VisitStats | null> {
   if (pageLoad) return pageLoad;
   pageLoad = whenVisible().then(() =>
-    isBot(navigator.userAgent, navigator.webdriver)
+    isBot(navigator.userAgent, navigator.webdriver) ||
+    isLocalDev(process.env.NODE_ENV, location.hostname)
       ? fetchStats()
       : // The language the viewer starts in, resolved here rather than taken
         // from context: this effect runs before HomeClient's detection, while
@@ -55,10 +57,13 @@ function loadStats(): Promise<VisitStats | null> {
 export function VisitCounter() {
   const lang = useLang();
   const [stats, setStats] = useState<VisitStats | null>(null);
+  // Set after mount: the prerendered HTML can't know the host.
+  const [localDev, setLocalDev] = useState(false);
 
   useEffect(() => {
     if (!statsConfigured) return;
     let cancelled = false;
+    setLocalDev(isLocalDev(process.env.NODE_ENV, location.hostname));
     loadStats().then((result) => {
       if (!cancelled) setStats(result);
     });
@@ -69,11 +74,18 @@ export function VisitCounter() {
   if (!stats) return null;
   const n = new Intl.NumberFormat(lang === "th" ? "th-TH" : "en-US");
   return (
-    <span className="visit-counter">
-      <EyeIcon size={13} />
-      {t("visits_total", lang).replace("{n}", n.format(stats.total))}
-      {" · "}
-      {t("visits_today", lang).replace("{n}", n.format(stats.today))}
-    </span>
+    <>
+      <span className="visit-counter">
+        <EyeIcon size={13} />
+        {t("visits_total", lang).replace("{n}", n.format(stats.total))}
+        {" · "}
+        {t("visits_today", lang).replace("{n}", n.format(stats.today))}
+      </span>
+      {localDev && (
+        <span className="visit-counter-dev">
+          <span>{t("visits_dev", lang)}</span>
+        </span>
+      )}
+    </>
   );
 }

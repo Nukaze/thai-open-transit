@@ -129,6 +129,10 @@ export const DICTIONARY: Record<string, Record<Lang, string>> = {
   structure_at_grade: { th: "ระดับดิน", en: "At grade" },
   visits_total: { th: "เข้าชมทั้งหมด {n} ครั้ง", en: "{n} views" },
   visits_today: { th: "วันนี้ {n}", en: "{n} today" },
+  visits_dev: {
+    th: "โหมดพัฒนา: ไม่นับยอดเข้าชม",
+    en: "Development mode: views not counted",
+  },
 };
 
 export function t(key: string, lang: Lang): string {

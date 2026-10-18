@@ -29,6 +29,16 @@ export function isBot(userAgent: string, webdriver: boolean): boolean {
   return webdriver || BOT_UA.test(userAgent);
 }
 
+// The developer's own machine: `next dev`, or a local production build
+// served on localhost. Shows the numbers but never adds views, so working on
+// the site doesn't inflate them. Needs no .env (CLAUDE.md: no environment
+// variables required to build).
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+export function isLocalDev(nodeEnv: string | undefined, hostname: string) {
+  return nodeEnv === "development" || LOCAL_HOSTS.has(hostname);
+}
+
 /** Same breakpoint as the layout (Sheet's DESKTOP_QUERY, min-width 768px). */
 export function deviceClass(viewportWidth: number): DeviceClass {
   return viewportWidth >= 768 ? "desktop" : "mobile";
