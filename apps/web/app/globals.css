@@ -908,10 +908,31 @@ a.row:active {
 }
 
 .year-value small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 15px;
   font-weight: 560;
   letter-spacing: 0;
   color: var(--ink-3);
+}
+
+/* Year left, the back-to-today link right on the same line, so the card
+   does not grow when the link appears. The caption gives way first. */
+.year-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.year-head .year-value {
+  min-width: 0;
+}
+
+.year-today {
+  flex: none;
 }
 
 .range {

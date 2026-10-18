@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { t } from "../lib/i18n";
+import { ResetViewIcon } from "./icons";
 
 // While a finger or mouse holds the year slider, `data-scrubbing` on <html>
 // fades everything but this card (globals.css), so the map shows through
@@ -45,9 +46,27 @@ export function YearSelector({
     <section className="section time-travel">
       <h2 className="section-title">{t("time_travel", "en")}</h2>
       <div className="year-card">
-        <div className="year-value" aria-live="polite">
-          {year}
-          <small>{isToday ? t("today", "en") : t("network_as_of", "en")}</small>
+        <div className="year-head">
+          <div className="year-value" aria-live="polite">
+            {year}
+            <small>
+              {isToday ? t("today", "en") : t("network_as_of", "en")}
+            </small>
+          </div>
+          {/* Only away from the present, so the card at its usual state
+              stays as it is: one tap back to today. */}
+          {!isToday && (
+            <button
+              type="button"
+              className="link-btn year-today"
+              aria-label={t("back_to_today", "en")}
+              title={t("back_to_today", "en")}
+              onClick={() => onChange(maxYear)}
+            >
+              <ResetViewIcon size={14} />
+              {t("today", "en")}
+            </button>
+          )}
         </div>
         <input
           className="range"
