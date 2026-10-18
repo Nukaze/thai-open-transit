@@ -53,6 +53,17 @@ function drawFlag(id: FlagId, uid: string): ReactNode {
           <circle cx="15" cy="10" r="6" fill="#BC002D" />
         </>
       );
+    // Five yellow stars on red; the four small ones point at the large one.
+    case "cn":
+      return (
+        <>
+          <rect width="30" height="20" fill="#EE1C25" />
+          <path
+            fill="#FFDE00"
+            d="M5.00 2.00L5.67 4.07L7.85 4.07L6.09 5.35L6.76 7.43L5.00 6.15L3.24 7.43L3.91 5.35L2.15 4.07L4.33 4.07Z M9.14 2.51L9.62 1.97L9.25 1.34L9.91 1.63L10.39 1.08L10.33 1.80L11.00 2.09L10.29 2.25L10.22 2.97L9.85 2.35Z M11.01 4.14L11.66 3.82L11.56 3.10L12.07 3.62L12.72 3.30L12.38 3.95L12.88 4.47L12.17 4.34L11.83 4.99L11.73 4.27Z M11.04 6.73L11.76 6.70L11.96 6.00L12.21 6.68L12.94 6.66L12.37 7.10L12.62 7.79L12.01 7.38L11.44 7.83L11.64 7.13Z M9.22 8.38L9.90 8.63L10.35 8.06L10.32 8.79L11.00 9.05L10.30 9.24L10.26 9.96L9.87 9.36L9.16 9.55L9.62 8.98Z"
+          />
+        </>
+      );
     // English: the US flag top-left and the Union Jack bottom-right, split
     // on the diagonal. Each is a full flag cropped (`slice`) to the 3:2
     // box; the Union Jack is clipped to the lower-right triangle.

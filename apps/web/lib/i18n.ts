@@ -3,9 +3,9 @@
 /** A language the UI is fully translated into. Only these reach `t()`. */
 export type Lang = "en" | "th";
 
-/** Flags drawn by `Flag.tsx`. Optional per language: some languages map to
- *  no single country, or to a contested one, and simply go without. */
-export type FlagId = "us-gb" | "th" | "jp";
+/** Flags drawn by `Flag.tsx`. Optional per language: a language with no
+ *  fitting flag simply goes without. */
+export type FlagId = "us-gb" | "th" | "jp" | "cn";
 
 export type LanguageOption =
   | { code: Lang; native: string; flag?: FlagId; ready: true }
@@ -19,8 +19,8 @@ export const LANGUAGES: LanguageOption[] = [
   { code: "en", native: "English", flag: "us-gb", ready: true },
   { code: "th", native: "ไทย", flag: "th", ready: true },
   { code: "ja", native: "日本語", flag: "jp", ready: false },
-  // No flag: Chinese spans several regions, and picking one is a statement.
-  { code: "zh", native: "中文", ready: false },
+  // Mainland China. Traditional Chinese (Taiwan) would be its own entry.
+  { code: "zh", native: "中文", flag: "cn", ready: false },
 ];
 
 /** First of the browser's preferred languages the UI supports, else English. */
