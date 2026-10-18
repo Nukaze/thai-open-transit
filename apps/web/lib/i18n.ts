@@ -127,7 +127,7 @@ export const DICTIONARY: Record<string, Record<Lang, string>> = {
   structure_elevated: { th: "ยกระดับ", en: "Elevated" },
   structure_underground: { th: "ใต้ดิน", en: "Underground" },
   structure_at_grade: { th: "ระดับดิน", en: "At grade" },
-  visits_total: { th: "เข้าชม {n} ครั้ง", en: "{n} views" },
+  visits_total: { th: "เข้าชมทั้งหมด {n} ครั้ง", en: "{n} views" },
   visits_today: { th: "วันนี้ {n}", en: "{n} today" },
 };
 
