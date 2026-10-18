@@ -17,10 +17,21 @@ export function BuildInfo() {
   const date = formatDataDate(DATA_VERIFIED_AT, lang);
   const url = commitUrl(BUILD_COMMIT);
   const commitLabel = t("build_commit", lang).replace("{commit}", BUILD_COMMIT);
+  // The date sits inside the translated sentence; split around it so it can
+  // carry its ISO form as a tooltip.
+  const [before, after] = t("data_verified", lang).split("{date}");
   return (
     <span className="footer-build">
-      {date && t("data_verified", lang).replace("{date}", date)}
-      {date && " · "}
+      {date && (
+        <>
+          {before}
+          <time dateTime={DATA_VERIFIED_AT} title={DATA_VERIFIED_AT}>
+            {date}
+          </time>
+          {after}
+          {" · "}
+        </>
+      )}
       {url ? (
         <a
           href={url}
