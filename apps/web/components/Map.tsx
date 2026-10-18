@@ -17,7 +17,14 @@ import type { Feature, FeatureCollection, Point, LineString } from "geojson";
 import { MapControls } from "./MapControls";
 
 // The first-load camera, which the controls' reset button flies back to.
-const HOME_VIEW = { center: [100.5018, 13.7563] as [number, number], zoom: 11 };
+// Centred on N4 Sanam Pao (coords from data/source/stations/N4.json). Zoom
+// follows the layout breakpoint (Sheet's DESKTOP_QUERY): a phone shows less
+// map, so it starts wider. Read at call time, so reset matches the layout
+// the window has now, not the one it loaded with.
+function homeView(): { center: [number, number]; zoom: number } {
+  const desktop = window.matchMedia("(min-width: 768px)").matches;
+  return { center: [100.5421, 13.7726], zoom: desktop ? 11 : 10.5 };
+}
 
 export type MapTheme = "light" | "dark";
 
@@ -638,7 +645,7 @@ export function Map({
   // lifecycle" (Protomaps docs), and re-running it on every line-filter
   // toggle (which produces a new `networkGeoJson` object each time) would
   // tear down and rebuild the whole MapLibre instance - destroying the
-  // protocol, resetting zoom/center to `HOME_VIEW`, and re-registering
+  // protocol, resetting the camera to `homeView()`, and re-registering
   // the protocol on top of itself.
   const onStationClickRef = useRef(onStationClick);
   const networkGeoJsonRef = useRef(networkGeoJson);
@@ -931,8 +938,7 @@ export function Map({
     const initialTheme = themeRef.current;
     const map = new maplibregl.Map({
       container: containerRef.current!,
-      center: HOME_VIEW.center,
-      zoom: HOME_VIEW.zoom,
+      ...homeView(),
       style: buildStyle(initialTheme),
       attributionControl: false,
     });
@@ -1113,7 +1119,7 @@ export function Map({
         <MapControls
           map={controls.map}
           geolocate={controls.geolocate}
-          home={HOME_VIEW}
+          home={homeView}
         />
       )}
     </>

@@ -6,11 +6,11 @@ import type * as maplibregl from "maplibre-gl";
 import { useLang } from "../lib/lang";
 import { t } from "../lib/i18n";
 import {
+  HomeIcon,
   LocateIcon,
   LocateOffIcon,
   MinusIcon,
   PlusIcon,
-  ResetViewIcon,
   SlidersIcon,
   TiltIcon,
 } from "./icons";
@@ -24,6 +24,9 @@ const FLAT_PITCH = 5;
 // One press of tilt up/down. Presses snap to multiples of it, so after a
 // free two-finger tilt the steps still land on round angles.
 const PITCH_STEP = 15;
+// One press of zoom in/out, in zoom levels. MapLibre's zoomIn/zoomOut step
+// a full level (2x scale); half a level is finer control on a dense network.
+const ZOOM_STEP = 0.5;
 
 // What the locate button shows. Mirrors GeolocateControl's watch states:
 // "waiting" for the first fix, "active" following the user, "background"
@@ -48,7 +51,8 @@ export function MapControls({
 }: {
   map: maplibregl.Map;
   geolocate: maplibregl.GeolocateControl;
-  home: { center: [number, number]; zoom: number };
+  /** The first-load camera, resolved per call (it depends on the layout). */
+  home: () => { center: [number, number]; zoom: number };
 }) {
   const lang = useLang();
   const [locate, setLocate] = useState<LocateState>("off");
@@ -158,7 +162,7 @@ export function MapControls({
         aria-label={t("zoom_out", lang)}
         title={t("zoom_out", lang)}
         disabled={atMinZoom}
-        onClick={() => map.zoomOut()}
+        onClick={() => map.zoomTo(map.getZoom() - ZOOM_STEP)}
       >
         <MinusIcon />
       </button>
@@ -168,7 +172,7 @@ export function MapControls({
         aria-label={t("zoom_in", lang)}
         title={t("zoom_in", lang)}
         disabled={atMaxZoom}
-        onClick={() => map.zoomIn()}
+        onClick={() => map.zoomTo(map.getZoom() + ZOOM_STEP)}
       >
         <PlusIcon />
       </button>
@@ -290,7 +294,7 @@ export function MapControls({
           </span>
         </button>
 
-        {/* Back to the first-load camera: Bangkok overview, north up, flat.
+        {/* Back to the first-load camera: N4-centred overview, north up, flat.
             A deliberate move, so it also leaves follow-my-location
             (GeolocateControl drops to background on any camera move). */}
         <button
@@ -299,10 +303,10 @@ export function MapControls({
           aria-label={t("reset_view", lang)}
           title={t("reset_view", lang)}
           onClick={() =>
-            map.flyTo({ ...home, bearing: 0, pitch: 0, speed: 1.6 })
+            map.flyTo({ ...home(), bearing: 0, pitch: 0, speed: 1.6 })
           }
         >
-          <ResetViewIcon />
+          <HomeIcon />
         </button>
 
         {zoom("wide")}
