@@ -51,7 +51,8 @@ export function MapControls({
 }: {
   map: maplibregl.Map;
   geolocate: maplibregl.GeolocateControl;
-  home: { center: [number, number]; zoom: number };
+  /** The first-load camera, resolved per call (it depends on the layout). */
+  home: () => { center: [number, number]; zoom: number };
 }) {
   const lang = useLang();
   const [locate, setLocate] = useState<LocateState>("off");
@@ -302,7 +303,7 @@ export function MapControls({
           aria-label={t("reset_view", lang)}
           title={t("reset_view", lang)}
           onClick={() =>
-            map.flyTo({ ...home, bearing: 0, pitch: 0, speed: 1.6 })
+            map.flyTo({ ...home(), bearing: 0, pitch: 0, speed: 1.6 })
           }
         >
           <HomeIcon />
