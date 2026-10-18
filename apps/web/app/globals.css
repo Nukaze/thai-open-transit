@@ -195,8 +195,108 @@ button {
 }
 
 .fab:active,
+.mobile-brand:active,
 .press:active {
   transform: scale(0.94);
+}
+
+/* Brand on phones (MobileBrand.tsx), top-left across from the theme
+   button and the same height and glass. Tapping folds it to the icon. */
+.mobile-brand {
+  position: fixed;
+  top: calc(var(--safe-top) + 12px);
+  left: 12px;
+  z-index: 5;
+  height: 44px;
+  /* Never under the theme button: 12px insets, 44px button, 8px gap. */
+  max-width: calc(100vw - 76px);
+  display: flex;
+  align-items: center;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: var(--shadow-float);
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mobile-brand img {
+  flex: none;
+  display: block;
+}
+
+.mobile-brand-text {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 300px;
+  padding: 0 3px 0 7px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    max-width 280ms var(--ease-out),
+    opacity 200ms ease,
+    padding 280ms var(--ease-out);
+}
+
+.mobile-brand[data-folded] .mobile-brand-text {
+  max-width: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+.mobile-brand-name {
+  font-family: var(--font-brand);
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.mobile-brand-beta {
+  flex: none;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--beta);
+  background: color-mix(in srgb, var(--beta) 14%, transparent);
+}
+
+/* Narrow phones: the BETA pill shrinks to an amber dot, and below 300px
+   only the icon is left. */
+@media (max-width: 339px) {
+  .mobile-brand-beta {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    font-size: 0;
+    background: var(--beta);
+  }
+}
+
+@media (max-width: 299px) {
+  .mobile-brand-text {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  /* The panel's brand row takes over. */
+  .mobile-brand {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-brand-text {
+    transition: none;
+  }
 }
 
 /* MapLibre's geolocate control stays mounted for its tracking and user dot,
@@ -439,9 +539,9 @@ button {
    panel's max-height leaves room for it). !important because
    maplibre-gl.css loads after this file and sets `bottom/left: 0`. */
 .maplibregl-ctrl-bottom-left {
-  /* Centered on the 44px theme button (top 12px) across from it: the
-     pill is 26px tall, so 12 + (44 - 26) / 2. */
-  top: calc(var(--safe-top) + 21px) !important;
+  /* One row under the brand pill (MobileBrand, 44px at top 12px), left
+     aligned with it: 12 + 44 + 8. */
+  top: calc(var(--safe-top) + 64px) !important;
   bottom: auto !important;
   left: 12px !important;
 }
@@ -1780,7 +1880,8 @@ a.row:active {
 }
 
 /* The theme button keeps its press scale (`.fab` above). */
-.fab {
+.fab,
+.mobile-brand {
   transition:
     transform 120ms ease-out,
     opacity 320ms ease;
@@ -1804,6 +1905,7 @@ a.row:active {
     .time-travel .section-title,
     .map-controls,
     .fab,
+    .mobile-brand,
     .maplibregl-ctrl-bottom-left
   ) {
   opacity: 0;

@@ -19,6 +19,7 @@ import { t, type Lang } from "../lib/i18n";
 import { LANG_KEY, LangContext, startingLang } from "../lib/lang";
 import { LanguagePicker } from "./LanguagePicker";
 import { VisitCounter } from "./VisitCounter";
+import { MobileBrand } from "./MobileBrand";
 import { YearSelector } from "./YearSelector";
 import { SelectionRingColorPicker } from "./SelectionRingColorPicker";
 import { NearestStationChip } from "./NearestStationChip";
@@ -509,6 +510,7 @@ export function HomeClient({
         onUserLocation={handleUserLocation}
         onGeolocateError={setGeolocateError}
       />
+      <MobileBrand />
       <div className="fab-stack">
         <ThemeToggle theme={theme} onChange={setTheme} />
       </div>

@@ -140,6 +140,8 @@ export const DICTIONARY: Record<string, Record<Lang, string>> = {
     en: "Development mode: views not counted",
   },
   beta: { th: "เบต้า", en: "Beta" },
+  brand_fold: { th: "ย่อเหลือไอคอน", en: "Show icon only" },
+  brand_unfold: { th: "แสดงชื่อ", en: "Show name" },
 };
 
 export function t(key: string, lang: Lang): string {
