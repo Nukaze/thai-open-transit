@@ -1707,9 +1707,48 @@ a.row:active {
   white-space: nowrap;
 }
 
-/* Phones: the groups dissolve into one horizontally scrolling chip row with
-   full names, the row the collapsed sheet is sized for. */
+/* Grouped by system on every screen: each group's label with its Show /
+   Hide link, then its chips under short names (the label carries the
+   brand). Phones give each group its own horizontally scrolling row, so
+   every group's toggle sits at the left edge, never at the end of one long
+   row; desktop wraps the chips instead. */
 .line-groups {
+  display: grid;
+  /* minmax(0, ...) so the track takes the panel's width, not the chip
+     rows' scrollable content width, which pushed each group's Show /
+     Hide link off the right edge. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.line-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 6px;
+}
+
+.line-group-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* Muted, not accent: three of these sit under the section's blue
+   Show all / Hide all and should not compete with it. Accent on hover
+   and focus says it is clickable. */
+.line-group-toggle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.line-group-toggle:hover,
+.line-group-toggle:focus-visible {
+  color: var(--accent);
+}
+
+.line-group .chips {
   display: flex;
   gap: 8px;
   margin: 0 -16px;
@@ -1719,77 +1758,26 @@ a.row:active {
   touch-action: pan-x;
 }
 
-.line-groups::-webkit-scrollbar {
+.line-group .chips::-webkit-scrollbar {
   display: none;
 }
 
-.line-group,
-.line-group .chips {
-  display: contents;
-}
-
-.line-group-head,
-.chip-name-short {
+.chip-name-full {
   display: none;
 }
 
 @media (min-width: 768px) {
   .line-groups {
-    display: grid;
     gap: 12px;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    touch-action: auto;
-  }
-
-  .line-group {
-    display: block;
   }
 
   .line-group .chips {
-    display: flex;
     flex-wrap: wrap;
     gap: 6px;
     margin: 0;
     padding: 0;
     overflow: visible;
-  }
-
-  /* Group name left, its Show / Hide link right. */
-  .line-group-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin: 0 0 6px;
-  }
-
-  .line-group-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--ink-2);
-  }
-
-  /* Muted, not accent: three of these sit under the section's blue
-     Show all / Hide all and should not compete with it. Accent on hover
-     and focus says it is clickable. */
-  .line-group-toggle {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--ink-3);
-  }
-
-  .line-group-toggle:hover,
-  .line-group-toggle:focus-visible {
-    color: var(--accent);
-  }
-
-  .chip-name-full {
-    display: none;
-  }
-
-  .chip-name-short {
-    display: inline;
+    touch-action: auto;
   }
 }
 

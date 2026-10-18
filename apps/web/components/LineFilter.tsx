@@ -12,14 +12,13 @@ import {
 import { LineLogo } from "./LineLogo";
 import { EyeIcon, EyeOffIcon, InfoIcon } from "./icons";
 
-// Desktop: chips grouped by system (BTS / MRT / SRT) with short names under
-// a small group label. Phones: the groups dissolve (`display: contents`)
-// into one horizontal chip row with full names, which is what the collapsed
-// sheet's fixed height is sized for. Each chip is a toggle; `aria-pressed`
-// carries the state and the full line name is always its accessible name.
-// Each desktop group label also carries a Show / Hide link for the whole
-// group, flipping by the same rule as the section's Show all / Hide all, so
-// "Hide all, then show MRT" is two clicks and groups add up.
+// Chips grouped by system (BTS / MRT / SRT) with short names under a small
+// group label. Phones scroll each group's chips sideways in its own row;
+// desktop wraps them. Each chip is a toggle; `aria-pressed` carries the
+// state and the full line name is always its accessible name. Each group
+// label also carries a Show / Hide link for the whole group, flipping by
+// the same rule as the section's Show all / Hide all, so "Hide all, then
+// show MRT" is two taps and groups add up.
 export function LineFilter({
   lines,
   activeLineIds,
@@ -125,8 +124,7 @@ export function LineFilter({
   );
 }
 
-// Desktop only: on phones the groups dissolve into one chip row with no
-// labels (CSS hides the head), so there is nowhere to put the link.
+// The group label with a Show / Hide link for the whole group.
 function GroupHead({
   name,
   allOn,
