@@ -18,7 +18,7 @@ import { MapControls } from "./MapControls";
 
 // The first-load camera, which the controls' reset button flies back to.
 // Centred on N4 Sanam Pao (coords from data/source/stations/N4.json).
-const HOME_VIEW = { center: [100.5421, 13.7726] as [number, number], zoom: 11 };
+const HOME_VIEW = { center: [100.5421, 13.7726] as [number, number], zoom: 10 };
 
 export type MapTheme = "light" | "dark";
 
