@@ -875,11 +875,6 @@ a.row:active {
   font-weight: 560;
 }
 
-.link-btn:disabled {
-  color: var(--ink-3);
-  cursor: default;
-}
-
 .section-head {
   display: flex;
   align-items: baseline;

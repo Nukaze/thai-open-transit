@@ -54,23 +54,16 @@ export function LineFilter({
           {t("lines_shown", "en")
             .replace("{shown}", String(shownCount))
             .replace("{total}", String(lines.length))}
-          {/* Both always present and disabled when there is nothing to do,
-              so neither jumps sideways as lines are toggled. */}
+          {/* One button whose label is its action, as a "select all" does:
+              Hide all only when every line is on; from any partial state it
+              offers the way back to the full map. Both labels are about the
+              same width, so nothing shifts when it flips. */}
           <button
             type="button"
             className="link-btn"
-            disabled={allOn}
-            onClick={onShowAll}
+            onClick={allOn ? onHideAll : onShowAll}
           >
-            {t("show_all", "en")}
-          </button>
-          <button
-            type="button"
-            className="link-btn"
-            disabled={shownCount === 0}
-            onClick={onHideAll}
-          >
-            {t("hide_all", "en")}
+            {t(allOn ? "hide_all" : "show_all", "en")}
           </button>
         </span>
       </div>
