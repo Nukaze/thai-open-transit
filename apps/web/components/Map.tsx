@@ -29,6 +29,9 @@ const FOCUS_MIN_ZOOM = 14;
 // Half the desktop panel's footprint (320px wide + 16px inset each side),
 // so the station lands in the middle of the map area right of it.
 const FOCUS_PANEL_OFFSET_X = 176;
+// The OSMF attribution guidelines allow collapsing credits "automatically
+// after five seconds".
+const CREDITS_FOLD_MS = 5000;
 
 // `StyleSpecification` lives in `@maplibre/maplibre-gl-style-spec`, which is a
 // transitive dependency here, not a declared one - importing it directly would
@@ -934,11 +937,22 @@ export function Map({
       attributionControl: false,
     });
     // Credits bottom-left, apart from the glass controls bottom-right, as
-    // Apple and Google Maps do. Same default control otherwise: it starts
-    // expanded and collapses to an (i) on narrow maps after the first pan,
-    // so the OpenStreetMap credit is visible before any interaction (ODbL,
-    // OSMF attribution guidelines).
+    // Apple and Google Maps do. MapLibre's default control (compact, with
+    // its own MapLibre credit - passing any options replaces that default
+    // object and drops the credit) starts expanded, so the OpenStreetMap
+    // credit is seen before any interaction, but only folds to an (i) on
+    // the first pan. The timer below also folds it after 5 seconds: both
+    // collapse triggers the OSMF attribution guidelines allow. Folded from
+    // the first frame would not be: the credit must not need a tap to see.
     map.addControl(new maplibregl.AttributionControl(), "bottom-left");
+    // MapLibre has no public fold call; this mirrors its own on-pan fold
+    // (`_updateCompactMinimize`), which only drops this class.
+    const foldCredits = window.setTimeout(() => {
+      map
+        .getContainer()
+        .querySelector(".maplibregl-ctrl-attrib.maplibregl-compact")
+        ?.classList.remove("maplibregl-compact-show");
+    }, CREDITS_FOLD_MS);
 
     // Code-badge images, built the first time the style asks for one. The
     // `station-badges` layer requests `badge|<fill>|<ring>` by expression, so
@@ -1056,6 +1070,7 @@ export function Map({
     syncHaze();
 
     return () => {
+      window.clearTimeout(foldCredits);
       setControls(null);
       map.remove();
       mapRef.current = null;
