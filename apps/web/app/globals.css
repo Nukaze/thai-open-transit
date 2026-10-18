@@ -1543,9 +1543,25 @@ a.row:active {
   color: inherit;
 }
 
+/* Data date and build commit (BuildInfo.tsx), tight under the links it
+   explains; the commit links to GitHub. */
+.footer-build {
+  flex-basis: 100%;
+  margin-top: -4px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.footer-build a {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  text-decoration-style: dotted;
+}
+
 /* View counter (VisitCounter.tsx): quieter than the links, on its own
-   centred line under them. */
+   centred line under them, starting a second group (stats). */
 .visit-counter {
+  margin-top: 8px;
   display: flex;
   flex-basis: 100%;
   justify-content: center;
