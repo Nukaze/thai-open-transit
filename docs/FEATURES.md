@@ -11,7 +11,7 @@ contributors and for the AI coding agents they work with.
 | How to build and run locally           | [README.md](../README.md) |
 | Proposed and accepted design decisions | [adr/](adr/README.md)     |
 
-Last reviewed against `main` at PR #11 (2026-10-13). When you ship a
+Last reviewed against `main` at PR #41 (2026-10-26). When you ship a
 user-visible feature, update the tables below in the same PR.
 
 ---
@@ -41,11 +41,14 @@ anonymous crowd editing, monetisation. See SPEC.md section 5 for the reasons.
 
 ## 2. Current phase
 
-**Phase 1: public read-only site**, plus parts of Phase 2 (time travel).
+**Phase 1: public read-only site** (public beta), plus parts of Phase 2 (time
+travel).
 
 - `apps/web` is a Next.js static export, deployed on Vercel.
 - No database, no API, no admin panel yet. The site reads a committed
-  `network.json` built from `data/source/`.
+  `network.json` built from `data/source/`. The one exception is an optional
+  view counter in an isolated stats store ([ADR 0002](adr/0002-visit-counter.md));
+  the map works without it.
 - The schema is already bitemporal and revision-shaped, so the Phase 3 admin
   plane can be added without a migration.
 
@@ -80,15 +83,17 @@ and offered on `/download`.
 
 ### 3.3 Data guarantees (enforced in CI)
 
-| Guarantee                                         | Where                                      |
-| ------------------------------------------------- | ------------------------------------------ |
-| Every entity matches the JSON Schema              | `packages/schema`, `data:validate`         |
-| No orphan stations or dangling segments           | `packages/network-graph`, `data:validate`  |
-| Interchange groups resolve                        | `scripts/build/interchange-groups.test.ts` |
-| Every mutation has non-empty `source_refs`        | `scripts/validate/check-source-refs.ts`    |
-| `status` is derived from milestones, never edited | `scripts/build/assemble.ts`                |
-| Generated JSON Schemas are committed and current  | CI `git diff --exit-code`                  |
-| Performance budgets (bundle, payload)             | `check-bundle-size`, `data:validate`       |
+| Guarantee                                          | Where                                           |
+| -------------------------------------------------- | ----------------------------------------------- |
+| Every entity matches the JSON Schema               | `packages/schema`, `data:validate`              |
+| No orphan stations or dangling segments            | `packages/network-graph`, `data:validate`       |
+| Interchange groups resolve                         | `scripts/build/interchange-groups.test.ts`      |
+| Every mutation has non-empty `source_refs`         | `scripts/validate/check-source-refs.ts`         |
+| `status` is derived from milestones, never edited  | `scripts/build/assemble.ts`                     |
+| Generated JSON Schemas are committed and current   | CI `git diff --exit-code`                       |
+| Performance budgets (bundle, payload)              | `check-bundle-size`, `data:validate`            |
+| `last_verified_at` is never in the future          | `scripts/validate/check-verified-dates.ts`      |
+| Changed entities bump `last_verified_at` (warning) | `scripts/validate/check-verification-bumped.ts` |
 
 ### 3.4 Data workflow
 
@@ -119,38 +124,43 @@ spec. **Planned** = in SPEC.md, not built.
 | Station dots, no clustering   | Shipped | Every station stays visible and clickable. Deliberately differs from SPEC 1.2                                    | `Map.tsx`                                        |
 | Station code badges and names | Shipped | Code badge plus Thai/English name labels, on/off toggle                                                          | `StationLabelsToggle.tsx`, `lib/stationLabel.ts` |
 | Light and dark map themes     | Shipped | Follows OS preference on load, manual toggle                                                                     | `ThemeToggle.tsx`                                |
+| Map controls                  | Shipped | Zoom, home (fly back to the network overview), compass, locate; tilt and 3D under an advanced toggle             | `MapControls.tsx`                                |
+| Phone layout                  | Shipped | Draggable bottom sheet with notch-aware detents; brand pill folds to the icon                                    | `Sheet.tsx`, `MobileBrand.tsx`                   |
 | Selection ring                | Shipped | Pulsing ring on the selected station, color configurable per theme, respects reduced motion                      | `SelectionRingColorPicker.tsx`                   |
 | Schematic (diagram) mode      | Planned | `packages/renderer` generates SVG, not yet wired into the site (SPEC 1.7)                                        | `packages/renderer`                              |
 
 ### 4.2 Finding stations
 
-| Feature              | Status  | Notes                                                                                                   | Code                                               |
-| -------------------- | ------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| Station search       | Shipped | Client-side fuzzy search (Fuse.js) on Thai name, English name, station ID and any historical code       | `StationSearch.tsx`                                |
-| Line filter          | Shipped | Toggle each line on or off                                                                              | `LineFilter.tsx`                                   |
-| Station detail panel | Shipped | Thai/English name, status, structure, accessibility, lines, opened date, last verified date             | `StationPanel.tsx`                                 |
-| Deep links           | Shipped | `?station=<ID>` opens that station's panel                                                              | `lib/deep-link.ts`                                 |
-| My location (GPS)    | Shipped | Locate button, blue dot, accuracy circle, live tracking. Needs HTTPS. Location never leaves the browser | `Map.tsx` (`GeolocateControl`)                     |
-| Nearest station      | Shipped | Chip with nearest open (`operational`/`trial`) station and distance; tap to open it                     | `NearestStationChip.tsx`, `lib/nearest-station.ts` |
+| Feature              | Status  | Notes                                                                                                                        | Code                                               |
+| -------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Station search       | Shipped | Client-side fuzzy search (Fuse.js) on Thai name, English name, station ID and any historical code; the map flies to the pick | `StationSearch.tsx`                                |
+| Line filter          | Shipped | Lines grouped by operator, Show / Hide per group, toggle each line on or off                                                 | `LineFilter.tsx`                                   |
+| Station detail panel | Shipped | Thai/English name, status, structure, accessibility, lines, opened date, last verified date                                  | `StationPanel.tsx`                                 |
+| Deep links           | Shipped | `?station=<ID>` opens that station's panel                                                                                   | `lib/deep-link.ts`                                 |
+| My location (GPS)    | Shipped | Locate button, blue dot, accuracy circle, live tracking. Needs HTTPS. Location never leaves the browser                      | `Map.tsx` (`GeolocateControl`)                     |
+| Nearest station      | Shipped | Chip with nearest open (`operational`/`trial`) station and distance; tap to open it                                          | `NearestStationChip.tsx`, `lib/nearest-station.ts` |
 
 ### 4.3 Time travel
 
-| Feature                      | Status  | Notes                                                              | Code                              |
-| ---------------------------- | ------- | ------------------------------------------------------------------ | --------------------------------- |
-| Year slider                  | Partial | Earliest year in the data up to today. SPEC 2.2 targets up to 2040 | `YearSelector.tsx`, `lib/asOf.ts` |
-| `?as_of=` permalinks         | Planned | SPEC 2.1 / 2.6                                                     |                                   |
-| Era presets, playback, stats | Planned | SPEC 2.3 to 2.5                                                    |                                   |
-| Plan vs reality view         | Planned | SPEC 2.7                                                           |                                   |
+| Feature                      | Status  | Notes                                                                                                            | Code                              |
+| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Year slider                  | Partial | Earliest year in the data up to today, focus while scrubbing, one tap back to today. SPEC 2.2 targets up to 2040 | `YearSelector.tsx`, `lib/asOf.ts` |
+| `?as_of=` permalinks         | Planned | SPEC 2.1 / 2.6                                                                                                   |                                   |
+| Era presets, playback, stats | Planned | SPEC 2.3 to 2.5                                                                                                  |                                   |
+| Plan vs reality view         | Planned | SPEC 2.7                                                                                                         |                                   |
 
 ### 4.4 Trust and openness
 
-| Feature               | Status  | Notes                                                                              | Code                    |
-| --------------------- | ------- | ---------------------------------------------------------------------------------- | ----------------------- |
-| Dataset download page | Shipped | JSON, GeoJSON, CSV at `/download`                                                  | `app/download/page.tsx` |
-| Report an error       | Shipped | Opens a prefilled GitHub issue for the station                                     | `ReportErrorButton.tsx` |
-| Last verified date    | Shipped | Shown in the station panel                                                         | `StationPanel.tsx`      |
-| Thai / English UI     | Partial | Station names are bilingual; UI strings have a TH/EN dictionary but render English | `lib/i18n.ts`           |
-| Offline (PWA)         | Planned | SPEC 1.10, for use underground                                                     |                         |
+| Feature               | Status  | Notes                                                                                                        | Code                                               |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| Dataset download page | Shipped | JSON, GeoJSON, CSV at `/download`                                                                            | `app/download/page.tsx`                            |
+| Report an error       | Shipped | Opens a prefilled GitHub issue for the station                                                               | `ReportErrorButton.tsx`                            |
+| Last verified date    | Shipped | Shown in the station panel                                                                                   | `StationPanel.tsx`                                 |
+| Thai / English UI     | Shipped | Language picker in Map settings with flags; per-language fonts                                               | `LanguagePicker.tsx`, `lib/i18n.ts`, `lib/lang.ts` |
+| Build info footer     | Shipped | Data verified date and build commit                                                                          | `BuildInfo.tsx`, `lib/buildInfo.ts`                |
+| View counter          | Shipped | "views · today" in the footer, isolated Supabase stats project, skips the developer's own machine (ADR 0002) | `VisitCounter.tsx`                                 |
+| BETA marker           | Shipped | BETA pill beside the brand                                                                                   | `HomeClient.tsx`, `MobileBrand.tsx`                |
+| Offline (PWA)         | Planned | SPEC 1.10, for use underground                                                                               |                                                    |
 
 ---
 
@@ -169,9 +179,9 @@ spec. **Planned** = in SPEC.md, not built.
 
 ## 6. Known issues
 
-| Issue                                                                                                               | Status            |
-| ------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| Toggling the theme while a station is selected logs `Style is not done loading` (pulse loop runs during `setStyle`) | Open, fix planned |
+| Issue                                                                                                               | Status          |
+| ------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Toggling the theme while a station is selected logs `Style is not done loading` (pulse loop runs during `setStyle`) | Fixed (5783a32) |
 
 ---
 
