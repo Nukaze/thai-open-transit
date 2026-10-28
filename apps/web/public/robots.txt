@@ -1,0 +1,5 @@
+# Thai Open Transit - open data (ODbL-1.0), open to every crawler,
+# AI crawlers included.
+# Sitemap line is added with the custom domain: it must be an absolute URL.
+User-agent: *
+Allow: /
