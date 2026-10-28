@@ -1,0 +1,35 @@
+# Thai Open Transit
+
+> Open, structured, versioned dataset of the Bangkok metropolitan rail network (Bangkok, Nonthaburi, Samut Prakan, Pathum Thani). The dataset is the product; the map on this site is a reference implementation of it. Data is ODbL-1.0, code is AGPL-3.0.
+
+Key facts for working with the data:
+
+- Every station and line carries `name_th` (Thai) and `name_en` (English, may be null).
+- Entity IDs are stable forever. Station IDs (e.g. `BL15`) are not station codes; codes change over time and are kept in `code_history[]`.
+- The data is temporal. `validity[]` and `milestones[]` hold dates; filter by date to get the network as of any day. `trial_run` and `opened` are distinct events.
+- Every date has a `date_precision`: `exact`, `month`, `year` or `disputed`.
+- Every milestone cites its sources in `source_refs[]`; every record has a `last_verified_at` date.
+- Dates are ISO 8601 (AD). Coordinates are WGS84 (EPSG:4326).
+
+## Data
+
+- [network.json](/network.json): stations, lines and segments, current state with full temporal fields
+- [network.geojson](/network.geojson): the same network as GeoJSON features
+- [stations.csv](/stations.csv): flat station list (id, names, structure, accessibility, lat/lon)
+
+## Schema
+
+- [Station schema](https://github.com/Nukaze/thai-open-transit/blob/main/packages/schema/schemas/station.json)
+- [Line schema](https://github.com/Nukaze/thai-open-transit/blob/main/packages/schema/schemas/line.json)
+- [Segment schema](https://github.com/Nukaze/thai-open-transit/blob/main/packages/schema/schemas/segment.json)
+
+## Project
+
+- [Source code and issues](https://github.com/Nukaze/thai-open-transit)
+- [Features](https://github.com/Nukaze/thai-open-transit/blob/main/docs/FEATURES.md)
+- [Data license (ODbL-1.0)](https://github.com/Nukaze/thai-open-transit/blob/main/LICENSE-DATA): attribute "Thai Open Transit" when you reuse the data
+
+## Optional
+
+- [Revision schema](https://github.com/Nukaze/thai-open-transit/blob/main/packages/schema/schemas/revision.json)
+- [Schematic layout schema](https://github.com/Nukaze/thai-open-transit/blob/main/packages/schema/schemas/layout.json)
