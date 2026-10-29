@@ -25,6 +25,8 @@ Key facts for working with the data:
 
 ## Project
 
+- Maintainer: [Nukaze](https://github.com/Nukaze)
+- Contributors: [PinkMontyPie](https://github.com/PinkMontyPie) and [everyone on GitHub](https://github.com/Nukaze/thai-open-transit/graphs/contributors)
 - [Source code and issues](https://github.com/Nukaze/thai-open-transit)
 - [Features](https://github.com/Nukaze/thai-open-transit/blob/main/docs/FEATURES.md)
 - [Data license (ODbL-1.0)](https://github.com/Nukaze/thai-open-transit/blob/main/LICENSE-DATA): attribute "Thai Open Transit" when you reuse the data
