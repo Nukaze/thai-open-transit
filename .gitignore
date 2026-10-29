@@ -17,3 +17,6 @@ apps/web/public/maplibre/
 
 # Claude Code agent worktrees
 .claude/worktrees/
+
+# Playwright MCP screenshots and scratch files
+.playwright-mcp/

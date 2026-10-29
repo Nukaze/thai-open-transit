@@ -177,6 +177,9 @@ apps, anonymous crowd editing, monetisation.
 
 ## Contributing
 
+Full guide: [CONTRIBUTING.md](./CONTRIBUTING.md). Security problems: see
+[SECURITY.md](./docs/SECURITY.md).
+
 - **Found wrong data?** Use the "Report an error" button on any station, or
   open an issue. Include a source.
 - **Fixing data yourself:** put corrections in `data/overrides/`, never edit

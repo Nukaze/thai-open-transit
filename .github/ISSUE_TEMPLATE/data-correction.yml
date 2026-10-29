@@ -1,0 +1,31 @@
+name: Data correction
+description: A station, line or date in the dataset is wrong or missing
+title: "Data error: "
+labels: ["data-correction"]
+body:
+  - type: input
+    id: entity
+    attributes:
+      label: Station or line
+      description: ID or name, e.g. BL15 or Lat Phrao, MRT_BLUE
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong
+      description: What the dataset says now, and what it should say
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: A link or document that backs the correction. Corrections without a source cannot be merged.
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build / data date
+      description: From the site footer, e.g. "Data verified 18 Oct 2026 · a1b2c3d". Optional.
