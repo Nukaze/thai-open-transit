@@ -160,7 +160,7 @@ Full detail in [SPEC.md](./SPEC.md) section 4.
 | 2     | Time travel                             | Partial. Year slider shipped. Next: `?as_of=` permalinks, era presets, playback, era stats, plan vs reality |
 | 3     | Admin plane                             | Not started. Invite-only editors, Postgres RLS, four-eyes review, append-only audit log                     |
 | 4     | Wikipedia-style transparency            | Not started. Per-entity history, diffs, recent changes feed, contributor attribution                        |
-| 5     | Expansion                               | Speculative. GTFS export, airport links, public API, other Thai cities                                      |
+| 5     | Expansion                               | Speculative. Route planner (idea), GTFS export, airport links, fares, public API, other Thai cities         |
 
 The schema is already bitemporal and revision-shaped, so Phase 3 can land
 without a data migration.
@@ -170,7 +170,7 @@ without a data migration.
 cities are added as data, not as new brands. A custom domain is planned; until
 then the site lives on Vercel.
 
-**Non-goals:** real-time train positions, trip planning, ticketing, native
+**Non-goals:** real-time train positions, a production journey planner, ticketing, native
 apps, anonymous crowd editing, monetisation.
 
 ---
