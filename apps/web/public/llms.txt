@@ -2,6 +2,8 @@
 
 > Open, structured, versioned dataset of the Bangkok metropolitan rail network (Bangkok, Nonthaburi, Samut Prakan, Pathum Thani). The dataset is the product; the map on this site is a reference implementation of it. Data is ODbL-1.0, code is AGPL-3.0.
 
+Also known as: ThaiOpenTransit, thaiopts, bkkopts. Formerly: BangkokOpenTransit.
+
 Key facts for working with the data:
 
 - Every station and line carries `name_th` (Thai) and `name_en` (English, may be null).
@@ -25,7 +27,7 @@ Key facts for working with the data:
 
 ## Project
 
-- Maintainer: Anupun Khumthong ([Nukaze](https://github.com/Nukaze))
+- Maintainer: [Nukaze](https://github.com/Nukaze) (Anupun Khumthong)
 - Contributors: [PinkMontyPie](https://github.com/PinkMontyPie) and [everyone on GitHub](https://github.com/Nukaze/thai-open-transit/graphs/contributors)
 - [Source code and issues](https://github.com/Nukaze/thai-open-transit)
 - [Features](https://github.com/Nukaze/thai-open-transit/blob/main/docs/FEATURES.md)
