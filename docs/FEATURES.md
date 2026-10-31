@@ -34,8 +34,10 @@ user-visible feature, update the tables below in the same PR.
 
 ### Non-goals
 
-Real-time train positions, trip planning or routing, ticketing, native apps,
-anonymous crowd editing, monetisation. See SPEC.md section 5 for the reasons.
+Real-time train positions, a production journey planner, ticketing, native
+apps, anonymous crowd editing, monetisation. See SPEC.md section 5 for the
+reasons. A reference route planner that demonstrates the graph is an idea
+(SPEC 5.7), not a non-goal.
 
 ---
 
@@ -139,6 +141,7 @@ spec. **Planned** = in SPEC.md, not built.
 | Deep links           | Shipped | `?station=<ID>` opens that station's panel                                                                                   | `lib/deep-link.ts`                                 |
 | My location (GPS)    | Shipped | Locate button, blue dot, accuracy circle, live tracking. Needs HTTPS. Location never leaves the browser                      | `Map.tsx` (`GeolocateControl`)                     |
 | Nearest station      | Shipped | Chip with nearest open (`operational`/`trial`) station and distance; tap to open it                                          | `NearestStationChip.tsx`, `lib/nearest-station.ts` |
+| Route planner        | Idea    | SPEC 5.7: origin to destination, fewest stops or interchanges, time-travel routing; time and fare estimates later            |                                                    |
 
 ### 4.3 Time travel
 

@@ -219,14 +219,29 @@ Only start this once Phase 1 has real users.
 
 ### Phase 5 - Expansion (speculative)
 
-| #   | Feature             | Notes                                       |
-| --- | ------------------- | ------------------------------------------- |
-| 5.1 | Bus network, coarse | Very large scope, evaluate carefully        |
-| 5.2 | Airport connections | Small scope, high tourist value             |
-| 5.3 | GTFS export         | Unlocks OpenTripPlanner, Transitous, Google |
-| 5.4 | Fare calculation    | Cross-operator fares are genuinely complex  |
-| 5.5 | Public API          | Only if there is real demand                |
-| 5.6 | Other Thai cities   | Realistically 10+ years away                |
+| #   | Feature                 | Notes                                       |
+| --- | ----------------------- | ------------------------------------------- |
+| 5.1 | Bus network, coarse     | Very large scope, evaluate carefully        |
+| 5.2 | Airport connections     | Small scope, high tourist value             |
+| 5.3 | GTFS export             | Unlocks OpenTripPlanner, Transitous, Google |
+| 5.4 | Fare calculation        | Cross-operator fares are genuinely complex  |
+| 5.5 | Public API              | Only if there is real demand                |
+| 5.6 | Other Thai cities       | Realistically 10+ years away                |
+| 5.7 | Reference route planner | Idea, see below                             |
+
+**5.7 Reference route planner (idea).** A demonstration of the network graph,
+not a competitor to Google. Break down into a spec and ADR when it starts.
+
+| Step | Scope                                                                                                           | Data needed                                       |
+| ---- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| P1   | Pick origin and destination, highlight the route, dim the rest; fewest stops; fewest interchanges; alternatives | Already in the dataset                            |
+| P2   | Time-travel routing: the best route as of any date (`filterAsOf` before routing)                                | Already in the dataset                            |
+| P3   | Estimated travel time, labelled as an estimate                                                                  | Segment run time, transfer walk time (schema ADR) |
+| P4   | Cheapest route, with 5.4                                                                                        | Temporal, sourced fare rules (schema ADR)         |
+
+Model each node as a (station, line) pair so interchanges are explicit,
+costed edges. Route in the browser: the graph is small and the public site
+stays static. Routing tests are required, like all graph logic.
 
 ---
 
@@ -234,14 +249,14 @@ Only start this once Phase 1 has real users.
 
 Stating these prevents scope creep.
 
-| Not doing                       | Why                                    |
-| ------------------------------- | -------------------------------------- |
-| Real-time train positions       | No open data source exists             |
-| Trip planning / routing         | metro-fare and Google already do this  |
-| Ticketing or payments           | Out of scope for a public-good dataset |
-| Native mobile apps              | PWA is sufficient                      |
-| Crowd-sourced anonymous editing | Invite-only admin model chosen instead |
-| Monetisation                    | Explicitly not a goal                  |
+| Not doing                       | Why                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------- |
+| Real-time train positions       | No open data source exists                                                      |
+| Production journey planner      | Google and metro-fare already do this; no live data. A reference planner is 5.7 |
+| Ticketing or payments           | Out of scope for a public-good dataset                                          |
+| Native mobile apps              | PWA is sufficient                                                               |
+| Crowd-sourced anonymous editing | Invite-only admin model chosen instead                                          |
+| Monetisation                    | Explicitly not a goal                                                           |
 
 ---
 
