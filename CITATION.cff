@@ -1,0 +1,33 @@
+# Citation metadata. GitHub reads it for the "Cite this repository" button;
+# Zenodo reads it when archiving a release (there is no .zenodo.json, which
+# would take precedence). version and date-released are left out on purpose:
+# Zenodo takes them from the release tag, so they cannot go stale here.
+cff-version: 1.2.0
+message: >-
+  If you use this dataset or software, please cite it using the metadata
+  from this file, and attribute "Thai Open Transit" as required by the
+  ODbL-1.0 data licence.
+type: dataset
+title: Thai Open Transit
+abstract: >-
+  An open, structured, versioned and time-aware dataset of Thailand's rail
+  transit network, starting with Bangkok and its metropolitan region
+  (Nonthaburi, Samut Prakan, Pathum Thani). Every station and segment
+  carries validity windows and sourced milestones, so the network can be
+  queried as it was on any date. Includes a reference web map.
+authors:
+  - given-names: Anupun
+    family-names: Khumthong
+    alias: Nukaze
+repository-code: "https://github.com/Nukaze/thai-open-transit"
+license:
+  - ODbL-1.0
+  - AGPL-3.0-only
+keywords:
+  - Bangkok
+  - Thailand
+  - rail transit
+  - open data
+  - temporal data
+  - GeoJSON
+  - OpenStreetMap
