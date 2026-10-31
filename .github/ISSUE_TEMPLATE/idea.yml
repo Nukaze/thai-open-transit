@@ -1,0 +1,20 @@
+name: Idea
+description: Suggest a feature or a dataset improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does it solve
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Check the non-goals in [SPEC.md](https://github.com/Nukaze/thai-open-transit/blob/main/SPEC.md#5-explicit-non-goals) first. The dataset is the product; the map demonstrates it.
