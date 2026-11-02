@@ -19,6 +19,7 @@ authors:
   - given-names: Anupun
     family-names: Khumthong
     alias: Nukaze
+    orcid: "https://orcid.org/0009-0001-4429-6515"
 repository-code: "https://github.com/Nukaze/thai-open-transit"
 license:
   - ODbL-1.0
