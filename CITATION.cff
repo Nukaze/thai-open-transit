@@ -21,9 +21,9 @@ authors:
     alias: Nukaze
     orcid: "https://orcid.org/0009-0001-4429-6515"
 repository-code: "https://github.com/Nukaze/thai-open-transit"
-license:
-  - ODbL-1.0
-  - AGPL-3.0-only
+# Zenodo rejects a list here ("Citation metadata load failed"), so this
+# names the data licence only. Code is AGPL-3.0-only, see LICENSE-CODE.
+license: ODbL-1.0
 keywords:
   - Bangkok
   - Thailand
