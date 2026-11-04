@@ -6,6 +6,8 @@ transit network, starting with Bangkok and its metropolitan region
 
 **Live map (beta):** [thaiopentransit.vercel.app](https://thaiopentransit.vercel.app)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23948132.svg)](https://doi.org/10.5281/zenodo.23948132)
+
 > Nobody in Thailand publishes the rail network as a structured, versioned,
 > temporally-aware open dataset. The map is how we prove the dataset is good.
 

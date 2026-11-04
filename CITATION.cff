@@ -20,6 +20,8 @@ authors:
     family-names: Khumthong
     alias: Nukaze
     orcid: "https://orcid.org/0009-0001-4429-6515"
+# Concept DOI: always resolves to the latest archived release.
+doi: 10.5281/zenodo.23948132
 repository-code: "https://github.com/Nukaze/thai-open-transit"
 # Zenodo rejects a list here ("Citation metadata load failed"), so this
 # names the data licence only. Code is AGPL-3.0-only, see LICENSE-CODE.
