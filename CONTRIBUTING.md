@@ -60,6 +60,11 @@ Tests are required for temporal and graph logic; UI tests are optional.
 
 `main` is protected: changes land through pull requests, and CI must pass.
 
+Vercel skips the deployment for a push that changes nothing the site is built
+from, such as a docs-only commit. If a new top-level path feeds the site build,
+add it to `apps/web/scripts/vercel-ignore-build.sh`, or changes there will not
+deploy.
+
 ## Licensing of contributions
 
 By contributing you agree that your code is released under AGPL-3.0
